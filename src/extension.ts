@@ -1,14 +1,28 @@
 import * as vscode from 'vscode';
-import ServerParser from './parser/serverParser';
+import * as serverTypes from './constants/serverTypes';
+import ExpressParser from './parser/expressParser';
 
 const CONFIG = require('../reverbconfig.json');
 
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Parse server to find endpoints
-	const serverParser = new ServerParser(CONFIG);
-	serverParser.parse();
+	let serverParser;
 
+	// Activate the appropriate parser for the server type
+	switch(CONFIG.serverType){
+		case serverTypes.EXPRESS:
+			console.log("Parsing Express server");
+			serverParser = new ExpressParser(CONFIG.serverPath);
+			serverParser.parse();
+			break;
+		case serverTypes.NODE:
+			console.log("NODE support coming soon");
+			break;
+		default:
+			console.log("ERROR: Unsupported server type specified in reverbconfig.json");
+	}
+
+
+	// Pre-existing code from initial creation of extention scaffolding
 	console.log('Congratulations, your extension "reverb-vs-code-extension" is now active!');
 
 	const disposable = vscode.commands.registerCommand('reverb-vs-code-extension.helloWorld', () => {
