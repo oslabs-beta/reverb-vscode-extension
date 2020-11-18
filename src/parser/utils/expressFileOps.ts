@@ -21,7 +21,7 @@ const checkForRequireExpress = (line: string) => {
 
 // Attempt to parse the name applied to the express import statement from the specified file
 export const checkFileForExpress = (file: fileOps.File) => {
-  const LINES = file.contents.split('\n');
+  const LINES = file.contents.split(/\r?\n/);
   for( let i = 0; i < LINES.length; i += 1 ) {
     // Check the current line for an express import statement
     let expressImport = checkForExpressImport(LINES[i]);

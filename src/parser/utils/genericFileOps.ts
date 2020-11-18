@@ -104,7 +104,7 @@ const resolvePath = (path: string) => {
 // Find all imported/required local files in the specified file
 export const findImportedFiles = (file: File) => {
   let output: Array<File>  = [];
-  const LINES = file.contents.split('\n');
+  const LINES = file.contents.split(/\r?\n/);
   // Check each line in the file for an import/require statement
   for( let i = 0; i < LINES.length; i += 1 ) {
     const filePath = parseLineForImport(file.path, LINES[i]);
