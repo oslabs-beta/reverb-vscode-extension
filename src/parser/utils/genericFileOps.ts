@@ -68,7 +68,8 @@ const findCodeFiles = (path: string) => {
   const dirContents: any = fs.readdirSync(path);
   // Loop through each item in the current dir
   let files = dirContents.map((content: string) => {
-    const resource = pathUtil.resolve(path, content);
+    // Replace any backslashes in the path with forward slashes (for Windows users)
+    const resource = pathUtil.resolve(path, content).replace(/\\/g, '/');
     // If a folder, find the files within, otherwise store the file name
     return fs.statSync(resource).isDirectory() ? findCodeFiles(resource) : resource;
   });
