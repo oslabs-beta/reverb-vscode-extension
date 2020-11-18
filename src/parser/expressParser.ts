@@ -1,25 +1,21 @@
 import * as patterns from '../constants/expressPatterns';
+import * as fileOps from './utils/genericFileOps';
+import * as expressOps from './utils/expressFileOps';
 
-const fs = require('fs');
-
-// Used to store information about imported files
-interface File {
-  path: string; // Absolute path to the server file
-  fileName: string; // Name of the server file
-  importedFiles: Array<string>; // All local files that are imported into the server file
-  contents: string; // Contents of the server file
-};
-
-// Used to store information about the server file
-interface ExpressFile extends File {
-  importName: string; // Name applied to the express import statement
-  name: string; // Name applied to the express server
-};
+// Used to store information about the express import statement
+interface ExpressImport {
+  filePath: string;
+  importName: string;
+}
 
 class ExpressParser {
-  serverFile: ExpressFile;
+  serverFile: fileOps.File;
 
-  importedFiles: Array<File>;
+  supportingFiles: Map<string, fileOps.File>;
+
+  parsingQueue: Array<string>;
+
+  expressImport: ExpressImport;
 
   constructor(serverPath: string){
     let path = ''; 
@@ -30,74 +26,77 @@ class ExpressParser {
       path += MATCH[1];
       fileName += MATCH[2];
     }
-    this.serverFile = { path, fileName, importedFiles: [], importName: '', name: '', contents: '' };
-    this.importedFiles = [];
+    this.serverFile = { path, fileName, contents: '' };
+    this.parsingQueue = [];
+    this.supportingFiles = new Map();
+    this.expressImport = {filePath: '', importName: ''};
   }
 
   // Parse all endpoints from the express server
   parse() {
-    this.readServerFile();
-    this.findImportedFiles();
+    // Read the top level server file into memory and identify all files it imports
+    this.serverFile.contents = fileOps.readFile(this.serverFile);
+    this.addSupportingFiles(fileOps.findImportedFiles(this.serverFile));
+    this.findRemainingServerFiles();
+    // Locate the location of the Express import statement 
     this.findExpressImport();
+    console.log("SERVER FILE: ", this.serverFile);
+    console.log("EXPRESS IMPORT: ", this.expressImport);
+    console.log("SUPPORTING FILES:");
+    this.supportingFiles.forEach((el, key) => console.log("FILE: ", key, el));
   }
 
-  // Read the contents of the server file into memory for parsing
-  readServerFile(){
-    const { path, fileName } = this.serverFile;
-    const FILE_CONTENTS = fs.readFileSync(path + fileName, { encoding:'utf8', flag:'r' });
-    this.serverFile.contents = FILE_CONTENTS;
-  }
-
-  // Find all imported/required local files in the server file
-  findImportedFiles() {
-    const LINES = this.serverFile.contents.split('\n');
-    for( let i = 0; i < LINES.length; i += 1 ) {
-      // Check the line for an import or require statement
-      let importedPackage = LINES[i].match(patterns.IMPORTED_FILES);
-      if( importedPackage === null ) importedPackage = LINES[i].match(patterns.REQUIRED_FILES);
-      // Store the imported package if one was found
-      if( importedPackage ) {
-        // TO DO: determine file path of imported package
-        // this.serverFile.importedFiles.push(importedPackage[1]);
+  // Add any imported files to the list of supporting files, if they haven't already been added
+  addSupportingFiles(importedFiles: Array<fileOps.File>) {
+    for(let i = 0; i < importedFiles.length; i += 1) {
+      const FILE = importedFiles[i].path.concat(importedFiles[i].fileName);
+      if (this.supportingFiles.get(FILE) === undefined) {
+        // Queue up the file for parsing
+        this.parsingQueue.push(FILE);
+        // Add the file to the list of supporting files
+        this.supportingFiles.set(FILE, importedFiles[i]);
       }
     }
   }
 
-  // Attempt to parse the name applied to the express import statement from the server file
+   // Read the contents of all imported files, and identify all files that they import
+  findRemainingServerFiles() {
+    while(this.parsingQueue.length > 0) {
+      // Shift the first file out of the queue to be parsed
+      const CURRENT_KEY = this.parsingQueue.shift();
+      if (CURRENT_KEY === undefined) return; // Check required by typescript
+      const CURRENT_FILE = this.supportingFiles.get(CURRENT_KEY);
+      if(CURRENT_FILE === undefined) return; // Check required by typescript
+
+      // Read the file contents and store check for any file imports
+      CURRENT_FILE.contents = fileOps.readFile(CURRENT_FILE);
+      this.addSupportingFiles(fileOps.findImportedFiles(CURRENT_FILE));
+    }
+  }
+
+  // Searches the code base, starting at the server file, for an express import statement
   findExpressImport() {
-    const LINES = this.serverFile.contents.split('\n');
-    for( let i = 0; i < LINES.length; i += 1 ) {
-      // Check the current line for all possible variations of an express import statement
-      if( this.checkForExpressImport(LINES[i]) ) return true;
-      if( this.checkForRequireExpress(LINES[i]) ) return true;
+    // Check the server file for the express import statement
+    let importName = expressOps.checkFileForExpress(this.serverFile);
+    if ( importName !== undefined ) {
+      // If found, store the import statement, and associated file
+      const filePath = this.serverFile.path.concat(this.serverFile.fileName);
+      this.expressImport = {filePath, importName};
+      return;
     }
-    return false;
-  }
-
-  // Check each line in the server file for an express import statement
-  checkForExpressImport(line: string) {
-    let importFound = false;  
-    const MATCH = line.match(patterns.IMPORT_EXPRESS);
-    // If a match is found, store the name applied to the express import statement
-    if( MATCH !== null ) {
-      const importName = MATCH[1];
-      this.serverFile.importName = importName;
-      importFound = true;
+    // Otherwise, search the other files until an express import statement is found
+    const FILE_LIST = this.supportingFiles.entries();
+    let currentFile = FILE_LIST.next().value;
+    while (currentFile !== undefined) {
+      importName = expressOps.checkFileForExpress(currentFile[1]);
+      if ( importName !== undefined ) {
+        // If found, store the import statement, and associated file
+        const filePath = currentFile[0];
+        this.expressImport = {filePath, importName};
+        return;
+      }
+      currentFile = FILE_LIST.next().value;
     }
-    return importFound;
-  }
-
-  // Check each line in the server file for a require express statement
-  checkForRequireExpress(line: string) {
-    let importFound = false;   
-    const MATCH = line.match(patterns.REQUIRE_EXPRESS);
-    // If a match is found, store the name applied to the express import statement
-    if( MATCH !== null ) {
-      const importName = MATCH[1];
-      this.serverFile.importName = importName;
-      importFound = true;
-    }
-    return importFound;
   }
 };
 
