@@ -21,7 +21,7 @@ const checkForRequireExpress = (line: string) => {
 
 // Attempt to parse the name applied to the express import statement from the specified file
 export const checkFileForExpress = (file: fileOps.File) => {
-  const LINES = file.contents.split(/\r?\n/);
+  const LINES = file.contents.split(patterns.NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
     // Check the current line for an express import statement
     let expressImport = checkForExpressImport(LINES[i]);
@@ -34,4 +34,15 @@ export const checkFileForExpress = (file: fileOps.File) => {
   return undefined;
 };
 
-export default checkFileForExpress;
+// Attempt to parse the name applied to the express server from the specified file
+export const checkFileForServer = (file: fileOps.File, expressName: string) => {
+  const LINES = file.contents.split(patterns.NEW_LINE);
+  const SERVER_PATTERN = new RegExp('(\\S+)\\s*=\\s*' + expressName + '\\(\\)');
+  for (let i = 0; i < LINES.length; i += 1) {
+    // Check the current line for an invocation of express
+    const SERVER_NAME = LINES[i].match(SERVER_PATTERN);
+    if (SERVER_NAME !== null) return SERVER_NAME[1];
+  }
+  // The file does not contain an express import/require statement
+  return undefined;
+};

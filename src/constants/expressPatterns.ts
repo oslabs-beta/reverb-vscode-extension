@@ -1,4 +1,5 @@
 // Patterns used for parsing Express server files
+export const NEW_LINE = new RegExp('\\r?\\n');
 export const CODE_FILE = new RegExp('.*\\.(js|ts)$');
 export const FILENAME_AND_PATH = new RegExp('(\\S+\\/)(\\S+)');
 export const PARENT_DIRECTORY = new RegExp('(\\S+\\/)\\S+');

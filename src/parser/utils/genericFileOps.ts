@@ -70,7 +70,7 @@ const parseLineForImport = (filePath: string, line: string) => {
 const findCodeFiles = (path: string) => {
   const codeFiles: Array<string> = [];
   // Read all files/folders in the specified directory
-  const dirContents: any = fs.readdirSync(path);
+  const dirContents = fs.readdirSync(path);
   // Loop through each item in the current dir
   let files = dirContents.map((content: string) => {
     // Replace any backslashes in the path with forward slashes (for Windows users)

@@ -3,9 +3,10 @@ import * as fileOps from './utils/genericFileOps';
 import * as expressOps from './utils/expressFileOps';
 
 // Used to store information about the express import statement
-interface ExpressImport {
+interface ExpressData {
   filePath: string;
   importName: string;
+  serverName: string;
 }
 
 class ExpressParser {
@@ -13,12 +14,12 @@ class ExpressParser {
 
   supportFiles: Map<string, fileOps.File>;
 
-  expressImport: ExpressImport;
+  expressData: ExpressData;
 
   constructor(serverPath: string) {
     this.serverFile = this.initializeServerFile(serverPath);
     this.supportFiles = new Map();
-    this.expressImport = { filePath: '', importName: '' };
+    this.expressData = { filePath: '', importName: '', serverName: '' };
   }
 
   // Creates a File object containing info about the server file
@@ -37,9 +38,10 @@ class ExpressParser {
     this.serverFile.contents = fileOps.readFile(this.serverFile);
     this.findSupportFiles();
     this.findExpressImport();
+    this.findServerName();
     // Console log data for testing purposes
     console.log('SERVER FILE: ', this.serverFile);
-    console.log('EXPRESS IMPORT: ', this.expressImport);
+    console.log('EXPRESS DATA: ', this.expressData);
     console.log('SUPPORT FILES:');
     this.supportFiles.forEach((el, key) => console.log('FILE: ', key, el));
   }
@@ -118,7 +120,22 @@ class ExpressParser {
   // Store the filename and variable name associated with the express import
   storeExpressImport(file: fileOps.File, importName: string) {
     const filePath = file.path.concat(file.fileName);
-    this.expressImport = { filePath, importName };
+    this.expressData = { filePath, importName, serverName: '' };
+  }
+
+  // Find the name of the variable associated with the invocation of express
+  findServerName() {
+    // Get the file that contains the express import
+    const EXPRESS_FILE =
+      this.supportFiles.get(this.expressData.filePath) || this.serverFile;
+    const EXPRESS_NAME = this.expressData.importName;
+    // Check the server file to see if it calls express
+    const SERVER_NAME = expressOps.checkFileForServer(
+      EXPRESS_FILE,
+      EXPRESS_NAME,
+    );
+    // If an express call was found, store the name of the associated variable
+    if (SERVER_NAME) this.expressData.serverName = SERVER_NAME;
   }
 }
 
