@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as serverTypes from './constants/serverTypes';
 import ExpressParser from './parser/expressParser';
+import * as utils from './utils/utils';
+import { multiStepInput } from './utils/multiStepInput';
 
 const CONFIG = require('../reverbconfig.json');
 
@@ -23,21 +25,20 @@ export function activate(context: vscode.ExtensionContext) {
       );
   }
 
-  // Pre-existing code from initial creation of extention scaffolding
-  console.log(
-    'Congratulations, your extension "reverb-vs-code-extension" is now active!',
-  );
+  const disposable1 = vscode.commands.registerCommand(
+    'extension.testRoute',
+    async () => {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor) {
+        return;
+      }
 
-  const disposable = vscode.commands.registerCommand(
-    'reverb-vs-code-extension.helloWorld',
-    () => {
-      vscode.window.showInformationMessage(
-        'Hello World from reVerb VS Code extension!',
-      );
+      const res = await multiStepInput(context);
+      console.log(res);
     },
   );
 
-  context.subscriptions.push(disposable);
+  context.subscriptions.push(disposable1);
 }
 
 export function deactivate() {
