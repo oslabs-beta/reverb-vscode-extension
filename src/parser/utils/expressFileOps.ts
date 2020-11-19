@@ -10,7 +10,7 @@ const checkForExpressImport = (line: string) => {
   return undefined;
 };
 
-// Check each line in the server file for a require express statement
+// Check the specified line for a require express statement
 const checkForRequireExpress = (line: string) => {
   const MATCH = line.match(patterns.REQUIRE_EXPRESS);
   // If a match is found, return the name applied to the express import
@@ -34,14 +34,40 @@ export const checkFileForExpress = (file: fileOps.File) => {
   return undefined;
 };
 
+// Check the specified line for an express invocation
+const checkForExpressInvocation = (line: string, expressName: string) => {
+  const SERVER_PATTERN = new RegExp('(\\S+)\\s*=\\s*' + expressName + '\\(\\)');
+  // Check the current line for an invocation of express
+  const SERVER_NAME = line.match(SERVER_PATTERN);
+  // If a match is found, return the name applied to the express server
+  if (SERVER_NAME !== null) return SERVER_NAME[1];
+  // Otherwise return undefined
+  return undefined;
+};
+
+// Check the specified line for express.Application
+const checkForExpressApplication = (line: string, expressName: string) => {
+  const SERVER_PATTERN = new RegExp(
+    '\\(\\s*(\\S+)\\s*:\\s*' + expressName + '\\.Application\\)',
+  );
+  // Check the current line for a call to express.Application
+  const SERVER_NAME = line.match(SERVER_PATTERN);
+  // If a match is found, return the name applied to the express server
+  if (SERVER_NAME !== null) return SERVER_NAME[1];
+  // Otherwise return undefined
+  return undefined;
+};
+
 // Attempt to parse the name applied to the express server from the specified file
 export const checkFileForServer = (file: fileOps.File, expressName: string) => {
   const LINES = file.contents.split(patterns.NEW_LINE);
-  const SERVER_PATTERN = new RegExp('(\\S+)\\s*=\\s*' + expressName + '\\(\\)');
   for (let i = 0; i < LINES.length; i += 1) {
-    // Check the current line for an invocation of express
-    const SERVER_NAME = LINES[i].match(SERVER_PATTERN);
-    if (SERVER_NAME !== null) return SERVER_NAME[1];
+    // Check the current line for an express import statement
+    let expressImport = checkForExpressInvocation(LINES[i], expressName);
+    if (expressImport !== undefined) return expressImport;
+    // Check the current line for a require express statement
+    expressImport = checkForExpressApplication(LINES[i], expressName);
+    if (expressImport !== undefined) return expressImport;
   }
   // The file does not contain an express import/require statement
   return undefined;
