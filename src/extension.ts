@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
   switch (CONFIG.serverType) {
     case serverTypes.EXPRESS:
       console.log('Parsing Express server');
-      serverParser = new ExpressParser(CONFIG.serverPath);
+      serverParser = new ExpressParser(CONFIG.serverPath, CONFIG.portNumber);
       serverParser.parse();
       break;
     case serverTypes.NODE:

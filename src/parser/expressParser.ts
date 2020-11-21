@@ -10,16 +10,20 @@ interface ExpressData {
 }
 
 class ExpressParser {
+  serverPort: number;
   serverFile: fileOps.File;
-
   supportFiles: Map<string, fileOps.File>;
+  expressData: Array<ExpressData>;
+  routerData: Array<expressOps.RouterData>;
+  routes: Array<expressOps.Route>;
 
-  expressData: ExpressData;
-
-  constructor(serverPath: string) {
+  constructor(serverPath: string, portNum: number) {
+    this.serverPort = portNum;
     this.serverFile = this.initializeServerFile(serverPath);
     this.supportFiles = new Map();
-    this.expressData = { filePath: '', importName: '', serverName: '' };
+    this.expressData = [];
+    this.routerData = [];
+    this.routes = [];
   }
 
   // Creates a File object containing info about the server file
@@ -37,13 +41,12 @@ class ExpressParser {
   parse() {
     this.serverFile.contents = fileOps.readFile(this.serverFile);
     this.findSupportFiles();
-    this.findExpressImport();
+    this.findExpressImports();
     this.findServerName();
+    this.findRouters();
+    this.findAllRoutes();
     // Console log data for testing purposes
-    console.log('SERVER FILE: ', this.serverFile);
-    console.log('EXPRESS DATA: ', this.expressData);
-    console.log('SUPPORT FILES:');
-    this.supportFiles.forEach((el, key) => console.log('FILE: ', key, el));
+    console.log(this.routes);
   }
 
   // Read the contents of all imported files, and all files that they import
@@ -92,16 +95,16 @@ class ExpressParser {
   }
 
   // Searches the code base, starting at the server file, for an express import statement
-  findExpressImport() {
+  findExpressImports() {
     // Check the server file to see if it imports express
     const IMPORT_NAME = expressOps.checkFileForExpress(this.serverFile);
     // If found, store the details of the import
     if (IMPORT_NAME) this.storeExpressImport(this.serverFile, IMPORT_NAME);
-    // Otherwise, search the support files until an express import statement is found
-    else this.searchSupportFilesForExpress();
+    // Search the support files for any express import statements
+    this.searchSupportFilesForExpress();
   }
 
-  // Search through the support files until an express import statement is found
+  // Search through the support files for any express import statements
   searchSupportFilesForExpress() {
     const FILE_LIST = this.supportFiles.entries();
     let currentFile = FILE_LIST.next().value;
@@ -111,7 +114,6 @@ class ExpressParser {
       if (IMPORT_NAME) {
         // If found, store the details of the import
         this.storeExpressImport(currentFile[1], IMPORT_NAME);
-        break;
       }
       currentFile = FILE_LIST.next().value;
     }
@@ -120,22 +122,63 @@ class ExpressParser {
   // Store the filename and variable name associated with the express import
   storeExpressImport(file: fileOps.File, importName: string) {
     const filePath = file.path.concat(file.fileName);
-    this.expressData = { filePath, importName, serverName: '' };
+    this.expressData.push({ filePath, importName, serverName: '' });
   }
 
-  // Find the name of the variable associated with the invocation of express
+  // Find the name of the variable associated with each invocation of express
   findServerName() {
-    // Get the file that contains the express import
-    const EXPRESS_FILE =
-      this.supportFiles.get(this.expressData.filePath) || this.serverFile;
-    const EXPRESS_NAME = this.expressData.importName;
-    // Check the server file to see if it calls express
-    const SERVER_NAME = expressOps.checkFileForServer(
-      EXPRESS_FILE,
-      EXPRESS_NAME,
-    );
-    // If an express call was found, store the name of the associated variable
-    if (SERVER_NAME) this.expressData.serverName = SERVER_NAME;
+    for (let i = 0; i < this.expressData.length; i += 1) {
+      // Get the file that contains the express import
+      const EXPRESS_FILE =
+        this.supportFiles.get(this.expressData[i].filePath) || this.serverFile;
+      const EXPRESS_NAME = this.expressData[i].importName;
+      // Check the server file to see if it calls express
+      const SERVER_NAME = expressOps.checkFileForServer(
+        EXPRESS_FILE,
+        EXPRESS_NAME,
+      );
+      // If an express call was found, store the name of the associated variable
+      if (SERVER_NAME) this.expressData[i].serverName = SERVER_NAME;
+    }
+  }
+
+  // Find all routers used by the express server
+  findRouters() {
+    this.supportFiles.forEach((file, path) => {
+      const ROUTERS = expressOps.checkFileForRouters(file, this.serverPort);
+      ROUTERS.forEach((router) => {
+        const PATH_FOUND = router.importName.match(patterns.REQUIRE_PATH);
+        if (PATH_FOUND !== null) {
+          const BASE_PATH = fileOps.removeFilenameFromPath(path);
+          router.path = fileOps.resolvePath(
+            fileOps.mergePaths(BASE_PATH, PATH_FOUND[1]),
+          )[0];
+        }
+        // TO DO: find file associated with router
+        else
+          expressOps.findPath(file.contents, path, router, this.supportFiles);
+      });
+      this.routerData = this.routerData.concat(ROUTERS);
+    });
+  }
+
+  // Finds all routes in the express file and router files
+  findAllRoutes() {
+    const BASE_ROUTE = 'http//localhost:' + this.serverPort;
+    const PATH = this.serverFile.path.concat(this.serverFile.fileName);
+    expressOps.findRoutes(this.serverFile.contents, PATH, BASE_ROUTE);
+    for (let i = 0; i < this.routerData.length; i += 1) {
+      const FILE = this.supportFiles.get(this.routerData[i].path);
+      if (FILE !== undefined) {
+        this.routes = this.routes.concat(
+          expressOps.findRoutes(
+            FILE.contents,
+            this.routerData[i].path,
+            this.routerData[i].baseRoute,
+          ),
+        );
+      }
+    }
   }
 }
 

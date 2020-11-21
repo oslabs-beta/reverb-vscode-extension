@@ -15,3 +15,10 @@ export const REQUIRE_EXPRESS = new RegExp(
 export const IMPORT_EXPRESS = new RegExp(
   'import\\s*(\\S+)\\s*from\\s*[\'"`]express[\'"`]',
 );
+export const USE_ROUTER = new RegExp(
+  '\\.use\\([\'"`](\\S+)[\'"`],\\s*(\\S+)\\)',
+);
+export const REQUIRE_PATH = new RegExp('require\\(\\s*[\'"`](\\S+)[\'"`]\\)');
+export const EXPRESS_ROUTE = new RegExp(
+  '\\.(get|post|put|delete)\\([\'"`](\\/\\S*)[\'"`]',
+);
