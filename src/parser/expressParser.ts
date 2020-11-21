@@ -34,14 +34,65 @@ class ExpressParser {
 
   // Parse all endpoints from the express server
   parse() {
-    this.serverFile.contents = fileOps.readFile(this.serverFile);
-    this.findSupportFiles();
-    this.findExpressImport();
-    // Console log data for testing purposes
-    console.log('SERVER FILE: ', this.serverFile);
-    console.log('EXPRESS IMPORT: ', this.expressImport);
-    console.log('SUPPORT FILES:');
-    this.supportFiles.forEach((el, key) => console.log('FILE: ', key, el));
+    // this.serverFile.contents = fileOps.readFile(this.serverFile);
+    // this.findSupportFiles();
+    // this.findExpressImport();
+    // // Console log data for testing purposes
+    // console.log('SERVER FILE: ', this.serverFile);
+    // console.log('EXPRESS IMPORT: ', this.expressImport);
+    // console.log('SUPPORT FILES:');
+    // this.supportFiles.forEach((el, key) => console.log('FILE: ', key, el));
+    const obj: WorkspaceObj = {
+      '/c:/Users/itsme/Documents/test-server-express/server4/src/routes/ApiRouter.ts': [
+        {
+          port: 3004,
+          range: [24, 24],
+          endPoint: '/api/',
+          method: 'GET',
+          config: {},
+        },
+        {
+          port: 3004,
+          range: [25, 25],
+          endPoint: '/api/login',
+          method: 'GET',
+          config: {},
+        },
+
+        {
+          port: 3004,
+          range: [26, 26],
+          endPoint: '/api/signup',
+          method: 'GET',
+          config: {},
+        },
+      ],
+      '/c:/Users/itsme/Documents/test-server-express/server4/src/routes/AuthRouter.ts': [
+        {
+          port: 3004,
+          range: [24, 24],
+          endPoint: '/api/',
+          method: 'GET',
+          config: {},
+        },
+        {
+          port: 3004,
+          range: [25, 25],
+          endPoint: '/auth/verify',
+          method: 'GET',
+          config: {},
+        },
+
+        {
+          port: 3004,
+          range: [26, 26],
+          endPoint: '/auth/create',
+          method: 'GET',
+          config: {},
+        },
+      ],
+    };
+    return obj;
   }
 
   // Read the contents of all imported files, and all files that they import
