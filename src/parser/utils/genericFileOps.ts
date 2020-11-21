@@ -36,7 +36,7 @@ const createFileObjects = (fileList: Array<string>) => {
 };
 
 // Merges a file's relative path with the path of the file into which it is being imported
-const mergePaths = (parentPath: string, importPath: string) => {
+export const mergePaths = (parentPath: string, importPath: string) => {
   // Repeatedly check the imported file's path for "../" at the beginning
   while (importPath[0] === '.' && importPath[1] === '.') {
     // If found, go up one level in the root directory
@@ -70,7 +70,7 @@ const parseLineForImport = (filePath: string, line: string) => {
 const findCodeFiles = (path: string) => {
   const codeFiles: Array<string> = [];
   // Read all files/folders in the specified directory
-  const dirContents: any = fs.readdirSync(path);
+  const dirContents = fs.readdirSync(path);
   // Loop through each item in the current dir
   let files = dirContents.map((content: string) => {
     // Replace any backslashes in the path with forward slashes (for Windows users)
@@ -90,7 +90,7 @@ const findCodeFiles = (path: string) => {
 };
 
 // Returns an array of File objects for each file in the specified path
-const resolvePath = (path: string) => {
+export const resolvePath = (path: string) => {
   // If the path exists, check if it is a directory or file
   if (fs.existsSync(path)) {
     return fs.statSync(path).isDirectory() ? findCodeFiles(path) : [path];
@@ -128,4 +128,14 @@ export const findImportedFiles = (file: File) => {
   }
   // Return all imported files found in the file
   return output;
+};
+
+// Remove the file name from the end of a path
+export const removeFilenameFromPath = (path: string) => {
+  // Split the extract the file name from the merged path
+  const MATCH = path.match(patterns.FILENAME_AND_PATH);
+  // Return the path with the file name removed
+  if (MATCH) return MATCH[1];
+  // Return the original path if there was no match
+  return path;
 };

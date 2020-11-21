@@ -1,5 +1,5 @@
 {
   "portNumber": 3001,
-  "serverPath": "C:/Users/itsme/Documents/test-server-express/server1/index.js",
+  "serverPath": "/home/cvanspl1/github/test-server-express/server4/src/server.ts",
   "serverType": "EXPRESS"
 }

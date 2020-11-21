@@ -11,6 +11,25 @@ export async function activate(context: vscode.ExtensionContext) {
   // wipe storage on start for dev testing
   await context.workspaceState.update('obj', undefined);
 
+export function activate(context: vscode.ExtensionContext) {
+  let serverParser;
+
+  // Activate the appropriate parser for the server type
+  switch (CONFIG.serverType) {
+    case serverTypes.EXPRESS:
+      console.log('Parsing Express server');
+      serverParser = new ExpressParser(CONFIG.serverPath, CONFIG.portNumber);
+      serverParser.parse();
+      break;
+    case serverTypes.NODE:
+      console.log('NODE support coming soon');
+      break;
+    default:
+      console.log(
+        'ERROR: Unsupported server type specified in reverbconfig.json',
+      );
+  }
+
   const disposable1 = vscode.commands.registerCommand(
     'extension.testRoute',
     async () => {
