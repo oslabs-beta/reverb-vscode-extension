@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   QuickPickItem,
   window,
@@ -59,15 +60,15 @@ export async function multiStepInput(context: ExtensionContext) {
   }
 
   async function validatePort(port: string) {
-    // if (port.length === 4) {
-    // 	return find('port', port).then(function (list) {
-    // 		if (!list.length) {
-    // 			return `No local server running on ${port}. Please start dev server and try again`;
-    // 		} else {
-    // 			return undefined;
-    // 		}
-    // 	});
-    // }
+    if (port.length === 4) {
+      return find('port', port).then(function (list) {
+        if (!list.length) {
+          return `No local server running on ${port}. Please start dev server and try again`;
+        } else {
+          return undefined;
+        }
+      });
+    }
     return undefined;
   }
 
