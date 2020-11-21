@@ -7,10 +7,7 @@ import {
   workspace,
   ConfigurationTarget,
   ProgressLocation,
-  DecorationOptions,
-  TextEditorDecorationType,
 } from 'vscode';
-import { existsSync, mkdir, writeFile, readFile } from 'fs';
 import axios from 'axios';
 
 export const addDeco = (
