@@ -1,22 +1,22 @@
 interface WorkspaceObj {
-  [routerUri: string]: { [endpoint: string]: EndPoint };
+  [routerUri: string]: { [endpoint: string]: EndPointMethods };
+}
+interface EndPointMethods {
+  [method: string]: EndPoint;
 }
 interface EndPoint {
-  port: number;
   range: number[];
-  endPoint: string;
   config: options;
 }
 interface options {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | undefined;
   url: string;
   headers: Record<any, never>;
   data: Record<any, never>;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | undefined;
 }
 
-interface expressionRanges {
-  startNum: number;
-  endNum: number;
+interface ExpressionRanges {
+  [startLine: number]: number;
 }
 
 interface node {

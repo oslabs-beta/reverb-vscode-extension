@@ -8,7 +8,7 @@ import {
 } from '@typescript-eslint/typescript-estree';
 
 export function getRanges(FILETEXT: string) {
-  const output: Array<expressionRanges> = [];
+  const output: ExpressionRanges = {};
   const ast = parser.parse(FILETEXT, {
     loc: true,
   });
@@ -27,10 +27,9 @@ export function getRanges(FILETEXT: string) {
           'DELETE',
         ].includes(node.property.name)
       ) {
-        output.push({
-          startNum: node.property.loc.start.line,
-          endNum: parent.loc.end.line,
-        });
+        const startNum = node.property.loc.start.line;
+        const endNum = parent.loc.end.line;
+        output[startNum] = endNum;
       }
     },
   });
