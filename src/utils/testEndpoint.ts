@@ -6,8 +6,7 @@ import { getLocalPath } from '../parser/utils/genericFileOps';
 import * as utils from './utils';
 
 /**
- * Normalizes the possible options for `linter.verify` and `linter.verifyAndFix` to a
- * consistent shape.
+ * Attempts to send request to endpoint with given config
  * @param {ExtensionContext} context context provided by vscode during activation
  * @param {OutputChannel} outputWindow reVerb output initialized in extension.ts
  */
