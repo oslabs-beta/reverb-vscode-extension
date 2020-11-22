@@ -11,15 +11,29 @@ import {
 } from 'vscode';
 import find = require('find-process');
 
+/**
+ * Takes config and makes axios request
+ * @param {ExtensionContext} context context provided by vscode during activation
+ */
 export async function multiStepInput(context: ExtensionContext) {
   const title = 'Configure Environment';
 
+  /**
+   * Init gathering user input on server,port and server path.
+   * @returns {State} Object with user input.
+   */
   async function collectInputs() {
     const state = {} as Partial<State>;
     await MultiStepInput.run((input) => pickServerType(input, state));
     return state as State;
   }
 
+  /**
+   * Gets server type from user
+   * @param {MultiStepInput} input traversing function.
+   * @param {Partial<State>} state Object with user input.
+   * @returns {MultiStepInput} traversing function.
+   */
   async function pickServerType(input: MultiStepInput, state: Partial<State>) {
     state.serverType = await input.showQuickPick({
       title,
@@ -33,6 +47,12 @@ export async function multiStepInput(context: ExtensionContext) {
     return (input: MultiStepInput) => inputPort(input, state);
   }
 
+  /**
+   * Gets port from user
+   * @param {MultiStepInput} input traversing function.
+   * @param {Partial<State>} state Object with user input.
+   * @returns {MultiStepInput} traversing function.
+   */
   async function inputPort(input: MultiStepInput, state: Partial<State>) {
     state.port = await input.showInputBox({
       title,
@@ -47,36 +67,50 @@ export async function multiStepInput(context: ExtensionContext) {
     return (input: MultiStepInput) => pickServerFile(input, state);
   }
 
+  /**
+   * Gets server file path from user
+   * @param {MultiStepInput} input traversing function.
+   * @param {Partial<State>} state Object with user input.
+   * @returns {MultiStepInput} traversing function.
+   */
   async function pickServerFile(input: MultiStepInput, state: Partial<State>) {
+    if (!window.activeTextEditor) return;
     state.serverPath = await input.showInputBox({
       title,
       step: 3,
       totalSteps: 3,
-      value: window.activeTextEditor!.document.uri.path,
+      value: window.activeTextEditor.document.uri.path,
       prompt: 'select main server file in file explorer',
       validate: validateNameIsUnique,
       shouldResume: shouldResume,
     });
   }
 
+  /**
+   * Ensures server running on selected port.
+   * @param {string} port server port.
+   * @returns {undefined | string} undefined if server running. String if no server running.
+   */
   async function validatePort(port: string) {
-    // if (port.length === 4) {
-    //   return find('port', port).then(function (list) {
-    //     if (!list.length) {
-    //       return `No local server running on ${port}. Please start dev server and try again`;
-    //     } else {
-    //       return undefined;
-    //     }
-    //   });
-    // }
+    if (port.length === 4) {
+      return find('port', port).then(function (list) {
+        if (!list.length) {
+          return `No local server running on ${port}. Please start dev server and try again`;
+        } else {
+          return undefined;
+        }
+      });
+    }
     return undefined;
   }
 
+  // todo
   async function validateNameIsUnique(serverPath: string) {
     // todo - check that file has express server declaration
     return undefined;
   }
 
+  // todo
   async function shouldResume() {
     return new Promise<boolean>((resolve, reject) => {
       // todo
