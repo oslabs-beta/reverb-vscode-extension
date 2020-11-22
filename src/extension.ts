@@ -1,34 +1,41 @@
 import * as vscode from 'vscode';
 import * as utils from './utils/utils';
 import { testEndpoint } from './utils/testEndpoint';
-import { getRanges } from './parser/utils/ast';
-import * as fs from 'fs';
+import { configEndpoint } from './utils/configEndpoint';
 
-// runs on extension startup
 export async function activate(context: vscode.ExtensionContext) {
-  const { rootPath } = vscode.workspace;
-  utils.init(rootPath);
-  // wipe storage on start for dev testing
-  await context.workspaceState.update('obj', undefined);
+  // uncomment to wipe storage
+  // await context.workspaceState.update(`obj`, undefined);
+  console.log(`INIT STATE => ${await context.workspaceState.get(`obj`)}`);
 
+  // Init output window. Needs to be passed to functions that use it.
+  const outputWindow: vscode.OutputChannel = vscode.window.createOutputChannel(
+    'reVerb',
+  );
+  outputWindow.appendLine('---reVerb initialized---');
+  utils.init();
+
+  /**
+   * Takes config and makes axios request
+   * @param {ExtensionContext} context context provided by vscode during activation
+   * @param {vscode.OutputChannel} outputWindow reVerb output initialized in extension.ts
+   */
   const disposable1 = vscode.commands.registerCommand(
     'extension.testRoute',
     async () => {
-      const activeEditor = vscode.window.activeTextEditor;
-      if (!activeEditor) {
-        return;
-      }
-      // testEndpoint(context);
-      const FILETEXT = fs.readFileSync(
-        activeEditor.document.uri.path.slice(1),
-        'utf8',
-      );
-      const output = getRanges(FILETEXT);
-      console.log(output);
+      testEndpoint(context, outputWindow);
     },
   );
 
-  context.subscriptions.push(disposable1);
+  const disposable2 = vscode.commands.registerCommand(
+    'extension.configRoute',
+    async () => {
+      // only for testing. Just changes GET to PUT for validation. See file for info.
+      configEndpoint(context);
+    },
+  );
+
+  context.subscriptions.push(disposable1, disposable2);
 }
 
 export function deactivate() {

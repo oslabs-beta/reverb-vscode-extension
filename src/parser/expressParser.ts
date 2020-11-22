@@ -1,24 +1,23 @@
 import * as patterns from '../constants/expressPatterns';
 import * as fileOps from './utils/genericFileOps';
 import * as expressOps from './utils/expressFileOps';
-
-// Used to store information about the express import statement
-interface ExpressImport {
-  filePath: string;
-  importName: string;
-}
+import { getRanges } from './utils/ast';
 
 class ExpressParser {
-  serverFile: fileOps.File;
+  serverPort: number;
+  serverFile: File;
+  supportFiles: Map<string, File>;
+  expressData: Array<ExpressData>;
+  routerData: Array<RouterData>;
+  routes: Array<Route>;
 
-  supportFiles: Map<string, fileOps.File>;
-
-  expressImport: ExpressImport;
-
-  constructor(serverPath: string) {
+  constructor(serverPath: string, portNum: number) {
+    this.serverPort = portNum;
     this.serverFile = this.initializeServerFile(serverPath);
     this.supportFiles = new Map();
-    this.expressImport = { filePath: '', importName: '' };
+    this.expressData = [];
+    this.routerData = [];
+    this.routes = [];
   }
 
   // Creates a File object containing info about the server file
@@ -34,65 +33,14 @@ class ExpressParser {
 
   // Parse all endpoints from the express server
   parse() {
-    // this.serverFile.contents = fileOps.readFile(this.serverFile);
-    // this.findSupportFiles();
-    // this.findExpressImport();
-    // // Console log data for testing purposes
-    // console.log('SERVER FILE: ', this.serverFile);
-    // console.log('EXPRESS IMPORT: ', this.expressImport);
-    // console.log('SUPPORT FILES:');
-    // this.supportFiles.forEach((el, key) => console.log('FILE: ', key, el));
-    const obj: WorkspaceObj = {
-      '/c:/Users/itsme/Documents/test-server-express/server4/src/routes/ApiRouter.ts': [
-        {
-          port: 3004,
-          range: [24, 24],
-          endPoint: '/api/',
-          method: 'GET',
-          config: {},
-        },
-        {
-          port: 3004,
-          range: [25, 25],
-          endPoint: '/api/login',
-          method: 'GET',
-          config: {},
-        },
-
-        {
-          port: 3004,
-          range: [26, 26],
-          endPoint: '/api/signup',
-          method: 'GET',
-          config: {},
-        },
-      ],
-      '/c:/Users/itsme/Documents/test-server-express/server4/src/routes/AuthRouter.ts': [
-        {
-          port: 3004,
-          range: [24, 24],
-          endPoint: '/api/',
-          method: 'GET',
-          config: {},
-        },
-        {
-          port: 3004,
-          range: [25, 25],
-          endPoint: '/auth/verify',
-          method: 'GET',
-          config: {},
-        },
-
-        {
-          port: 3004,
-          range: [26, 26],
-          endPoint: '/auth/create',
-          method: 'GET',
-          config: {},
-        },
-      ],
-    };
-    return obj;
+    this.serverFile.contents = fileOps.readFile(this.serverFile);
+    this.findSupportFiles();
+    this.findExpressImports();
+    this.findServerName();
+    this.findRouters();
+    this.findAllRoutes();
+    this.findRouteEndLines();
+    return this.buildWorkspaceObject();
   }
 
   // Read the contents of all imported files, and all files that they import
@@ -124,7 +72,7 @@ class ExpressParser {
   }
 
   // Add any imported files to the list of support files, if they haven't already been added
-  addSupportFiles(importedFiles: Array<fileOps.File>) {
+  addSupportFiles(importedFiles: Array<File>) {
     const queue = [];
     for (let i = 0; i < importedFiles.length; i += 1) {
       // Check the list of support files to ensure the current file has not alread been read
@@ -141,16 +89,16 @@ class ExpressParser {
   }
 
   // Searches the code base, starting at the server file, for an express import statement
-  findExpressImport() {
+  findExpressImports() {
     // Check the server file to see if it imports express
     const IMPORT_NAME = expressOps.checkFileForExpress(this.serverFile);
     // If found, store the details of the import
     if (IMPORT_NAME) this.storeExpressImport(this.serverFile, IMPORT_NAME);
-    // Otherwise, search the support files until an express import statement is found
-    else this.searchSupportFilesForExpress();
+    // Search the support files for any express import statements
+    this.searchSupportFilesForExpress();
   }
 
-  // Search through the support files until an express import statement is found
+  // Search through the support files for any express import statements
   searchSupportFilesForExpress() {
     const FILE_LIST = this.supportFiles.entries();
     let currentFile = FILE_LIST.next().value;
@@ -160,16 +108,100 @@ class ExpressParser {
       if (IMPORT_NAME) {
         // If found, store the details of the import
         this.storeExpressImport(currentFile[1], IMPORT_NAME);
-        break;
       }
       currentFile = FILE_LIST.next().value;
     }
   }
 
   // Store the filename and variable name associated with the express import
-  storeExpressImport(file: fileOps.File, importName: string) {
+  storeExpressImport(file: File, importName: string) {
     const filePath = file.path.concat(file.fileName);
-    this.expressImport = { filePath, importName };
+    this.expressData.push({ filePath, importName, serverName: '' });
+  }
+
+  // Find the name of the variable associated with each invocation of express
+  findServerName() {
+    for (let i = 0; i < this.expressData.length; i += 1) {
+      // Get the file that contains the express import
+      const EXPRESS_FILE =
+        this.supportFiles.get(this.expressData[i].filePath) || this.serverFile;
+      const EXPRESS_NAME = this.expressData[i].importName;
+      // Check the server file to see if it calls express
+      const SERVER_NAME = expressOps.checkFileForServer(
+        EXPRESS_FILE,
+        EXPRESS_NAME,
+      );
+      // If an express call was found, store the name of the associated variable
+      if (SERVER_NAME) this.expressData[i].serverName = SERVER_NAME;
+    }
+  }
+
+  // Find all routers used by the express server
+  findRouters() {
+    this.supportFiles.forEach((file, path) => {
+      const ROUTERS = expressOps.checkFileForRouters(file, this.serverPort);
+      ROUTERS.forEach((router) => {
+        const PATH_FOUND = router.importName.match(patterns.REQUIRE_PATH);
+        if (PATH_FOUND !== null) {
+          const BASE_PATH = fileOps.removeFilenameFromPath(path);
+          router.path = fileOps.resolvePath(
+            fileOps.mergePaths(BASE_PATH, PATH_FOUND[1]),
+          )[0];
+        }
+        // TO DO: find file associated with router
+        else
+          expressOps.findPath(file.contents, path, router, this.supportFiles);
+      });
+      this.routerData = this.routerData.concat(ROUTERS);
+    });
+  }
+
+  // Finds all routes in the express file and router files
+  findAllRoutes() {
+    const BASE_ROUTE = 'http//localhost:' + this.serverPort;
+    const PATH = this.serverFile.path.concat(this.serverFile.fileName);
+    expressOps.findRoutes(this.serverFile.contents, PATH, BASE_ROUTE);
+    for (let i = 0; i < this.routerData.length; i += 1) {
+      const FILE = this.supportFiles.get(this.routerData[i].path);
+      if (FILE !== undefined) {
+        this.routes = this.routes.concat(
+          expressOps.findRoutes(
+            FILE.contents,
+            this.routerData[i].path,
+            this.routerData[i].baseRoute,
+          ),
+        );
+      }
+    }
+  }
+
+  findRouteEndLines() {
+    this.routes.forEach((route) => {
+      const ROUTER_FILE = this.supportFiles.get(route.path) || this.serverFile;
+      const FILE_RANGES = getRanges(ROUTER_FILE.contents);
+      route.endLine = FILE_RANGES[route.startLine];
+    });
+  }
+
+  buildWorkspaceObject() {
+    const output: WorkspaceObj = {};
+    this.routes.forEach((route) => {
+      const LOCAL_PATH = fileOps.getLocalPath(route.path);
+      const LOCAL_ROUTE = fileOps.getLocalRoute(route.route);
+      if (output[LOCAL_PATH] === undefined) output[LOCAL_PATH] = {};
+      if (output[LOCAL_PATH][LOCAL_ROUTE] === undefined)
+        output[LOCAL_PATH][LOCAL_ROUTE] = {};
+      output[LOCAL_PATH][LOCAL_ROUTE][route.method.toUpperCase()] = {
+        range: [route.startLine, route.endLine],
+        config: {
+          method: route.method.toUpperCase(),
+          url: route.route,
+          headers: {},
+          data: {},
+        },
+      };
+    });
+    return output;
   }
 }
 
