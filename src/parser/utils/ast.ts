@@ -2,7 +2,7 @@ const parser = require('typescript-estree');
 const walk = require('estree-walker').walk;
 
 export function getRanges(FILETEXT: string) {
-  const output: Array<expressionRanges> = [];
+  const output: ExpressionRanges = {};
   const ast = parser.parse(FILETEXT, {
     loc: true,
   });
@@ -15,10 +15,9 @@ export function getRanges(FILETEXT: string) {
           || node.property.name === 'delete'
           || node.property.name === 'post')
       ) {
-        output.push({
-          startNum: node.property.loc.start.line,
-          endNum: parent.loc.end.line,
-        });
+        const startNum = node.property.loc.start.line;
+        const endNum = parent.loc.end.line;
+        output[startNum] = endNum;
       }
     },
   });

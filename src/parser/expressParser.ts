@@ -1,21 +1,15 @@
 import * as patterns from '../constants/expressPatterns';
 import * as fileOps from './utils/genericFileOps';
 import * as expressOps from './utils/expressFileOps';
-
-// Used to store information about the express import statement
-interface ExpressData {
-  filePath: string;
-  importName: string;
-  serverName: string;
-}
+import { getRanges } from './utils/ast';
 
 class ExpressParser {
   serverPort: number;
-  serverFile: fileOps.File;
-  supportFiles: Map<string, fileOps.File>;
+  serverFile: File;
+  supportFiles: Map<string, File>;
   expressData: Array<ExpressData>;
-  routerData: Array<expressOps.RouterData>;
-  routes: Array<expressOps.Route>;
+  routerData: Array<RouterData>;
+  routes: Array<Route>;
 
   constructor(serverPath: string, portNum: number) {
     this.serverPort = portNum;
@@ -45,8 +39,8 @@ class ExpressParser {
     this.findServerName();
     this.findRouters();
     this.findAllRoutes();
-    // Console log data for testing purposes
-    console.log(this.routes);
+    this.findRouteEndLines();
+    return this.buildWorkspaceObject();
   }
 
   // Read the contents of all imported files, and all files that they import
@@ -78,7 +72,7 @@ class ExpressParser {
   }
 
   // Add any imported files to the list of support files, if they haven't already been added
-  addSupportFiles(importedFiles: Array<fileOps.File>) {
+  addSupportFiles(importedFiles: Array<File>) {
     const queue = [];
     for (let i = 0; i < importedFiles.length; i += 1) {
       // Check the list of support files to ensure the current file has not alread been read
@@ -120,7 +114,7 @@ class ExpressParser {
   }
 
   // Store the filename and variable name associated with the express import
-  storeExpressImport(file: fileOps.File, importName: string) {
+  storeExpressImport(file: File, importName: string) {
     const filePath = file.path.concat(file.fileName);
     this.expressData.push({ filePath, importName, serverName: '' });
   }
@@ -179,6 +173,35 @@ class ExpressParser {
         );
       }
     }
+  }
+
+  findRouteEndLines() {
+    this.routes.forEach((route) => {
+      const ROUTER_FILE = this.supportFiles.get(route.path) || this.serverFile;
+      const FILE_RANGES = getRanges(ROUTER_FILE.contents);
+      route.endLine = FILE_RANGES[route.startLine];
+    });
+  }
+
+  buildWorkspaceObject() {
+    const output: WorkspaceObj = {};
+    this.routes.forEach((route) => {
+      const LOCAL_PATH = fileOps.getLocalPath(route.path);
+      const LOCAL_ROUTE = fileOps.getLocalRoute(route.route);
+      if (output[LOCAL_PATH] === undefined) output[LOCAL_PATH] = {};
+      if (output[LOCAL_PATH][LOCAL_ROUTE] === undefined)
+        output[LOCAL_PATH][LOCAL_ROUTE] = {};
+      output[LOCAL_PATH][LOCAL_ROUTE][route.method.toUpperCase()] = {
+        range: [route.startLine, route.endLine],
+        config: {
+          method: route.method.toUpperCase(),
+          url: route.route,
+          headers: {},
+          data: {},
+        },
+      };
+    });
+    return output;
   }
 }
 

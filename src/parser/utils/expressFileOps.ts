@@ -1,20 +1,6 @@
 import * as patterns from '../../constants/expressPatterns';
 import * as fileOps from './genericFileOps';
 
-export interface RouterData {
-  path: string; // Absolute path to the file that contains the router
-  baseRoute: string; // The base root of all the routes handled by the router
-  importName: string; // The name applied to the router import statement
-}
-
-export interface Route {
-  path: string;
-  route: string;
-  method: string;
-  startLine: number;
-  endLine: number;
-}
-
 // Check the specified line for an express import statement
 const checkForExpressImport = (line: string) => {
   const MATCH = line.match(patterns.IMPORT_EXPRESS);
@@ -34,7 +20,7 @@ const checkForRequireExpress = (line: string) => {
 };
 
 // Attempt to parse the name applied to the express import statement from the specified file
-export const checkFileForExpress = (file: fileOps.File) => {
+export const checkFileForExpress = (file: File) => {
   const LINES = file.contents.split(patterns.NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
     // Check the current line for an express import statement
@@ -73,7 +59,7 @@ const checkForExpressApplication = (line: string, expressName: string) => {
 };
 
 // Attempt to parse the name applied to the express server from the specified file
-export const checkFileForServer = (file: fileOps.File, expressName: string) => {
+export const checkFileForServer = (file: File, expressName: string) => {
   const LINES = file.contents.split(patterns.NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
     // Check the current line for an express import statement
@@ -88,7 +74,7 @@ export const checkFileForServer = (file: fileOps.File, expressName: string) => {
 };
 
 // Attempt to parse the route and import name of all routers from the specified file
-export const checkFileForRouters = (file: fileOps.File, portNum: number) => {
+export const checkFileForRouters = (file: File, portNum: number) => {
   const routerList = [];
   const LINES = file.contents.split(patterns.NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
@@ -170,7 +156,7 @@ const checkForRouterPathRequire = (
   line: string,
   router: RouterData,
   path: string,
-  supportFiles: Map<string, fileOps.File>,
+  supportFiles: Map<string, File>,
 ) => {
   // Don't bother searching if the path has already been set
   if (router.path !== '') return;
@@ -201,7 +187,7 @@ export const findPath = (
   fileContents: string,
   path: string,
   router: RouterData,
-  supportFiles: Map<string, fileOps.File>,
+  supportFiles: Map<string, File>,
 ) => {
   const LINES = fileContents.split(patterns.NEW_LINE);
   const BASE_PATH = fileOps.removeFilenameFromPath(path);

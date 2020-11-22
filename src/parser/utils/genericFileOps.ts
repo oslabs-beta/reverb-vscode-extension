@@ -1,14 +1,8 @@
+import { workspace } from 'vscode';
 import * as patterns from '../../constants/expressPatterns';
 
 const fs = require('fs');
 const pathUtil = require('path');
-
-// Used to store information about imported files
-export interface File {
-  path: string; // Absolute path to the server file
-  fileName: string; // Name of the server file
-  contents: string; // Contents of the server file
-}
 
 // Read the contents of the specified file
 export const readFile = (file: File) => {
@@ -138,4 +132,27 @@ export const removeFilenameFromPath = (path: string) => {
   if (MATCH) return MATCH[1];
   // Return the original path if there was no match
   return path;
+};
+
+export const getLocalPath = (fullPath: string) => {
+  let basePath = workspace.rootPath;
+  if (basePath) {
+    basePath = basePath.replace(/\\/g, '/');
+    // Split the extract the file name from the merged path
+    const MATCH = fullPath.match(new RegExp(basePath + '\\/(\\S*)'));
+    // Return the path with the file name removed
+    if (MATCH) return MATCH[1];
+    // Return the original path if there was no match
+    return fullPath;
+  }
+  return fullPath;
+};
+
+export const getLocalRoute = (fullRoute: string) => {
+  // Split the extract the file name from the merged path
+  const MATCH = fullRoute.match(/http:\/\/(\S*)/);
+  // Return the path with the file name removed
+  if (MATCH) return MATCH[1];
+  // Return the original path if there was no match
+  return fullRoute;
 };

@@ -1,33 +1,22 @@
 interface WorkspaceObj {
-  [routerUri: string]: EndPoint[];
+  [routerUri: string]: { [endpoint: string]: EndPointMethods };
+}
+interface EndPointMethods {
+  [method: string]: EndPoint;
 }
 interface EndPoint {
-  port: number;
   range: number[];
-  endPoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  config: Partial<EndpointConfig>;
+  config: options;
 }
-interface EndpointConfig {
-  header: {
-    key: string;
-    value: string;
-  }[];
-  body: Record<any, never>;
-  params: {
-    key: string;
-    value: string;
-  }[];
-  query: {
-    key: string;
-    value: string;
-  }[];
-  auth: Record<any, never>;
+interface options {
+  method: string;
+  url: string;
+  headers: Record<any, never>;
+  data: Record<any, never>;
 }
 
-interface expressionRanges {
-  startNum: number;
-  endNum: number;
+interface ExpressionRanges {
+  [startLine: number]: number;
 }
 
 interface node {
