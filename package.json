@@ -18,6 +18,10 @@
       {
         "command": "extension.testRoute",
         "title": "Test Endpoint"
+      },
+      {
+        "command": "extension.configRoute",
+        "title": "Configure Endpoint"
       }
     ],
     "menus": {
@@ -26,6 +30,11 @@
           "when": "editorTextFocus",
           "command": "extension.testRoute",
           "group": "navigation"
+        },
+        {
+          "when": "editorTextFocus",
+          "command": "extension.configRoute",
+          "group": "navigation@1"
         }
       ]
     }
