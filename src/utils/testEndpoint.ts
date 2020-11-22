@@ -36,44 +36,48 @@ export async function testEndpoint(context: ExtensionContext) {
       return;
     }
     // Router file found => check if selected line is associated with known endpoint in file
-    routerFileObj.forEach((endPoint: EndPoint) => {
-      if (line >= endPoint.range[0] && line <= endPoint.range[1]) {
-        queryEndpoint(endPoint);
+    for (const key in routerFileObj) {
+      if (
+        line >= routerFileObj[key].range[0]
+        && line <= routerFileObj[key].range[1]
+      ) {
+        queryEndpoint(routerFileObj[key]);
       }
-      return;
-    });
+    }
+    return;
   }
 
   async function queryEndpoint(endPoint: EndPoint) {
     await utils
-      .ping(
-        endPoint.method,
-        `http://localhost:${endPoint.port}${endPoint.endPoint}`,
-      )
+      .ping(endPoint.config)
       .then((res) => {
         // is we get response, add decorative inline text of status and statusCode
-        utils.addDeco(
-          `${res.status} : ${res.statusText}`,
-          endPoint.range[0] - 1,
-          activeEditor!.document.lineAt(endPoint.range[0] - 1).range.end
-            .character + 5,
-          activeEditor!,
-        );
+        if (res.status === 200) {
+          utils.addDeco(
+            `${res.status} : ${res.statusText}`,
+            endPoint.range[0] - 1,
+            activeEditor!.document.lineAt(endPoint.range[0] - 1).range.end
+              .character + 5,
+            activeEditor!,
+          );
+        } else {
+          utils.addDeco(
+            `${res}`,
+            endPoint.range[0] - 1,
+            activeEditor!.document.lineAt(endPoint.range[0] - 1).range.end
+              .character + 5,
+            activeEditor!,
+          );
+        }
       })
       .catch((err) => {
-        utils.addDeco(
-          `500 NO RESPONSE`,
-          endPoint.range[0] - 1,
-          activeEditor!.document.lineAt(endPoint.range[0] - 1).range.end
-            .character + 5,
-          activeEditor!,
-        );
+        console.log(err);
       });
   }
 
   async function parseAndUpdate() {
-    const userInput = await multiStepInput(context);
-    const expressParser = new ExpressParser(userInput.serverPath);
+    const { serverPath, port } = await multiStepInput(context);
+    const expressParser = new ExpressParser(serverPath, parseInt(port));
     const data = await expressParser.parse();
     await context.workspaceState.update(`obj`, data);
     testEndpoint(context);

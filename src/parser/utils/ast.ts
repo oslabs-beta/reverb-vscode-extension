@@ -1,5 +1,11 @@
 const parser = require('typescript-estree');
 const walk = require('estree-walker').walk;
+const fs = require('fs').promises;
+import {
+  parse,
+  TSESTreeOptions,
+  TSESTree,
+} from '@typescript-eslint/typescript-estree';
 
 export function getRanges(FILETEXT: string) {
   const output: Array<expressionRanges> = [];
@@ -10,10 +16,16 @@ export function getRanges(FILETEXT: string) {
     enter: function (node: node, parent: parent) {
       if (
         node.type === 'MemberExpression'
-        && (node.property.name === 'get'
-          || node.property.name === 'put'
-          || node.property.name === 'delete'
-          || node.property.name === 'post')
+        && [
+          'get',
+          'GET',
+          'post',
+          'POST',
+          'put',
+          'PUT',
+          'delete',
+          'DELETE',
+        ].includes(node.property.name)
       ) {
         output.push({
           startNum: node.property.loc.start.line,

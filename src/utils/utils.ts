@@ -6,7 +6,6 @@ import {
   Position,
   workspace,
   ConfigurationTarget,
-  ProgressLocation,
 } from 'vscode';
 import axios from 'axios';
 
@@ -20,7 +19,7 @@ export const addDeco = (
     after: {
       contentText,
       margin: '20px',
-      color: contentText === '500 NO RESPONSE' ? 'red' : 'green',
+      color: contentText === '200 : OK' ? 'green' : 'red',
     },
   });
 
@@ -44,11 +43,19 @@ export async function init(rootPath: string | undefined) {
   outputWindow.appendLine('---reVerb initialized---');
 }
 
-export function ping(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string) {
-  return axios({
-    method,
-    url,
-  });
+// export function writeOutput(message: string) {
+//   window.
+// }
+
+export function ping(options: options) {
+  return axios
+    .request(options)
+    .then(function (response) {
+      return response;
+    })
+    .catch(function (error) {
+      return error;
+    });
 }
 
 export function loading(method: 'GET', url: string) {
