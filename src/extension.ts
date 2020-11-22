@@ -14,13 +14,17 @@ export async function activate(context: vscode.ExtensionContext) {
   const disposable1 = vscode.commands.registerCommand(
     'extension.testRoute',
     async () => {
-      testEndpoint(context);
-      // const FILETEXT = fs.readFileSync(
-      //   'C:/Users/itsme/Documents/test-server-express/server4/src/routes/ApiRouter.ts',
-      //   'utf8',
-      // );
-      // const output = getRanges(FILETEXT);
-      // console.log(output);
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor) {
+        return;
+      }
+      // testEndpoint(context);
+      const FILETEXT = fs.readFileSync(
+        activeEditor.document.uri.path.slice(1),
+        'utf8',
+      );
+      const output = getRanges(FILETEXT);
+      console.log(output);
     },
   );
 

@@ -28,6 +28,25 @@
           "group": "navigation"
         }
       ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "reverb",
+          "title": "reverb",
+          "icon": "./media/rr.png"
+        }
+      ]
+    },
+    "views": {
+      "reverb": [
+        {
+          "id": "reverb",
+          "name": "reverb",
+          "icon": "./media/rr.png",
+          "contextualTitle": "reverb"
+        }
+      ]
     }
   },
   "scripts": {
