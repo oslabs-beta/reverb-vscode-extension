@@ -12,29 +12,9 @@ interface options {
   url: string;
   headers: Record<any, never>;
   data: Record<any, never>;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | undefined;
+  method: string | undefined;
 }
 
 interface ExpressionRanges {
   [startLine: number]: number;
-}
-
-interface node {
-  type: string;
-  property: {
-    name: string;
-    loc: {
-      start: {
-        line: any;
-      };
-    };
-  };
-}
-
-interface parent {
-  loc: {
-    end: {
-      line: any;
-    };
-  };
 }
