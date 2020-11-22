@@ -1,22 +1,27 @@
 import { window, ExtensionContext } from 'vscode';
-import ExpressParser from '../parser/expressParser';
-import { multiStepInput } from './multiStepInput';
-import * as utils from './utils';
+import { getLocalPath } from '../parser/utils/genericFileOps';
 
+/**
+ * Updates endpoint config based on user input
+ * @param {ExtensionContext} context context provided by vscode during activation
+ */
 export async function configEndpoint(context: ExtensionContext) {
   const activeEditor = window.activeTextEditor;
-  if (!activeEditor) {
-    return;
-  }
-  const path = activeEditor.document.uri.path;
-  const line = activeEditor.selection.active.line + 1;
-  const data: Partial<options> = {
-    method: 'PUT',
-    headers: {},
-    data: {},
-  };
-  getState();
+  if (!activeEditor) return;
 
+  const path = getLocalPath(activeEditor.document.uri.path);
+  const line = activeEditor.selection.active.line + 1;
+
+  // uncomment to simulate input that would come from webview/electron input
+  const data: Partial<options> = {
+    // method: 'PUT',
+    // headers: {},
+    // data: {},
+  };
+
+  /**
+   * Attempts to get state and calls parser if it is undefined.
+   */
   async function getState() {
     // Search vscode workspace storage for key that matches file path of selected endpoint
     const workspaceObj:
@@ -27,28 +32,37 @@ export async function configEndpoint(context: ExtensionContext) {
       console.log('No state obj');
       return;
     }
-    const changed = await findRouterMatch(workspaceObj);
-    if (!changed) return;
-    workspaceObj[path] = changed;
-    await context.workspaceState.update(`obj`, workspaceObj);
-    console.log('Config updated');
+    findRouterMatch(workspaceObj);
   }
 
+  /**
+   * Finds matching endpoint in state and updates config.
+   * @param {WorkspaceObj} workspaceObj Main state object.
+   */
   async function findRouterMatch(workspaceObj: WorkspaceObj) {
     const routerFileObj = workspaceObj[path];
     if (routerFileObj === undefined) {
       console.log('No routerFile obj');
       return;
     }
-    for (const key in routerFileObj) {
-      if (
-        line >= routerFileObj[key].range[0]
-        && line <= routerFileObj[key].range[1]
-      ) {
-        const newConfig = Object.assign(routerFileObj[key].config, data);
-        routerFileObj[key].config = newConfig;
-        return routerFileObj;
+    for (const type in routerFileObj) {
+      for (const key in routerFileObj[type]) {
+        if (
+          line >= routerFileObj[type][key].range[0]
+          && line <= routerFileObj[type][key].range[1]
+        ) {
+          const newConfig = Object.assign(
+            routerFileObj[type][key].config,
+            data,
+          );
+          workspaceObj[path][type][key].config = newConfig;
+          await context.workspaceState.update(`obj`, workspaceObj);
+          console.log('Config updated');
+        }
       }
     }
   }
+
+  // Init
+  getState();
 }
