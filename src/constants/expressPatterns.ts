@@ -1,4 +1,5 @@
 // Patterns used for parsing Express server files
+export const NEW_LINE = new RegExp('\\r?\\n');
 export const CODE_FILE = new RegExp('.*\\.(js|ts)$');
 export const FILENAME_AND_PATH = new RegExp('(\\S+\\/)(\\S+)');
 export const PARENT_DIRECTORY = new RegExp('(\\S+\\/)\\S+');
@@ -13,4 +14,11 @@ export const REQUIRE_EXPRESS = new RegExp(
 );
 export const IMPORT_EXPRESS = new RegExp(
   'import\\s*(\\S+)\\s*from\\s*[\'"`]express[\'"`]',
+);
+export const USE_ROUTER = new RegExp(
+  '\\.use\\([\'"`](\\S+)[\'"`],\\s*(\\S+)\\)',
+);
+export const REQUIRE_PATH = new RegExp('require\\(\\s*[\'"`](\\S+)[\'"`]\\)');
+export const EXPRESS_ROUTE = new RegExp(
+  '\\.(get|post|put|delete)\\([\'"`](\\/\\S*)[\'"`]',
 );
