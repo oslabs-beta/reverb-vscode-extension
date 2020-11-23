@@ -12,7 +12,7 @@ interface options {
   url: string;
   headers: Record<any, never>;
   data: Record<any, never>;
-  method: string | undefined;
+  method: any;
 }
 
 interface ExpressionRanges {

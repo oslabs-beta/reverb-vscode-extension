@@ -57,10 +57,10 @@ export async function init() {
  * @param {AxiosRequestConfig | options} options Config option object of request.
  * @returns {AxiosResponse<any>} Response of the request made.
  */
-export function ping(options: AxiosRequestConfig | options) {
+export function ping(options: AxiosRequestConfig) {
   return axios
     .request(options)
-    .then(function (response: AxiosResponse<any>) {
+    .then(function (response: AxiosResponse) {
       return response;
     })
     .catch(function (error) {

@@ -1,5 +1,4 @@
 const walk = require('estree-walker').walk;
-import { Node } from '@typescript-eslint/types/dist/ts-estree';
 import { parse } from '@typescript-eslint/typescript-estree';
 
 /**
@@ -13,7 +12,13 @@ export function getRanges(FILETEXT: string) {
     loc: true,
   });
   walk(ast, {
-    enter: function (node: Node, parent: Node) {
+    enter: function (
+      node: {
+        type: string;
+        property: { name: string; loc: { start: { line: any } } };
+      },
+      parent: { loc: { end: { line: any } } },
+    ) {
       if (
         node.type === 'MemberExpression'
         && [
@@ -46,19 +51,18 @@ export function getExpressIdentifier(FILETEXT: string) {
     loc: true,
   });
   walk(ast, {
-    enter: function (node: Node, parent: Node) {
+    enter: function (node: any, parent: any) {
       if (
         node.type === 'CallExpression'
         && node.callee.type === 'Identifier'
         && node.callee.name === 'require'
       ) {
-        node.arguments.forEach((el) => {
+        node.arguments.forEach((el: { type: string; value: string }) => {
           if (el.type === 'Literal' && el.value === 'express') {
             if (
               parent.type === 'VariableDeclarator'
               && parent.id.type === 'Identifier'
             ) {
-              console.log(parent.id.name);
               const expressId = parent.id.name;
               return expressId;
             }

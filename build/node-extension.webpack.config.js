@@ -8,7 +8,7 @@ const config = {
 
   entry: './src/extension.ts',
   output: {
-    path: path.resolve(__dirname, '..', 'dist'),
+    path: path.resolve(__dirname, '..', 'out'),
     filename: 'extension.js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]',
@@ -24,7 +24,7 @@ const config = {
     rules: [
       {
         test: /\.ts$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /react-app/],
         use: [
           {
             loader: 'ts-loader',
