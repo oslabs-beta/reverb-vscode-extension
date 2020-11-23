@@ -54,7 +54,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "tsc -p ./ && npm run copy",
+    "compile": "tsc -p ./ && cp react-app/dist/index.html out/index.html ",
     "copy": "npx copyfiles react-app/dist/index.html out/",
     "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
     "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
