@@ -1,0 +1,143 @@
+
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+input,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+button,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+html {
+    height: 98%;
+}
+
+#index {
+    height: 100%;
+}
+
+body {
+  background-color: $background-color;
+  color: $font-color;
+  height: 100%;
+}
+
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: minmax(52rem, 52rem) minmax(35%, 1fr);
+    grid-template-rows: 1.7fr;
+    gap: 0px 0px;
+    grid-template-areas:
+      "main output";
+    height: 100%;
+    margin-top:2px;
+  }
+  
+  .container__output { grid-area: output; }
+  
+  
+  .container__main {
+    display: grid;
+    grid-template-columns: 6.2rem 1.7fr;
+    grid-template-rows: 2rem 1.7fr;
+    gap: 0px 0px;
+    grid-template-areas:
+      "header header"
+      "sidebar input";
+    grid-area: main;
+    padding: 0 .6rem 0 .6rem;
+  }
+  
+  .container__header { grid-area: header; }
+  
+  .container__input { grid-area: input; }
+  
+  .container__sidebar { 
+    grid-area: sidebar;
+    margin-top: .5rem; 
+  }
+  
