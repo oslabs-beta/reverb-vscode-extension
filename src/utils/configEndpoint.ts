@@ -14,9 +14,7 @@ export async function configEndpoint(context: ExtensionContext) {
 
   // uncomment to simulate input that would come from webview/electron input
   const data: Partial<options> = {
-    // method: 'PUT',
-    // headers: {},
-    // data: {},
+    // data: { key: 'test' },
   };
 
   /**

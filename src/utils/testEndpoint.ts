@@ -43,6 +43,7 @@ export async function testEndpoint(
    * @param {WorkspaceObj} workspaceObj Main state object.
    */
   async function findRouterMatch(workspaceObj: WorkspaceObj) {
+    console.log(path);
     const routerFileObj = workspaceObj[path];
     if (routerFileObj === undefined) {
       console.log('No routerFile obj. Reparsing');
@@ -72,7 +73,7 @@ export async function testEndpoint(
     const { method, url, headers, data } = endPoint.config;
     await utils
       .ping(endPoint.config)
-      .then((res) => {
+      .then((res: { status: any; data: any; statusText: any }) => {
         // is we get response, add decorative inline text of status and statusCode
         if (!!res.status) {
           outputWindow.append(
@@ -104,7 +105,7 @@ export async function testEndpoint(
           );
         }
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.log(err);
       });
   }
@@ -114,10 +115,7 @@ export async function testEndpoint(
    */
   async function parseAndUpdate() {
     const { serverPath, port } = await multiStepInput(context);
-    const expressParser = new ExpressParser(
-      serverPath.slice(1),
-      parseInt(port),
-    );
+    const expressParser = new ExpressParser(serverPath, parseInt(port));
     const data = await expressParser.parse();
     let state = await context.workspaceState.get(`obj`);
 
