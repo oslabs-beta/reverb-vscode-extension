@@ -1,29 +1,15 @@
 import React from "react";
+import Select from "../components/Select";
 
-function Header() {
+function Header({ routes, axiosReq }) {
   return (
     <div className="container__header">
       <div className="header">
         <div className="group__left">
-          <button type="button" className="button__type">
-            GET
-          </button>
-          <input className="input__url" type="text" />
-          <button type="button" className="button__send">
-            Send
-          </button>
+          <Select axiosReq={axiosReq} routes={routes} group="group__left" />
         </div>
         <div className="group__right">
-          <button type="button" className="button__presets">
-            Presets
-          </button>
-          <input className="input__presets" type="text" />
-          <button type="button" className="button__add">
-            +
-          </button>
-          <button type="button" className="button__save">
-            Save
-          </button>
+          <Select />
         </div>
       </div>
     </div>
