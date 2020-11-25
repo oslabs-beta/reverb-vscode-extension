@@ -4,14 +4,14 @@ export const routesSlice = createSlice({
   name: "routes",
   initialState: {},
   reducers: {
-    setRoute: (state, action) => {
-      state = { ...state, ...action.payload };
+    setRoutes: (state, action) => {
+      state = action.payload;
       return state;
     },
   },
 });
 
-export const { setRoute } = routesSlice.actions;
+export const { setRoutes } = routesSlice.actions;
 
 export const routes = (state) => state.routes;
 
