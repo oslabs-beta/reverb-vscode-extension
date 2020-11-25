@@ -7,8 +7,10 @@
     max-height: 250px;
     justify-content: flex-start;
     align-items: flex-start;
-    overflow-y: auto;
-    // -webkit-box-shadow: -35px 0px 0px -35px #aaa;
+    overflow-y: scroll;
     box-shadow: -15px 0px 2px -14px rgb(207, 207, 207);
+    .output__item {
+        margin: .4rem 0 .4rem 0;
+    }
 }
 

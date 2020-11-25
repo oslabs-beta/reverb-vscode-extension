@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { configs } from "../../redux/reducers/configsSlice";
 
 function Output() {
   const output = useSelector(configs);
-
   const lines = output.map((el) => {
-    return <p key={el}>{el}</p>;
+    let data;
+    if (el.data) {
+      data = <p>{`${JSON.stringify(el.data, null, 2)}`}</p>;
+    }
+    return (
+      <div className="output__item" key={el.time}>
+        <p>{`> [${el.time}] ${el.method} ${el.url} responded with status: ${el.status}`}</p>
+        {data}
+      </div>
+    );
   });
   useEffect(() => {
-    console.log(output);
-    window.scrollTo(
-      0,
-      document.querySelector("#index > div > div.container__output > div")
-        .scrollHeight,
-    );
+    document.querySelector(".output").scrollTop = document.querySelector(
+      ".output",
+    ).scrollHeight;
   }, [output]);
 
   return (

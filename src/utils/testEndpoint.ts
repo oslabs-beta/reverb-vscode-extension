@@ -43,7 +43,6 @@ export async function testEndpoint(
    * @param {WorkspaceObj} workspaceObj Main state object.
    */
   async function findRouterMatch(workspaceObj: WorkspaceObj) {
-    console.log(path);
     const routerFileObj = workspaceObj[path];
     if (routerFileObj === undefined) {
       console.log('No routerFile obj. Reparsing');

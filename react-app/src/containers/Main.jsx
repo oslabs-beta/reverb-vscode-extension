@@ -1,18 +1,14 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { routes } from "../../redux/reducers/routesSlice";
-import { configs } from "../../redux/reducers/configsSlice";
 import create from "../Interaction/InteractorApi";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Input from "./Input";
 
 function Main() {
-  const routesObj = useSelector(routes);
-  const configsObj = useSelector(configs);
   const Interactor = create(vscode);
-
-  console.log(configsObj, routesObj);
+  const routesObj = useSelector(routes);
 
   function axiosReq({ type, route }) {
     const [key, subkey] = route.split(",");

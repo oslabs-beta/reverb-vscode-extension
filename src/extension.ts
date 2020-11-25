@@ -44,6 +44,7 @@ function onPanelDispose(): void {
 async function onPanelDidReceiveMessage(message: any) {
   switch (message.command) {
     case 'get-data':
+      console.log(message);
       const data = await vscode.commands.executeCommand('getState');
       webViewPanel.webview.postMessage({
         command: 'data',
@@ -52,9 +53,20 @@ async function onPanelDidReceiveMessage(message: any) {
       break;
     case 'axiosReq':
       const res = await utils.ping(message.config);
+      const out = {
+        status: res.status || 500,
+        headers: res.headers || {},
+        data: res.data || undefined,
+        method: message.config.method,
+        url: message.config.url,
+        time: new Date().toLocaleString('en-US', {
+          hour12: false,
+        }),
+      };
+      console.log(message, res, out);
       webViewPanel.webview.postMessage({
         command: 'config',
-        res: res,
+        out,
       });
       break;
   }
