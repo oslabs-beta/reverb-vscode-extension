@@ -43,16 +43,20 @@ function onPanelDispose(): void {
 
 async function onPanelDidReceiveMessage(message: any) {
   switch (message.command) {
-    case 'getState':
-      const state = await vscode.commands.executeCommand('getState');
-      webViewPanel.webview.postMessage({ command: 'giveState', state: state });
-      return;
-    case 'axoisReq':
-      const config = message;
-      console.log(config);
-      console.log('>>');
-
-      return;
+    case 'get-data':
+      const data = await vscode.commands.executeCommand('getState');
+      webViewPanel.webview.postMessage({
+        command: 'data',
+        data: data,
+      });
+      break;
+    case 'axiosReq':
+      const res = await utils.ping(message.config);
+      webViewPanel.webview.postMessage({
+        command: 'config',
+        res: res,
+      });
+      break;
   }
 }
 
@@ -127,6 +131,9 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand(
         'workbench.action.closeEditorsToTheLeft',
       );
+    await vscode.commands.executeCommand(
+      'workbench.action.webview.openDeveloperTools',
+    );
   });
   const disposable4 = vscode.commands.registerCommand('getState', async () => {
     return await context.workspaceState.get(`obj`);
