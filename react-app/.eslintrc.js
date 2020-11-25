@@ -1,5 +1,10 @@
 module.exports = {
   root: true,
+  settings: {
+    react: {
+      version: "999.999.999",
+    },
+  },
   env: {
     browser: true,
     es6: true,
