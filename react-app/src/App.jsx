@@ -3,20 +3,19 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import Main from "./containers/Main";
 import Output from "./containers/Output";
-import { sendConfig } from "../redux/reducers/configsSlice";
-import { setVsState } from "../redux/reducers/routesSlice";
+import setConfig from "../redux/reducers/configsSlice";
+import setRoutes from "../redux/reducers/routesSlice";
 
-function App({ data, res }) {
+function App() {
   const dispatch = useDispatch();
 
   window.addEventListener("message", (event) => {
-    const message = event.data;
-    switch (message.command) {
+    switch (event.data.command) {
       case "data":
-        dispatch(setVsState(data));
+        dispatch(setRoutes(event.data.data));
         break;
       case "config":
-        dispatch(sendConfig(res));
+        dispatch(setConfigs(event.data.res));
         break;
       default:
     }

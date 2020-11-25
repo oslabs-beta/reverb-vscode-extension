@@ -6,7 +6,11 @@ function Header({ routesArr, axiosReq }) {
     <div className="container__header">
       <div className="header">
         <div className="group__left">
-          <Select axiosReq={axiosReq} routes={routesArr} group="group__left" />
+          <Select
+            axiosReq={axiosReq}
+            routesArr={routesArr}
+            group="group__left"
+          />
         </div>
         <div className="group__right">
           <Select />

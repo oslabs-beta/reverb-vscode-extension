@@ -2,16 +2,16 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const configsSlice = createSlice({
   name: "configs",
-  initialState: {},
+  initialState: [],
   reducers: {
-    sendConfig: (state, action) => {
-      state = action.payload;
+    setConfig: (state, action) => {
+      state = { ...state, ...action.payload };
       return state;
     },
   },
 });
 
-export const { sendConfig } = configsSlice.actions;
+export const { setConfig } = configsSlice.actions;
 
 export const configs = (state) => state.configs;
 
