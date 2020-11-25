@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 
-function Select({ routes, group, axiosReq }) {
+function Select({ routesArr, group, axiosReq }) {
   const { register, handleSubmit } = useForm();
   const onSubmit = (data) => {
     axiosReq(data);
@@ -17,7 +17,7 @@ function Select({ routes, group, axiosReq }) {
       </select>
 
       <select ref={register} name="route" className="select__endpoint">
-        {routes}
+        {routesArr}
       </select>
 
       <input type="submit" value="Send" className="button__send" />
