@@ -3,9 +3,7 @@ import React from "react";
 function Output() {
   return (
     <div className="container__output">
-      <div className="output">
-        <p>OUTPUT</p>
-      </div>
+      <div className="output">output</div>
     </div>
   );
 }
