@@ -11,7 +11,7 @@
     {
       "label": "buildReactApp",
       "type": "npm",
-      "script": "build",
+      "script": "start",
       "path": "react-app/",
       "problemMatcher": []
     }
