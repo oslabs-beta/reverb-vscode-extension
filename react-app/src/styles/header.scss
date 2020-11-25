@@ -4,20 +4,11 @@
     height: 100%;
     justify-content: space-between;
     align-items: center;
-    button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 1.8rem; 
-        background-color: rgb(32, 32, 32) ;
+
+    select {
+        height: 1.8rem;
         border: .05rem solid $border-color;
         color: $font-color;
-    }
-
-    input {
-        height: 1.7rem;
-        background-color: rgb(54, 54, 54);
-        border: .05rem solid $border-color;
         margin: 0 .2rem 0 .2rem;
     }
 
@@ -25,14 +16,26 @@
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        .button__type{
+        .select__type{
             width: 6rem;
+            text-align-last:right;
+            padding-right: 16px;
+            background-color: rgb(32, 32, 32);
         }
-        .input__url {
-            width: 15rem;
+        .select__endpoint {
+            width: 17rem;
+            color: $font-color;
+            padding-left:5px;
+            background-color: rgb(54, 54, 54);
         }
         .button__send{
             width: 4rem;
+            height: 1.8rem;
+            background-color: rgb(32, 32, 32) ;
+            border: .05rem solid $border-color;
+            color: $font-color;
+            margin-left: .2rem;
+            
             
         }
     }
