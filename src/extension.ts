@@ -41,39 +41,19 @@ function onPanelDispose(): void {
   // Clean up panel here
 }
 
-function onPanelDidReceiveMessage(message: any) {
+async function onPanelDidReceiveMessage(message: any) {
   switch (message.command) {
-    case 'showInformationMessage':
-      vscode.window.showInformationMessage(message.text);
+    case 'getState':
+      const state = await vscode.commands.executeCommand('getState');
+      webViewPanel.webview.postMessage({ command: 'giveState', state: state });
       return;
+    case 'axoisReq':
+      const config = message;
+      console.log(config);
+      console.log('>>');
 
-    case 'getDirectoryInfo':
-      runDirCommand((result: string) =>
-        webViewPanel.webview.postMessage({
-          command: 'getDirectoryInfo',
-          directoryInfo: result,
-        }),
-      );
       return;
   }
-}
-
-function runDirCommand(callback: {
-  (result: string): Thenable<boolean>;
-  (arg0: any): void;
-}) {
-  const spawn = require('child_process').spawn;
-  const cp = spawn(process.env.comspec, ['/c', 'dir']);
-
-  cp.stdout.on('data', function (data: any) {
-    const dataString = data.toString();
-
-    callback(dataString);
-  });
-
-  cp.stderr.on('data', function (data: any) {
-    // No op
-  });
 }
 
 function getHtmlForWebview(): string {
@@ -148,6 +128,9 @@ export async function activate(context: vscode.ExtensionContext) {
         'workbench.action.closeEditorsToTheLeft',
       );
   });
+  const disposable4 = vscode.commands.registerCommand('getState', async () => {
+    return await context.workspaceState.get(`obj`);
+  });
   const startCommand = vscode.commands.registerCommand(startCommandName, () =>
     startCommandHandler(context),
   );
@@ -157,6 +140,7 @@ export async function activate(context: vscode.ExtensionContext) {
     disposable1,
     disposable2,
     disposable3,
+    disposable4,
   );
 }
 
