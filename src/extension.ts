@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as utils from './utils/utils';
 import { testEndpoint } from './utils/testEndpoint';
 import { configEndpoint } from './utils/configEndpoint';
+import { ReverbTreeProvider } from './reverbTreeProvider';
 
 const startCommandName = 'extension.startExtension';
 const webViewPanelTitle = 'reVerb config';
@@ -91,9 +92,21 @@ function getHtmlForWebview(): string {
 export async function activate(context: vscode.ExtensionContext) {
   // uncomment to wipe storage
   // await context.workspaceState.update(`obj`, undefined);
-  const state = await context.workspaceState.get(`obj`);
+  const state: WorkspaceObj | undefined = await context.workspaceState.get(
+    `obj`,
+  );
   console.log(`INIT STATE =>`, state);
-
+  if (state) {
+    Object.entries(state).forEach(([path, routeObject]) => {
+      console.log('PATH: ', path, 'ROUTE OBJECT: ', routeObject);
+      Object.entries(routeObject).forEach(([route, methodObject]) => {
+        console.log('ROUTE: ', route, 'METHOD OBJECT: ', methodObject);
+        Object.keys(methodObject).forEach((method) => {
+          console.log('METHOD: ', method);
+        });
+      });
+    });
+  }
   // Init output window. Needs to be passed to functions that use it.
   const outputWindow: vscode.OutputChannel = vscode.window.createOutputChannel(
     'reVerb',
@@ -157,6 +170,17 @@ export async function activate(context: vscode.ExtensionContext) {
     disposable1,
     disposable2,
     disposable3,
+  );
+
+  // Search vscode workspace storage for key that matches file path of selected endpoint
+  const workspaceObj:
+    | WorkspaceObj
+    | undefined = await context.workspaceState.get(`obj`);
+
+  // populates tree views in side bar
+  vscode.window.registerTreeDataProvider(
+    'reVerbView',
+    new ReverbTreeProvider(vscode.workspace.rootPath || '', workspaceObj),
   );
 }
 

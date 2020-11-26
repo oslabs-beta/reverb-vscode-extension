@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onView:reVerbView"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -51,30 +52,19 @@
         }
       ]
     },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "reverb",
-          "title": "reverb",
-          "icon": "./media/rr.png"
-        }
-      ]
-    },
     "views": {
-      "reverb": [
-        {
-          "id": "reverb",
-          "name": "reverb",
-          "icon": "./media/rr.png",
-          "contextualTitle": "reverb"
+      "explorer": [
+				{
+					"id": "reVerbView",
+          "name": "reVerbView"
         }
-      ]
+			]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "tsc -p ./ && npm run copy",
-    "copy": "npx copyfiles react-app/dist/index.html out/",
+    "compile": "tsc -p ./ && copy react-app\\dist\\index.html out\\index.html",
+    "copy": "cp react-app/dist/index.html out/index.html",
     "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
     "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
     "test-compile": "tsc -p ./",
