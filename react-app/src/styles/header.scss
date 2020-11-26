@@ -8,8 +8,16 @@
     select {
         height: 1.8rem;
         border: .05rem solid $border-color;
-        color: $font-color;
+        color: inherit;
         margin: 0 .2rem 0 .2rem;
+        font: inherit
+        
+    }
+    .select__endpoint {
+        width: 17rem;
+        color: $font-color;
+        padding-left:5px;
+        background-color: rgb(54, 54, 54);
     }
 
     .group__left {
@@ -22,12 +30,7 @@
             padding-right: 16px;
             background-color: rgb(32, 32, 32);
         }
-        .select__endpoint {
-            width: 17rem;
-            color: $font-color;
-            padding-left:5px;
-            background-color: rgb(54, 54, 54);
-        }
+        
         .button__send{
             width: 4rem;
             height: 1.8rem;
@@ -43,18 +46,39 @@
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        .button__presets{
-            width: 5.5rem;
+        .select__endpoint {
+            width: 11rem;
         }
-        .input__presets {
-            width: 10rem;
-        }
+        // .button__presets{
+        //     width: 4rem;
+        //     height: 1.8rem;
+        //     background-color: rgb(32, 32, 32) ;
+        //     border: .05rem solid $border-color;
+        //     color: $font-color;
+        //     margin-left: .2rem;
+        // }
+        // .input__presets {
+        //     width: 10rem;
+        //     color: $font-color;
+        //     padding-left:5px;
+        //     background-color: rgb(54, 54, 54);
+        // }
         .button__add{
             width: 2rem;
-            margin-right: .15rem;
+            height: 1.8rem;
+            background-color: rgb(32, 32, 32) ;
+            border: .05rem solid $border-color;
+            color: $font-color;
+            margin-left: .2rem;
         }
         .button__save{
             width: 4rem;
+          
+            height: 1.8rem;
+            background-color: rgb(32, 32, 32) ;
+            border: .05rem solid $border-color;
+            color: $font-color;
+            margin-left: .2rem;
         }
     }
     

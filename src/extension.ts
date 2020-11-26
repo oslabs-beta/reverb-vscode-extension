@@ -4,10 +4,11 @@ import * as path from 'path';
 import * as utils from './utils/utils';
 import { testEndpoint } from './utils/testEndpoint';
 import { configEndpoint } from './utils/configEndpoint';
+import ExpressParser from './parser/expressParser';
 
 const startCommandName = 'extension.startExtension';
-const webViewPanelTitle = 'reVerb config';
-const webViewPanelId = 'reactExtension';
+const webViewPanelTitle = 'reVerb app';
+const webViewPanelId = 'reVerb';
 
 let webViewPanel: vscode.WebviewPanel;
 
@@ -16,6 +17,7 @@ async function startCommandHandler(
 ): Promise<void> {
   const showOptions = {
     enableScripts: true,
+    retainContextWhenHidden: true,
   };
 
   const panel = vscode.window.createWebviewPanel(
@@ -63,7 +65,7 @@ async function onPanelDidReceiveMessage(message: any) {
           hour12: false,
         }),
       };
-      console.log(message, res, out);
+
       webViewPanel.webview.postMessage({
         command: 'config',
         out,
@@ -87,8 +89,25 @@ function getHtmlForWebview(): string {
 export async function activate(context: vscode.ExtensionContext) {
   // uncomment to wipe storage
   // await context.workspaceState.update(`obj`, undefined);
+  vscode.window.registerWebviewPanelSerializer(
+    'reVerb',
+    new reVerbSerializer(),
+  );
   const state = await context.workspaceState.get(`obj`);
   console.log(`INIT STATE =>`, state);
+
+  // vscode.workspace.onDidSaveTextDocument(async (e) => {
+  //   const expressParser = new ExpressParser(
+  //     'C:/Users/itsme/Documents/test-server-express/server4/src/server.ts',
+  //     3004,
+  //   );
+  //   const data = await expressParser.parse();
+  //   let state = await context.workspaceState.get(`obj`);
+
+  //   // preserve existing state
+  //   state = Object.assign({}, state, data);
+  //   await context.workspaceState.update(`obj`, state);
+  // });
 
   // Init output window. Needs to be passed to functions that use it.
   const outputWindow: vscode.OutputChannel = vscode.window.createOutputChannel(
@@ -139,13 +158,18 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand(
         'workbench.action.decreaseViewHeight',
       ),
+      await vscode.commands.executeCommand(
+        'workbench.action.decreaseViewHeight',
+      ),
       await vscode.commands.executeCommand('extension.startExtension'),
       await vscode.commands.executeCommand(
         'workbench.action.closeEditorsToTheLeft',
       );
-    await vscode.commands.executeCommand(
-      'workbench.action.webview.openDeveloperTools',
-    );
+    setTimeout(function () {
+      vscode.commands.executeCommand(
+        'workbench.action.webview.openDeveloperTools',
+      );
+    }, 500);
   });
   const disposable4 = vscode.commands.registerCommand('getState', async () => {
     return await context.workspaceState.get(`obj`);
@@ -161,6 +185,19 @@ export async function activate(context: vscode.ExtensionContext) {
     disposable3,
     disposable4,
   );
+}
+
+class reVerbSerializer implements vscode.WebviewPanelSerializer {
+  async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+    // `state` is the state persisted using `setState` inside the webview
+    console.log(`Got state: ${state}`);
+
+    // Restore the content of our webview.
+    //
+    // Make sure we hold on to the `webviewPanel` passed in here and
+    // also restore any event listeners we need on it.
+    webviewPanel.webview.html = getHtmlForWebview();
+  }
 }
 
 export function deactivate() {
