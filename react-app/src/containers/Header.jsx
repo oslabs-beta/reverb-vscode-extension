@@ -2,6 +2,7 @@ import React from "react";
 import Select from "../components/Select";
 
 function Header({ routesArr, axiosReq }) {
+  console.log(routesArr, "i");
   return (
     <div className="container__header">
       <div className="header">
@@ -13,7 +14,15 @@ function Header({ routesArr, axiosReq }) {
           />
         </div>
         <div className="group__right">
-          <Select />
+          <select name="route" className="select__endpoint">
+            test
+          </select>
+          <button type="button" className="button__add">
+            +
+          </button>
+          <button type="button" className="button__save">
+            Save
+          </button>
         </div>
       </div>
     </div>
