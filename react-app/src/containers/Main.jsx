@@ -10,16 +10,17 @@ function Main() {
   const Interactor = create(vscode);
   const routesObj = useSelector(routes);
 
-  function axiosReq({ type, route }) {
-    const [key, subkey] = route.split(",");
-    const { config } = routesObj[key][subkey][type];
-    Interactor.axiosReq(config);
+  function axiosReq(data) {
+    console.log(data.route);
+    // const { config } = routesObj[route.key][route.subkey][type];
+    // Interactor.axiosReq(config);
   }
 
   const routesArr = [];
   Object.keys(routesObj).forEach((key) => {
     Object.keys(routesObj[key]).forEach((subkey) => {
-      const vals = [key, subkey];
+      const vals = { key, subkey, types: Object.keys(routesObj[key][subkey]) };
+      console.log(vals);
       routesArr.push(
         <option key={subkey} value={vals}>
           {subkey}
