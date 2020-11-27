@@ -179,7 +179,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // populates tree views in side bar
   vscode.window.registerTreeDataProvider(
-    'reVerbView',
+    'paths',
     new ReverbTreeProvider(vscode.workspace.rootPath || '', workspaceObj),
   );
 }

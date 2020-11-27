@@ -64,8 +64,11 @@ export class ReverbTreeProvider
     const output: Array<RouteItem | PathItem> = [];
     if (routeData) {
       Object.keys(routeData).forEach((path) => {
-        const pathsAndRoutes = this.getPathsAndRoutes(path);
-        output.concat(pathsAndRoutes);
+        //const pathsAndRoutes = this.getPathsAndRoutes(path);
+        //output = [...output, ...pathsAndRoutes];
+        output.push(
+          new PathItem(path, vscode.TreeItemCollapsibleState.Collapsed),
+        );
       });
     }
     return output;
@@ -146,7 +149,7 @@ class PathItem extends vscode.TreeItem {
     super(label, collapsibleState);
     // Define text that should be displayed when the mouse is hovering over the dependency
     this.tooltip = this.label;
-    this.description = this.label;
+    this.description = '';
   }
 
   // Defines which icon to display next to each dependency
@@ -180,7 +183,7 @@ class RouteItem extends vscode.TreeItem {
     super(label, collapsibleState);
     // Define text that should be displayed when the mouse is hovering over the dependency
     this.tooltip = this.label;
-    this.description = this.label;
+    this.description = '';
   }
 
   // Defines which icon to display next to each dependency

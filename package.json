@@ -11,8 +11,8 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onView:reVerbView"
-  ],
+    "onView:paths"
+    ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -52,11 +52,21 @@
         }
       ]
     },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "reverb-explorer",
+          "title": "reverb",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "reverb-explorer": [
 				{
-					"id": "reVerbView",
-          "name": "reVerbView"
+					"id": "paths",
+          "name": "paths",
+          "contextualTitle": "paths"
         }
 			]
     }
