@@ -1,9 +1,11 @@
-import React, { useRef, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { configs } from "../../redux/reducers/configsSlice";
 
 function Output() {
   const output = useSelector(configs);
+  console.log("Output.jsx => Output => output:", output);
+
   const lines = output.map((el) => {
     let data;
     if (el.data) {

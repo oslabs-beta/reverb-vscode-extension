@@ -53,7 +53,8 @@ async function onPanelDidReceiveMessage(message: any) {
         data: data,
       });
       break;
-    case 'axiosReq':
+    case 'sendRequest':
+      console.log(message);
       const res = await utils.ping(message.config);
       const out = {
         status: res.status || 500,
