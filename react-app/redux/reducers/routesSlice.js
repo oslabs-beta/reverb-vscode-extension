@@ -2,9 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const routesSlice = createSlice({
   name: "routes",
-  initialState: {},
+  initialState: null,
   reducers: {
     setRoutes: (state, action) => {
+      console.log("routesSlice.js => setRoutes => action:", action.payload);
       state = action.payload;
       return state;
     },

@@ -5,6 +5,7 @@ export const configsSlice = createSlice({
   initialState: [],
   reducers: {
     setConfigs: (state, action) => {
+      console.log("configsSlice.js => setConfigs => action:", action.payload);
       state.push(action.payload);
       return state;
     },
