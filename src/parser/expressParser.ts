@@ -147,9 +147,7 @@ class ExpressParser {
           router.path = fileOps.resolvePath(
             fileOps.mergePaths(BASE_PATH, PATH_FOUND[1]),
           )[0];
-        }
-        // TO DO: find file associated with router
-        else
+        } else
           expressOps.findPath(file.contents, path, router, this.supportFiles);
       });
       this.routerData = this.routerData.concat(ROUTERS);
@@ -158,21 +156,20 @@ class ExpressParser {
 
   // Finds all routes in the express file and router files
   findAllRoutes() {
-    const BASE_ROUTE = 'http//localhost:' + this.serverPort;
+    const BASE_ROUTE = 'http://localhost:' + this.serverPort;
     const PATH = this.serverFile.path.concat(this.serverFile.fileName);
     expressOps.findRoutes(this.serverFile.contents, PATH, BASE_ROUTE);
-    for (let i = 0; i < this.routerData.length; i += 1) {
-      const FILE = this.supportFiles.get(this.routerData[i].path);
-      if (FILE !== undefined) {
-        this.routes = this.routes.concat(
-          expressOps.findRoutes(
-            FILE.contents,
-            this.routerData[i].path,
-            this.routerData[i].baseRoute,
-          ),
-        );
+    this.supportFiles.forEach((file) => {
+      let route = BASE_ROUTE;
+      for (let i = 0; i < this.routerData.length; i += 1) {
+        if (this.routerData[i].path === file.path + file.fileName) {
+          route = this.routerData[i].baseRoute;
+        }
       }
-    }
+      this.routes = this.routes.concat(
+        expressOps.findRoutes(file.contents, file.path + file.fileName, route),
+      );
+    });
   }
 
   findRouteEndLines() {

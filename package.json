@@ -10,8 +10,10 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
-  ],
+    "onStartupFinished",
+    "onWebviewPanel:reVerb",
+    "onView:paths"
+  ],  
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -30,6 +32,10 @@
       {
         "command": "splitDown",
         "title": "reVerb Config"
+      },
+      {
+        "command": "getState",
+        "title": "get state"
       }
     ],
     "menus": {
@@ -41,21 +47,34 @@
         },
         {
           "when": "editorTextFocus",
-          "command": "extension.configRoute",
-          "group": "navigation@1"
-        },
-        {
-          "when": "editorTextFocus",
           "command": "splitDown",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "reverb-explorer",
+          "title": "reverb",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "reverb-explorer": [
+				{
+					"id": "paths",
+          "name": "paths",
+          "contextualTitle": "paths"
+        }
+			]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "tsc -p ./ && npm run copy",
-    "copy": "npx copyfiles react-app/dist/index.html out/",
+    "compile": "tsc -p ./ && copy react-app\\dist\\index.html out\\index.html",
+    "copy": "cp react-app/dist/index.html out/index.html",
     "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
     "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
     "test-compile": "tsc -p ./",
@@ -72,7 +91,6 @@
     "@types/vscode": "^1.51.0",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.8.1",
-    "copyfiles": "^2.4.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-base": "^14.2.0",
@@ -82,12 +100,14 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.0.0",
+    "gulp": "^4.0.2",
     "prettier": "npm:@btmills/prettier@^2.1.2",
     "ts-loader": "^8.0.3",
     "typescript": "^4.0.2",
     "webpack": "^4.44.1"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.4.0",
     "@types/estree": "0.0.45",
     "@typescript-eslint/types": "^4.8.1",
     "axios": "^0.21.0",
@@ -96,6 +116,8 @@
     "glob": "^7.1.6",
     "mocha": "^8.1.3",
     "node-sass": "^5.0.0",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5",
     "sass-loader": "^10.1.0",
     "vscode-test": "^1.4.0",
     "webpack-cli": "^3.3.12"
