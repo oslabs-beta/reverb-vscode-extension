@@ -1,21 +1,27 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Main from "./containers/Main";
 import Output from "./containers/Output";
-import setConfig from "../redux/reducers/configsSlice";
-import setRoutes from "../redux/reducers/routesSlice";
+import { setConfigs } from "../redux/reducers/configsSlice";
+import { setRoutes } from "../redux/reducers/routesSlice";
 
 function App() {
   const dispatch = useDispatch();
 
   window.addEventListener("message", (event) => {
-    switch (event.data.command) {
+    const message = event.data;
+
+    switch (message.command) {
       case "data":
-        dispatch(setRoutes(event.data.data));
+        if (message.data) {
+          dispatch(setRoutes(message.data));
+        } else {
+          dispatch(setRoutes({}));
+        }
         break;
       case "config":
-        dispatch(setConfigs(event.data.res));
+        dispatch(setConfigs(message.out));
         break;
       default:
     }

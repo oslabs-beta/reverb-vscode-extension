@@ -4,14 +4,15 @@ export const configsSlice = createSlice({
   name: "configs",
   initialState: [],
   reducers: {
-    setConfig: (state, action) => {
-      state = { ...state, ...action.payload };
+    setConfigs: (state, action) => {
+      console.log("configsSlice.js => setConfigs => action:", action.payload);
+      state.push(action.payload);
       return state;
     },
   },
 });
 
-export const { setConfig } = configsSlice.actions;
+export const { setConfigs } = configsSlice.actions;
 
 export const configs = (state) => state.configs;
 

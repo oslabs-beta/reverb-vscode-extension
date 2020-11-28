@@ -2,16 +2,17 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const routesSlice = createSlice({
   name: "routes",
-  initialState: {},
+  initialState: null,
   reducers: {
-    setRoute: (state, action) => {
-      state = { ...state, ...action.payload };
+    setRoutes: (state, action) => {
+      console.log("routesSlice.js => setRoutes => action:", action.payload);
+      state = action.payload;
       return state;
     },
   },
 });
 
-export const { setRoute } = routesSlice.actions;
+export const { setRoutes } = routesSlice.actions;
 
 export const routes = (state) => state.routes;
 

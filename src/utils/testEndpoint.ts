@@ -43,7 +43,6 @@ export async function testEndpoint(
    * @param {WorkspaceObj} workspaceObj Main state object.
    */
   async function findRouterMatch(workspaceObj: WorkspaceObj) {
-    console.log(path);
     const routerFileObj = workspaceObj[path];
     if (routerFileObj === undefined) {
       console.log('No routerFile obj. Reparsing');
@@ -81,7 +80,7 @@ export async function testEndpoint(
               hour12: false,
             })}] ${method} ${url} responded with status: ${
               res.status
-            } \n${JSON.stringify(res.data, null, 2)} \n`,
+            } \n${JSON.stringify(res.data, null, 2)} \n\n`,
           );
           utils.addDeco(
             `${res.status} : ${res.statusText}`,
@@ -92,12 +91,12 @@ export async function testEndpoint(
           );
         } else {
           outputWindow.append(
-            `[${new Date().toLocaleString('en-US', {
+            `> [${new Date().toLocaleString('en-US', {
               hour12: false,
             })}] ${method} ${url} => ${res} \n`,
           );
           utils.addDeco(
-            `ERROR`,
+            `ERROR NO RESPONSE`,
             endPoint.range[0] - 1,
             activeEditor.document.lineAt(endPoint.range[0] - 1).range.end
               .character + 5,
@@ -125,6 +124,7 @@ export async function testEndpoint(
     // preserve existing state
     state = Object.assign({}, state, data);
     await context.workspaceState.update(`obj`, state);
+    outputWindow.appendLine('> Server Parse Successful! \n');
   }
 
   // Init
