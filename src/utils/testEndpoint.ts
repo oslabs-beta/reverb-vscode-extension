@@ -125,6 +125,8 @@ export async function testEndpoint(
     state = Object.assign({}, state, data);
     await context.workspaceState.update(`obj`, state);
     outputWindow.appendLine('> Server Parse Successful! \n');
+    const newState = await context.workspaceState.get(`obj`);
+    console.log('newState: ', newState);
   }
 
   // Init

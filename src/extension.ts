@@ -5,6 +5,7 @@ import * as utils from './utils/utils';
 import { testEndpoint } from './utils/testEndpoint';
 import { configEndpoint } from './utils/configEndpoint';
 import ExpressParser from './parser/expressParser';
+import { ReverbTreeProvider } from './reverbTreeProvider';
 
 const startCommandName = 'extension.startExtension';
 const webViewPanelTitle = 'reVerb app';
@@ -94,22 +95,21 @@ export async function activate(context: vscode.ExtensionContext) {
     'reVerb',
     new reVerbSerializer(),
   );
-  const state = await context.workspaceState.get(`obj`);
+  const state: WorkspaceObj | undefined = await context.workspaceState.get(
+    `obj`,
+  );
   console.log(`INIT STATE =>`, state);
-
-  // vscode.workspace.onDidSaveTextDocument(async (e) => {
-  //   const expressParser = new ExpressParser(
-  //     'C:/Users/itsme/Documents/test-server-express/server4/src/server.ts',
-  //     3004,
-  //   );
-  //   const data = await expressParser.parse();
-  //   let state = await context.workspaceState.get(`obj`);
-
-  //   // preserve existing state
-  //   state = Object.assign({}, state, data);
-  //   await context.workspaceState.update(`obj`, state);
-  // });
-
+  if (state) {
+    Object.entries(state).forEach(([path, routeObject]) => {
+      console.log('PATH: ', path, 'ROUTE OBJECT: ', routeObject);
+      Object.entries(routeObject).forEach(([route, methodObject]) => {
+        console.log('ROUTE: ', route, 'METHOD OBJECT: ', methodObject);
+        Object.keys(methodObject).forEach((method) => {
+          console.log('METHOD: ', method);
+        });
+      });
+    });
+  }
   // Init output window. Needs to be passed to functions that use it.
   const outputWindow: vscode.OutputChannel = vscode.window.createOutputChannel(
     'reVerb',
@@ -185,6 +185,17 @@ export async function activate(context: vscode.ExtensionContext) {
     disposable2,
     disposable3,
     disposable4,
+  );
+
+  // Search vscode workspace storage for key that matches file path of selected endpoint
+  const workspaceObj:
+    | WorkspaceObj
+    | undefined = await context.workspaceState.get(`obj`);
+
+  // populates tree views in side bar
+  vscode.window.registerTreeDataProvider(
+    'paths',
+    new ReverbTreeProvider(vscode.workspace.rootPath || '', workspaceObj),
   );
 }
 
