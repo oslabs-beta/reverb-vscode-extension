@@ -1,1 +1,2 @@
-# duolog-vscode-extension
+![reVerb logo] 
+(./media/reVerbLogo.png)
