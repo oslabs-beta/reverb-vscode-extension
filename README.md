@@ -2,8 +2,6 @@
 
 <h2 align="center">A VS Code extension for testing server endpoints</h2>
 
-***
-
 <p align="center">
   <em>
     JavaScript
@@ -32,7 +30,6 @@
 
 ## Intro
 
-***
 
 Reverb is a VS Code extension that allows for testing and managing Express endpoints within VS Code. All routes handled by running Express servers are automatically detected, making testing as simple as right clicking on the route.
 
