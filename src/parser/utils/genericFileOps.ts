@@ -1,91 +1,99 @@
+/**
+ * @fileoverview Functions for finding/reading files within a workspace
+ */
+
 import { workspace } from 'vscode';
-import * as patterns from '../../constants/expressPatterns';
+// Regex patterns used for file parsing
+import {
+  FILENAME_AND_PATH,
+  IMPORTED_FILES,
+  REQUIRED_FILES,
+  CODE_FILE,
+  NEW_LINE,
+} from '../../constants/expressPatterns';
 
 const fs = require('fs');
 const pathUtil = require('path');
 
-// Read the contents of the specified file
-export const readFile = (file: File) => {
+/**
+ * Reads the contents of the specified file
+ * @param {File} file The file to read
+ * @return {string} The contents of the specified file
+ */
+export const readFile = (file: File): string => {
   const { path, fileName } = file;
-  const FILE_CONTENTS = fs.readFileSync(path + fileName, {
-    encoding: 'utf8',
-    flag: 'r',
-  });
-  return FILE_CONTENTS;
+  return fs.readFileSync(path + fileName, { encoding: 'utf8', flag: 'r' });
 };
 
-// Create a File object for each path in the file list
-const createFileObjects = (fileList: Array<string>) => {
-  const OUTPUT: Array<File> = [];
-  for (let i = 0; i < fileList.length; i += 1) {
-    const PATH = fileList[i];
+/**
+ * Creates a File object for each path in the specified file list
+ * @param {string[]} fileList The list of files for which to create objects
+ * @return {File[]} An array containing all of the generated File objects
+ */
+const createFileObjects = (fileList: string[]): File[] => {
+  const output: File[] = [];
+  fileList.forEach((path) => {
     // Split the extract the file name from the merged path
-    const MATCH = PATH.match(patterns.FILENAME_AND_PATH);
-    // Create a file object using the file name and path
-    if (MATCH)
-      OUTPUT.push({ path: MATCH[1], fileName: MATCH[2], contents: '' });
-  }
-  // If there was en error, return null
-  return OUTPUT;
+    const PATH_SPLIT = path.match(FILENAME_AND_PATH);
+    if (PATH_SPLIT)
+      // Create a file object using the file name and path
+      output.push({
+        path: PATH_SPLIT[1],
+        fileName: PATH_SPLIT[2],
+        contents: '',
+      });
+  });
+  return output;
 };
 
-// Merges a file's relative path with the path of the file into which it is being imported
-export const mergePaths = (parentPath: string, importPath: string) => {
-  // Repeatedly check the imported file's path for "../" at the beginning
-  while (importPath[0] === '.' && importPath[1] === '.') {
-    // If found, go up one level in the root directory
-    const PARENT_DIR = parentPath.match(patterns.PARENT_DIRECTORY);
-    if (PARENT_DIR !== null) {
-      const NEW_ROOT = PARENT_DIR[1];
-      parentPath = NEW_ROOT;
-    }
-    // Remove the "../"from the beginning of the file path
-    importPath = importPath.substring(3);
-  }
-  // Remove any remaining "./" from the path
-  if (importPath[0] === '.' && importPath[1] === '/')
-    importPath = importPath.substring(2);
-  // The root path and relative path are now ready to combine
-  return parentPath + importPath;
+/**
+ * Searches the specified line for any imported/required files
+ * @param {string} filePath The absolute path of the file being searched
+ * @param {string} line The line to search
+ * @return {string} Either the absolute path of the imported/required file,
+ *   or an empty string if no imported/required file was found
+ */
+const parseLineForImport = (filePath: string, line: string): string => {
+  const FILE_IMPORTED = line.match(IMPORTED_FILES);
+  if (FILE_IMPORTED) return pathUtil.join(filePath, FILE_IMPORTED[1]);
+
+  const FILE_REQUIRED = line.match(REQUIRED_FILES);
+  if (FILE_REQUIRED) return pathUtil.join(filePath, FILE_REQUIRED[1]);
+
+  return '';
 };
 
-// Returns the path to the imported/required file in the specified line, if one exists
-const parseLineForImport = (filePath: string, line: string) => {
-  let mergedPath = '';
-  // Check line for an import or require statement
-  let importedFile = line.match(patterns.IMPORTED_FILES);
-  if (importedFile === null) importedFile = line.match(patterns.REQUIRED_FILES);
-  // If found, merge the parent path and import path into a single path
-  if (importedFile) mergedPath = mergePaths(filePath, importedFile[1]);
-  return mergedPath;
-};
-
-// Recursively searches a directory to find all .js and .ts files
-const findCodeFiles = (path: string) => {
-  const codeFiles: Array<string> = [];
-  // Read all files/folders in the specified directory
-  const dirContents = fs.readdirSync(path);
-  // Loop through each item in the current dir
-  let files = dirContents.map((content: string) => {
+/**
+ * Recursively searches a directory for all .js and .ts files
+ * @param {string} path The path to search
+ * @return {string[]} An array containing all .js and .ts files found in the specified path
+ */
+const findCodeFiles = (path: string): string[] => {
+  const codeFiles: string[] = [];
+  const DIR_CONTENTS = fs.readdirSync(path);
+  // Loop through each file/folder in the specified directory
+  let files = DIR_CONTENTS.map((content: string) => {
     // Replace any backslashes in the path with forward slashes (for Windows users)
     const resource = pathUtil.resolve(path, content).replace(/\\/g, '/');
-    // If a folder, find the files within, otherwise store the file name
+    // If item is a folder find the files within, otherwise store the file name
     return fs.statSync(resource).isDirectory()
       ? findCodeFiles(resource)
       : resource;
   });
-  // Flatten the array of files
   files = files.flat(Infinity);
   // Reduce the list down to only javascript/typescript files
   files.forEach((file: string) => {
-    if (file.match(patterns.CODE_FILE)) codeFiles.push(file);
+    if (file.match(CODE_FILE)) codeFiles.push(file);
   });
   return codeFiles;
 };
 
-// Returns an array of File objects for each file in the specified path
-export const resolvePath = (path: string) => {
-  // If the path exists, check if it is a directory or file
+/**
+ * Generates an array of all .js/ts files located at the specified path
+ * @param {string} path The path to search
+ * @return {string[]} An array containing all .js and .ts files found in the specified path
+ */
+export const resolvePath = (path: string): string[] => {
   if (fs.existsSync(path)) {
     return fs.statSync(path).isDirectory() ? findCodeFiles(path) : [path];
   }
@@ -103,56 +111,57 @@ export const resolvePath = (path: string) => {
       ? findCodeFiles(TS_PATH)
       : [TS_PATH];
   }
-  // The file does not exist
+  // The path is invalid
   return [];
 };
 
-// Find all imported/required local files in the specified file
-export const findImportedFiles = (file: File) => {
-  let output: Array<File> = [];
-  const LINES = file.contents.split(/\r?\n/);
-  // Check each line in the file for an import/require statement
-  for (let i = 0; i < LINES.length; i += 1) {
-    const filePath = parseLineForImport(file.path, LINES[i]);
-    if (filePath !== '') {
-      // Get all file paths for the specified path
-      const FILE_LIST = resolvePath(filePath);
+/**
+ * Finds all imported/required local files in the specified file
+ * @param {File} file The file to search
+ * @return {File[]} An array containing File objects for all files
+ *   imported/required by the specified file
+ */
+export const findImportedFiles = (file: File): File[] => {
+  let output: File[] = [];
+  // Check each line in the file's contents for an import/require statement
+  file.contents.split(NEW_LINE).forEach((line) => {
+    const IMPORT_PATH = parseLineForImport(file.path, line);
+    if (IMPORT_PATH !== '') {
+      // Create File objects for all files located at the import path
+      const FILE_LIST = resolvePath(IMPORT_PATH);
       output = output.concat(createFileObjects(FILE_LIST));
     }
-  }
-  // Return all imported files found in the file
+  });
   return output;
 };
 
-// Remove the file name from the end of a path
-export const removeFilenameFromPath = (path: string) => {
-  // Split the extract the file name from the merged path
-  const MATCH = path.match(patterns.FILENAME_AND_PATH);
-  // Return the path with the file name removed
-  if (MATCH) return MATCH[1];
-  // Return the original path if there was no match
-  return path;
-};
-
+/**
+ * Returns the relative path from the user's workspace to the absolute path provided
+ * @param {string} fullPath The absolute path to trim
+ * @return {string} The relative path
+ */
 export const getLocalPath = (fullPath: string) => {
   let basePath = workspace.rootPath;
   if (basePath) {
+    // Replace any backslashes in the path with forward slashes (for Windows users)
     basePath = basePath.replace(/\\/g, '/');
-    // Split the extract the file name from the merged path
-    const MATCH = fullPath.match(new RegExp(basePath + '\\/(\\S*)'));
-    // Return the path with the file name removed
-    if (MATCH) return MATCH[1];
-    // Return the original path if there was no match
-    return fullPath;
+
+    const PATH_FOUND = fullPath.match(new RegExp(basePath + '\\/(\\S*)'));
+    if (PATH_FOUND) return PATH_FOUND[1];
   }
+  // Return the original path if there was no match
   return fullPath;
 };
 
+/**
+ * Strips the "http://" from the beginning of a route
+ * @param {string} fullRoute The full route
+ * @return {string} The stripped path
+ */
 export const getLocalRoute = (fullRoute: string) => {
-  // Split the extract the file name from the merged path
-  const MATCH = fullRoute.match(/http:\/\/(\S*)/);
-  // Return the path with the file name removed
-  if (MATCH) return MATCH[1];
-  // Return the original path if there was no match
+  // Split ro remove the "http://" from the route
+  const ROUTE_FOUND = fullRoute.match(/http:\/\/(\S*)/);
+  if (ROUTE_FOUND) return ROUTE_FOUND[1];
+  // Return the original route if there was no match
   return fullRoute;
 };
