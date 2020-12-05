@@ -8,6 +8,7 @@ import {
   FILENAME_AND_PATH,
   IMPORTED_FILES,
   REQUIRED_FILES,
+  REQUIRED_PATH_JOIN,
   CODE_FILE,
   NEW_LINE,
 } from '../../constants/expressPatterns';
@@ -60,6 +61,8 @@ const parseLineForImport = (filePath: string, line: string): string => {
   const FILE_REQUIRED = line.match(REQUIRED_FILES);
   if (FILE_REQUIRED) return pathUtil.join(filePath, FILE_REQUIRED[1]);
 
+  const JOIN_FILE_REQUIRED = line.match(REQUIRED_PATH_JOIN);
+  if (JOIN_FILE_REQUIRED) return pathUtil.join(filePath, JOIN_FILE_REQUIRED[1]);
   return '';
 };
 

@@ -5,7 +5,11 @@
 const pathUtil = require('path');
 import { getRanges } from './utils/ast';
 // Regex patterns used for file parsing
-import { FILENAME_AND_PATH, REQUIRE_PATH } from '../constants/expressPatterns';
+import {
+  FILENAME_AND_PATH,
+  REQUIRE_PATH,
+  REQUIRED_PATH_JOIN,
+} from '../constants/expressPatterns';
 // File and path manipulation functions
 import {
   readFile,
@@ -182,6 +186,16 @@ class ExpressParser {
    * Identifies all router files used by the express server
    */
   findRouterFiles() {
+    const SERVER_ROUTERS = findRouters(this.serverFile, this.serverPort);
+    SERVER_ROUTERS.forEach((router) => {
+      const PATH_FOUND = router.importName.match(REQUIRE_PATH);
+      if (PATH_FOUND) {
+        router.path = resolvePath(
+          pathUtil.join(this.serverFile.path, PATH_FOUND[1]),
+        )[0];
+      } else router.path = findPath(this.serverFile, router, this.supportFiles);
+      this.routerData.set(router.path, router);
+    });
     this.supportFiles.forEach((file) => {
       // Find all routers imported into each support file
       const ROUTERS = findRouters(file, this.serverPort);

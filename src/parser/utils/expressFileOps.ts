@@ -255,10 +255,15 @@ const findRouterRequire = (
   const REQUIRE_PATTERN = new RegExp(
     router.importName + '\\s*=\\s*require\\(\\s*[\'"`](\\S+)[\'"`]\\)',
   );
-  const REQUIRE_FOUND = line.match(REQUIRE_PATTERN);
-  if (REQUIRE_FOUND) {
+  const REQUIRE_JOIN_PATTERN = new RegExp(
+    router.importName
+      + '\\s*=\\s*require\\(\\S*\\.join\\(__dirname, [\'"`](\\.*\\/*\\S+)[\'"`]\\)',
+  );
+  let requireFound = line.match(REQUIRE_PATTERN);
+  if (!requireFound) requireFound = line.match(REQUIRE_JOIN_PATTERN);
+  if (requireFound) {
     // Resolve the specified path to ensure it includes the correct file extension
-    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]))[0];
+    routerPath = resolvePath(pathUtil.join(path, requireFound[1]))[0];
   }
   return routerPath;
 };
