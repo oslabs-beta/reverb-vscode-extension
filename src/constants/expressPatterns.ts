@@ -9,6 +9,9 @@ export const IMPORTED_FILES = new RegExp(
 export const REQUIRED_FILES = new RegExp(
   'require\\([\'"`](\\.*\\/\\S+)[\'"`]\\)',
 );
+export const REQUIRED_PATH_JOIN = new RegExp(
+  'require\\(\\S*\\.join\\(__dirname, [\'"`](\\.*\\/*\\S+)[\'"`]\\)',
+);
 export const REQUIRE_EXPRESS = new RegExp(
   '(\\S+)\\s*=\\s*require\\s*\\(\\s*[\'"`]express[\'"`]\\s*\\)',
 );
