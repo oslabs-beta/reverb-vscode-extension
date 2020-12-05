@@ -25,6 +25,7 @@ import {
   findRouters,
   findPath,
   findRoutes,
+  findRouterPath,
 } from './utils/expressFileOps';
 
 /** Class representing parsed express server data */
@@ -72,7 +73,8 @@ class ExpressParser {
     this.findSupportFiles();
     this.findExpressImports();
     this.findServerName();
-    this.findRouterFiles();
+    this.findRouterFiles(this.serverFile);
+    this.supportFiles.forEach((file) => this.findRouterFiles(file));
     this.findAllRoutes();
     this.findRouteEndLines();
     return this.buildWorkspaceObject();
@@ -185,31 +187,14 @@ class ExpressParser {
   /**
    * Identifies all router files used by the express server
    */
-  findRouterFiles() {
-    const SERVER_ROUTERS = findRouters(this.serverFile, this.serverPort);
-    SERVER_ROUTERS.forEach((router) => {
-      const PATH_FOUND = router.importName.match(REQUIRE_PATH);
-      if (PATH_FOUND) {
-        router.path = resolvePath(
-          pathUtil.join(this.serverFile.path, PATH_FOUND[1]),
-        )[0];
-      } else router.path = findPath(this.serverFile, router, this.supportFiles);
+  findRouterFiles(file: File) {
+    const ROUTERS = findRouters(file, this.serverPort);
+    ROUTERS.forEach((router) => {
+      // Determine the absolute file path for each router identified
+      router.path = findRouterPath(router, file, this.supportFiles);
       this.routerData.set(router.path, router);
     });
-    this.supportFiles.forEach((file) => {
-      // Find all routers imported into each support file
-      const ROUTERS = findRouters(file, this.serverPort);
-      // Determine the absolute file path for each router identified
-      ROUTERS.forEach((router) => {
-        const PATH_FOUND = router.importName.match(REQUIRE_PATH);
-        if (PATH_FOUND) {
-          router.path = resolvePath(pathUtil.join(file.path, PATH_FOUND[1]))[0];
-        } else router.path = findPath(file, router, this.supportFiles);
-        this.routerData.set(router.path, router);
-      });
-    });
   }
-
   /**
    * Finds all routes in the top-level server file and all support files
    */

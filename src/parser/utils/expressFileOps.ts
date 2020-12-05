@@ -11,6 +11,7 @@ import {
   REQUIRE_EXPRESS,
   USE_ROUTER,
   EXPRESS_ROUTE,
+  REQUIRE_PATH,
 } from '../../constants/expressPatterns';
 
 /**
@@ -255,6 +256,7 @@ const findRouterRequire = (
   const REQUIRE_PATTERN = new RegExp(
     router.importName + '\\s*=\\s*require\\(\\s*[\'"`](\\S+)[\'"`]\\)',
   );
+  // Finds require statements that include path.join
   const REQUIRE_JOIN_PATTERN = new RegExp(
     router.importName
       + '\\s*=\\s*require\\(\\S*\\.join\\(__dirname, [\'"`](\\.*\\/*\\S+)[\'"`]\\)',
@@ -316,6 +318,27 @@ export const findPath = (
     routerPath = searchLineForPath(LINES[i], router, file, supportFiles);
     if (routerPath !== '') break;
   }
+  return routerPath;
+};
+
+/**
+ * Finds the file path for the specified router
+ * @param router The router we're looking for
+ * @param file The file that imports the router
+ * @param supportFiles File objects for all server-related files
+ * @return  The file path for the specified router,
+ *   or an empty string if the path could not be found
+ */
+export const findRouterPath = (
+  router: RouterData,
+  file: File,
+  supportFiles: Map<string, File>,
+): string => {
+  let routerPath = '';
+  const PATH_FOUND = router.importName.match(REQUIRE_PATH);
+  if (PATH_FOUND) {
+    routerPath = resolvePath(pathUtil.join(file.path, PATH_FOUND[1]))[0];
+  } else routerPath = findPath(file, router, supportFiles);
   return routerPath;
 };
 
