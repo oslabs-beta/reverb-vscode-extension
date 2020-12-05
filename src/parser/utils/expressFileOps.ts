@@ -3,6 +3,7 @@
  */
 
 const pathUtil = require('path');
+import { resolvePath } from './genericFileOps';
 // Regex patterns used for file parsing
 import {
   NEW_LINE,
@@ -11,9 +12,6 @@ import {
   USE_ROUTER,
   EXPRESS_ROUTE,
 } from '../../constants/expressPatterns';
-
-// Path manipulation functions
-import { resolvePath } from './genericFileOps';
 
 /**
  * Searches the contents of specified file for an express import/require statement
@@ -120,7 +118,7 @@ export const findRouter = (line: string, portNum: number): RouterData[] => {
  * @return {RouterData[]} An array containing a RouterData object for
  *   each router used by express in the specified file
  */
-export const findAllRouters = (file: File, portNum: number): RouterData[] => {
+export const findRouters = (file: File, portNum: number): RouterData[] => {
   let output: RouterData[] = [];
   const LINES = file.contents.split(NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
