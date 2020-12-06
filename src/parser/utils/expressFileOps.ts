@@ -12,6 +12,8 @@ import {
   USE_ROUTER,
   EXPRESS_ROUTE,
   REQUIRE_PATH,
+  MULTI_LINE_ROUTE,
+  ROUTE_ENDPOINT,
 } from '../../constants/expressPatterns';
 
 /**
@@ -240,6 +242,33 @@ const findRouterImport = (
 };
 
 /**
+ * Search the specified line to see if the specified router is required using path.join
+ * @param {string} line The line to search
+ * @param {RouterData} router All known data about the router
+ * @param {string} path The directory containing the file whose line is being searched
+ * @return {string} The file path for the specified router,
+ *   or an empty string if no path was found
+ */
+const findJoinRequire = (
+  line: string,
+  router: RouterData,
+  path: string,
+): string => {
+  let routerPath = '';
+  // Finds require statements that include path.join
+  const REQUIRE_JOIN_PATTERN = new RegExp(
+    router.importName
+      + '\\s*=\\s*require\\(\\S*\\.join\\(__dirname, [\'"`](\\.*\\/*\\S+)[\'"`]\\)',
+  );
+  const REQUIRE_FOUND = line.match(REQUIRE_JOIN_PATTERN);
+  if (REQUIRE_FOUND) {
+    // Resolve the specified path to ensure it includes the correct file extension
+    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]))[0];
+  }
+  return routerPath;
+};
+
+/**
  * Search the specified line to see if the specified router is required
  * @param {string} line The line to search
  * @param {RouterData} router All known data about the router
@@ -256,16 +285,10 @@ const findRouterRequire = (
   const REQUIRE_PATTERN = new RegExp(
     router.importName + '\\s*=\\s*require\\(\\s*[\'"`](\\S+)[\'"`]\\)',
   );
-  // Finds require statements that include path.join
-  const REQUIRE_JOIN_PATTERN = new RegExp(
-    router.importName
-      + '\\s*=\\s*require\\(\\S*\\.join\\(__dirname, [\'"`](\\.*\\/*\\S+)[\'"`]\\)',
-  );
-  let requireFound = line.match(REQUIRE_PATTERN);
-  if (!requireFound) requireFound = line.match(REQUIRE_JOIN_PATTERN);
-  if (requireFound) {
+  const REQUIRE_FOUND = line.match(REQUIRE_PATTERN);
+  if (REQUIRE_FOUND) {
     // Resolve the specified path to ensure it includes the correct file extension
-    routerPath = resolvePath(pathUtil.join(path, requireFound[1]))[0];
+    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]))[0];
   }
   return routerPath;
 };
@@ -286,6 +309,9 @@ const searchLineForPath = (
 ): string => {
   // Check for all known ways a router could be utilized
   let routerPath = findRouterRequire(line, router, file.path);
+  if (routerPath !== '') return routerPath;
+
+  routerPath = findJoinRequire(line, router, file.path);
   if (routerPath !== '') return routerPath;
 
   routerPath = findRouterImport(line, router, file.path);
@@ -343,6 +369,44 @@ export const findRouterPath = (
 };
 
 /**
+ * Checks for routes that span multiple lines
+ * @param {string} line The line to check
+ * @param {string} nextLine The next line in the file
+ * @param {number} lineNum The line number of the line in the router file
+ * @param {string} path The path of the router file
+ * @param {string} baseRoute The base route for all routes in the router file
+ * @return {Route[]} An array containing a Route object if a route was found
+ */
+const findMultiLineRoutes = (
+  line: string,
+  nextLine: string,
+  lineNum: number,
+  path: string,
+  baseRoute: string,
+): Route[] => {
+  const routes: Route[] = [];
+  const HAS_ROUTE = line.match(MULTI_LINE_ROUTE);
+  if (HAS_ROUTE) {
+    const ROUTE_FOUND = nextLine.match(ROUTE_ENDPOINT);
+    if (ROUTE_FOUND) {
+      let route = baseRoute + ROUTE_FOUND[1];
+      // Remove any trailing slashes from the route
+      while (route.slice(-1) === '/') {
+        route = route.substring(0, route.length - 1);
+      }
+      routes.push({
+        path,
+        route,
+        method: HAS_ROUTE[1],
+        startLine: lineNum + 1,
+        endLine: lineNum + 1,
+      });
+    }
+  }
+  return routes;
+};
+
+/**
  * Checks the specified line to see if it contains a route
  * @param {string} line The line to check
  * @param {number} lineNum The line number of the line in the router file
@@ -391,6 +455,9 @@ export const findRoutes = (
   const LINES = contents.split(NEW_LINE);
   for (let i = 0; i < LINES.length; i += 1) {
     routes = routes.concat(checkLineForRoute(LINES[i], i, path, baseRoute));
+    routes = routes.concat(
+      findMultiLineRoutes(LINES[i], LINES[i + 1], i, path, baseRoute),
+    );
   }
   return routes;
 };
