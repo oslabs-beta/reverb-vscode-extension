@@ -9,6 +9,7 @@ import {
   FILENAME_AND_PATH,
   REQUIRE_PATH,
   REQUIRED_PATH_JOIN,
+  ROUTE_PARAMS,
 } from '../constants/expressPatterns';
 // File and path manipulation functions
 import {
@@ -249,9 +250,27 @@ class ExpressParser {
           url: route.route,
           headers: {},
           data: {},
+          params: this.findParams(LOCAL_ROUTE),
         },
       };
     });
+    return output;
+  }
+
+  /**
+   * Identifies all parameters in the specified route
+   * @param {string} route The route to check
+   * @return {Record<string, string>} A record containing "paramID: paramValue" key-value pairs
+   */
+  findParams(route: string): Record<string, string> {
+    const output: Record<string, string> = {};
+    const PARAMS_FOUND = route.match(ROUTE_PARAMS);
+    if (PARAMS_FOUND) {
+      for (let i = 1; i < PARAMS_FOUND.length; i++) {
+        // Remove the colon from the beginning of the param id
+        output[PARAMS_FOUND[i].slice(1)] = '';
+      }
+    }
     return output;
   }
 }

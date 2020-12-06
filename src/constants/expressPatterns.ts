@@ -27,3 +27,5 @@ export const EXPRESS_ROUTE = new RegExp(
 );
 export const MULTI_LINE_ROUTE = new RegExp('\\.(get|post|put|delete)\\(\\s*$');
 export const ROUTE_ENDPOINT = new RegExp('[\'"`](\\/\\S*)[\'"`]');
+
+export const ROUTE_PARAMS = new RegExp(':\\w*', 'g');

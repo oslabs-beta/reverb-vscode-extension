@@ -12,6 +12,7 @@ interface options {
   url: string;
   headers: Record<any, never>;
   data: Record<any, never>;
+  params: Record<string, string>;
   method: any;
 }
 
