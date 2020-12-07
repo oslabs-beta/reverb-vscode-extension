@@ -56,8 +56,8 @@
       "activitybar": [
         {
           "id": "reverb-explorer",
-          "title": "reverb",
-          "icon": "media/icon.svg"
+          "title": "reVerb",
+          "icon": "media/icon.png"
         }
       ]
     },
