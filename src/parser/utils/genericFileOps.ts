@@ -56,13 +56,13 @@ const createFileObjects = (fileList: string[]): File[] => {
  */
 const parseLineForImport = (filePath: string, line: string): string => {
   const FILE_IMPORTED = line.match(IMPORTED_FILES);
-  if (FILE_IMPORTED) return pathUtil.join(filePath, FILE_IMPORTED[1]);
+  if (FILE_IMPORTED) return pathUtil.join(filePath, FILE_IMPORTED[1]).replace(/\\/g, '/');
 
   const FILE_REQUIRED = line.match(REQUIRED_FILES);
-  if (FILE_REQUIRED) return pathUtil.join(filePath, FILE_REQUIRED[1]);
+  if (FILE_REQUIRED) return pathUtil.join(filePath, FILE_REQUIRED[1]).replace(/\\/g, '/');
 
   const JOIN_FILE_REQUIRED = line.match(REQUIRED_PATH_JOIN);
-  if (JOIN_FILE_REQUIRED) return pathUtil.join(filePath, JOIN_FILE_REQUIRED[1]);
+  if (JOIN_FILE_REQUIRED) return pathUtil.join(filePath, JOIN_FILE_REQUIRED[1]).replace(/\\/g, '/');
   return '';
 };
 

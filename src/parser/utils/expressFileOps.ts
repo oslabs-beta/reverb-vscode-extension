@@ -189,7 +189,7 @@ export const findPathRequire = (
   const PATH_FOUND = findRequiredPath(line, router);
   if (PATH_FOUND) {
     // Get a list of the files that could be the associated router file
-    const FILES = resolvePath(pathUtil.join(path, PATH_FOUND[1]));
+    const FILES = resolvePath(pathUtil.join(path, PATH_FOUND[1]).replace(/\\/g, '/'));
     routerPath = findRouterFile(router, FILES, supportFiles);
   }
   return routerPath;
@@ -236,7 +236,7 @@ const findRouterImport = (
   const IMPORT_FOUND = line.match(IMPORT_PATTERN);
   if (IMPORT_FOUND) {
     // Resolve the specified path to ensure it includes the correct file extension
-    routerPath = resolvePath(pathUtil.join(path, IMPORT_FOUND[1]))[0];
+    routerPath = resolvePath(pathUtil.join(path, IMPORT_FOUND[1]).replace(/\\/g, '/'))[0];
   }
   return routerPath;
 };
@@ -263,7 +263,7 @@ const findJoinRequire = (
   const REQUIRE_FOUND = line.match(REQUIRE_JOIN_PATTERN);
   if (REQUIRE_FOUND) {
     // Resolve the specified path to ensure it includes the correct file extension
-    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]))[0];
+    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]).replace(/\\/g, '/'))[0];
   }
   return routerPath;
 };
@@ -288,7 +288,7 @@ const findRouterRequire = (
   const REQUIRE_FOUND = line.match(REQUIRE_PATTERN);
   if (REQUIRE_FOUND) {
     // Resolve the specified path to ensure it includes the correct file extension
-    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]))[0];
+    routerPath = resolvePath(pathUtil.join(path, REQUIRE_FOUND[1]).replace(/\\/g, '/'))[0];
   }
   return routerPath;
 };
