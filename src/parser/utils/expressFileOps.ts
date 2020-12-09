@@ -363,7 +363,9 @@ export const findRouterPath = (
   let routerPath = '';
   const PATH_FOUND = router.importName.match(REQUIRE_PATH);
   if (PATH_FOUND) {
-    routerPath = resolvePath(pathUtil.join(file.path, PATH_FOUND[1]))[0];
+    routerPath = resolvePath(
+      pathUtil.join(file.path, PATH_FOUND[1]).replace(/\\/g, '/'),
+    )[0];
   } else routerPath = findPath(file, router, supportFiles);
   return routerPath;
 };
