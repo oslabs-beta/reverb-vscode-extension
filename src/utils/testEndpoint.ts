@@ -114,10 +114,9 @@ export async function testEndpoint(
    */
   async function parseAndUpdate() {
     const { serverPath, port } = await multiStepInput(context);
-    const expressParser = new ExpressParser(
-      serverPath.slice(1),
-      parseInt(port),
-    );
+    const parsingPath =
+      serverPath[2] === ':' ? serverPath.slice(1) : serverPath;
+    const expressParser = new ExpressParser(parsingPath, parseInt(port));
     const data = await expressParser.parse();
     let state = await context.workspaceState.get(`obj`);
 
