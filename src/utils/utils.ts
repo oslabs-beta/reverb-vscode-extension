@@ -9,19 +9,18 @@
  * ************************************
  */
 
-import { window, commands } from 'vscode';
+import { window, commands, workspace } from 'vscode';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ext } from '../extensionVariables';
+import ReverbTreeProvider from '../modules/reverbTreeProvider';
 
 const { performance } = require('perf_hooks');
 
 const HTTPSnippet = require('httpsnippet');
 
 export function generateSnippet(data: any) {
-    console.log(data, '!');
     let snippet = new HTTPSnippet(data);
-
     snippet = snippet.convert('javascript', 'axios');
-    console.log(snippet, '!!');
     return snippet;
 }
 
@@ -81,6 +80,19 @@ export function convert(route: string): any {
         output = { method, url };
     }
     return output;
+}
+
+export function resetTreeview() {
+    ext.treeView = undefined;
+    ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
+    ext.treeView.tree = window.createTreeView('paths', {
+        treeDataProvider: ext.treeView,
+    });
+
+    ext.treeView.tree.onDidChangeSelection(async (e: { selection: { label: string }[] }) => {
+        const { url } = convert(e.selection[0].label);
+        commands.executeCommand('extension.openFileInEditor', url);
+    });
 }
 
 /**
