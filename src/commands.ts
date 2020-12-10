@@ -142,8 +142,8 @@ export namespace ExtCmds {
             treeDataProvider: ext.treeView,
         });
         ext.treeView.tree.onDidChangeSelection((e: { selection: { label: string }[] }) => {
-            const uri = utils.convert(e.selection[0].label);
-            commands.executeCommand('extension.openFileInEditor', uri);
+            const { url } = utils.convert(e.selection[0].label);
+            commands.executeCommand('extension.openFileInEditor', url);
         });
     }
 
@@ -278,6 +278,7 @@ export namespace ExtCmds {
      * Generates Axios req snippet based on selected tree item and copies to clipboard
      */
     export async function GenerateAxios(node: any) {
+        console.log(node);
         const snippet = utils.generateSnippet(utils.convert(node.label));
         await env.clipboard.writeText(snippet);
         window.showInformationMessage(`Axios Request snippet added to clipboard`);

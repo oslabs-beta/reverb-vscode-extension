@@ -80,7 +80,7 @@ export function convert(route: string): any {
         const url = 'http://'.concat(METHOD_AND_URL[2]);
         output = { method, url };
     }
-    return output.url;
+    return output;
 }
 
 /**
