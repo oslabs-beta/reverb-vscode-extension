@@ -62,10 +62,6 @@ export function initializeExtensionVariables(ctx: ExtensionContext) {
         utils.resetTreeview();
     }
 
-    window.onDidChangeActiveTextEditor(async (e) => {
-        console.log(window.activeTextEditor, '<>');
-    });
-
     if (window.registerWebviewPanelSerializer) {
         // Make sure we register a serializer in activation event
         window.registerWebviewPanelSerializer(ReverbPanel.viewType, {

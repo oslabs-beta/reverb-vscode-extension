@@ -125,7 +125,6 @@ export namespace ExtCmds {
         sendUserConfigs();
         sendRoutes();
         if (ext.watcher) {
-            console.log('reset watcher');
             stopWatch();
             startWatch();
         }

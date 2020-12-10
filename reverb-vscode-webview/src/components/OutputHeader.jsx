@@ -75,7 +75,6 @@ function OutputHeader({ watchState }) {
           className="button__terminal"
           title="Show Terminal"
           onClick={() => {
-            console.log('MSG => openTerminal');
             return vscode.postMessage({
               command: 'openTerminal',
             });

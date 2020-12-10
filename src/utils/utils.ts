@@ -38,7 +38,6 @@ export function generateSnippet(data: any) {
 export function ping(Options: AxiosRequestConfig) {
     const config = { ...Options, validateStatus: undefined };
     const time = performance.now();
-
     return axios
         .request(config)
         .then(function (res: AxiosResponse) {

@@ -68,7 +68,6 @@ export default class ReverbPanel {
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
             async (msg: Msg) => {
-                console.log('MSG <=', msg);
                 switch (msg.command) {
                     case 'get-data':
                         commands.executeCommand('extension.sendRoutes');

@@ -67,7 +67,6 @@ export default class Decorator {
                     axios
                         .request(obj.config)
                         .then((res) => {
-                            console.log(res);
                             output.push({
                                 url: res.config.url,
                                 status: res.status,

@@ -3,7 +3,7 @@ import React from 'react';
 import Select from '../components/Select';
 
 function Header() {
-  console.log('header render');
+
 
   return (
     <div className="container__header">
