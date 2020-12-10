@@ -1,31 +1,48 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { context, setHeaderInputContext } from '../redux/reducers/inputContext';
-import {routes} from '../redux/reducers/routesSlice';
+import { context, setParamsInputContext } from '../redux/reducers/inputContext';
+import { useForm } from 'react-hook-form';
+import { routes } from '../redux/reducers/routesSlice';
 
 function Params() {
-//   const dispatch = useDispatch();
-//   const { paramsInputContext,userConfigs, urlInputContext } = useSelector(context);
+  const { register, handleSubmit, watch, errors } = useForm();
+  const dispatch = useDispatch();
+  const { paramsInputContext, urlInputContext } = useSelector(context);
+  const rts = useSelector(routes);
+  const url = urlInputContext.slice(7);
+  let params;
 
-//   Object.keys(userConfigs).forEach((el) =>{
-//     console.log(el, urlInputContext)
-//   })
-//     console.log(rts)
+  Object.keys(rts).forEach((el) => {
+    if (rts[el][url]) {
+      Object.keys(rts[el][url][Object.keys(rts[el][url])[0]].config.params).forEach((param) => {
+        params = param;
+      });
+    }
+  });
+
+  let parami = watch('paramValue');
+
+  useEffect(() => {
+    if (parami !== undefined) {
+      dispatch(setParamsInputContext(parami));
+    }
+  }, [parami]);
+
   return (
     <div className="input__params">
-        <button
-          type="button"
-          className="button__test"
-          title="ERASE"
-          onClick={() => {
-            // eslint-disable-next-line no-undef
-            return vscode.postMessage({
-              command: 'deleteRoutesObject',
-            });
-          }}>
-          Test all known Endpoints
-        </button>
-        <p>Erase ALL stored data</p>
+      <form>
+        {params && (
+          <div className="param">
+            <span>:{params}</span>
+            <input
+              defaultValue={paramsInputContext}
+              placeholder="param value"
+              name="paramValue"
+              ref={register()}
+            />
+          </div>
+        )}
+      </form>
     </div>
   );
 }

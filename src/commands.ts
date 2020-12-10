@@ -125,7 +125,6 @@ export namespace ExtCmds {
         sendUserConfigs();
         sendRoutes();
         if (ext.watcher) {
-            console.log('reset watcher');
             stopWatch();
             startWatch();
         }
@@ -161,11 +160,21 @@ export namespace ExtCmds {
         if (data === undefined) return;
 
         if (data[preset.url]) {
-            delete data[
-                data[preset.url].findIndex((el) => {
-                    return el.name === preset.name;
-                })
-            ];
+            console.log(data[preset.url], 'here');
+            const item = data[preset.url].findIndex((el) => {
+                return el.name === preset.name;
+            });
+            data[preset.url].splice(item, 1);
+            if (data[preset.url].length === 0) {
+                delete data[preset.url];
+            }
+            console.log(data, ',.');
+            // delete data[
+            //     data[preset.url].findIndex((el) => {
+            //         return el.name === preset.name;
+            //     })
+            // ];
+            // console.log(data,'!')
         }
         ext.context.workspaceState.update(`presets`, data);
         ReverbPanel.currentPanel?.send({
@@ -239,9 +248,9 @@ export namespace ExtCmds {
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
         sendRoutes();
 
-        setTimeout(function () {
-            commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        }, 1500);
+        // setTimeout(function () {
+        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        // }, 1500);
     }
 
     /**

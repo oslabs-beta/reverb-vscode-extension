@@ -8,7 +8,7 @@ import Params from '../components/Params';
 import { context } from '../redux/reducers/inputContext';
 
 function Input() {
-  console.log('input render');
+  
   const { inputViewContext } = useSelector(context);
 
   function renderGroup(x) {

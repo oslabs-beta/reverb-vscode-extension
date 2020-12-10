@@ -14,7 +14,7 @@ export const inputContextSlice = createSlice({
     methodInputContext: 'GET',
     headerInputContext: [],
     cookieInputContext: [],
-    paramsInputContext: [],
+    paramsInputContext: '',
     dataInputContext: '{\n\n}',
     possibleServerFilePaths: [],
     userConfigs: {},
@@ -109,9 +109,11 @@ export const inputContextSlice = createSlice({
     sendVerboseRequest: (state) => {
       const _cookies = JSON.parse(JSON.stringify(state.cookieInputContext));
       const _headers = JSON.parse(JSON.stringify(state.headerInputContext));
-      const _data = JSON.parse(JSON.stringify(state.dataInputContext));
-      const url = JSON.parse(JSON.stringify(state.urlInputContext));
+      const data = JSON.parse(JSON.stringify(state.dataInputContext));
+      const _url = JSON.parse(JSON.stringify(state.urlInputContext));
       const method = JSON.parse(JSON.stringify(state.methodInputContext));
+      const params = state.paramsInputContext;
+
       const cookiesArray = _cookies
         .filter((el) => {
           // No empty key/values
@@ -132,15 +134,18 @@ export const inputContextSlice = createSlice({
         headersObject[el.key] = el.value;
       });
       const headers = cookie.length ? { cookie, ...headersObject } : { ...headersObject };
-
-      const data = {
+      let baseURL = _url
+      const NO_PARAMS = baseURL.match(/(http:\/\/localhost\:\d*\S*)\:\S*/);
+      if (NO_PARAMS){
+        baseURL = NO_PARAMS[1]+= params
+    };
+      const req = {
         headers,
-        url,
+        baseURL,
         method,
-        _data,
+        data,
       };
-      console.log('MSG => verboseRequest', data);
-      vscode.postMessage({ command: 'verboseRequest', data });
+      vscode.postMessage({ command: 'verboseRequest', req });
       return state;
     },
   },
