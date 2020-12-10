@@ -27,7 +27,7 @@ import ReverbPanel from './webview/ReverbPanel';
 export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: OutputChannel;
-    export let treeView: ReverbTreeProvider;
+    export let treeView: ReverbTreeProvider | undefined;
     export let userConfig: UserConfigObject | undefined;
     export let watcher: Watcher | undefined;
     export let decorator: Decorator;

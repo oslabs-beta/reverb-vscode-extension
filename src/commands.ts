@@ -18,6 +18,7 @@ import Watcher from './modules/Watcher';
 import ReverbPanel from './webview/ReverbPanel';
 import { portFiles } from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
+import ReverbTreeProvider from './modules/reverbTreeProvider';
 
 export namespace ExtCmds {
     export function test(data: any) {
@@ -133,6 +134,9 @@ export namespace ExtCmds {
             stopWatch();
             startWatch();
         }
+        ext.treeView = undefined;
+        ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
+        window.registerTreeDataProvider('paths', ext.treeView);
     }
 
     /**
