@@ -18,10 +18,7 @@ const HTTPSnippet = require('httpsnippet');
 
 export function generateSnippet(data: any) {
     console.log(data, '!');
-    let snippet = new HTTPSnippet({
-        method: 'GET',
-        url: data,
-    });
+    let snippet = new HTTPSnippet(data);
 
     snippet = snippet.convert('javascript', 'axios');
     console.log(snippet, '!!');
@@ -65,6 +62,25 @@ export function ping(Options: AxiosRequestConfig) {
                 data: error.message,
             };
         });
+}
+
+/**
+ *
+ * @param
+ * @returns
+ */
+export function convert(route: string): any {
+    let output = {
+        method: '',
+        url: '',
+    };
+    const METHOD_AND_URL = route.match(/(\S*):\s+(\S*)/);
+    if (METHOD_AND_URL) {
+        const method = METHOD_AND_URL[1];
+        const url = 'http://'.concat(METHOD_AND_URL[2]);
+        output = { method, url };
+    }
+    return output.url;
 }
 
 /**
