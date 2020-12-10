@@ -3,33 +3,12 @@
   align-items: center;
   margin-top: 2px;
 
-  .header__watching {
-    display: flex;
-    width: 100%;
-    .button__main {
-      outline: none;
-      width: 7rem;
-      height: 1.8rem;
-      background-color: rgb(32, 32, 32);
-      border-bottom: 0.05rem solid $border-color;
-      color: $font-color;
-    }
-    .selected {
-      border: 0.05rem solid $border-color;
-      border-bottom: none;
-    }
-  }
-  .header__watching::after {
-    content: '';
-    width: 100%;
-    border-bottom: 0.05rem solid $border-color;
-  }
-
   .header__verbose {
     display: flex;
     width: 100%;
     .header__nav {
       display: flex;
+      .button__main,
       .button__response,
       .button__header,
       .button__info {
@@ -46,13 +25,20 @@
       }
     }
   }
+  .button__terminal {
+    width: 4rem;
+    height: 1.8rem;
+    background-color: rgb(32, 32, 32);
+    border: 0.05rem solid $border-color;
+    color: $font-color;
+  }
   .header__metrics {
     display: flex;
     border-bottom: 0.05rem solid $border-color;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-
+    padding-right: 1rem;
     span {
       background-color: var(--vscode-button-secondaryBackground);
       color: $font-color;
@@ -64,7 +50,7 @@
 
 .watch__main {
   border-left: 0.05rem solid $border-color;
-  height: 209px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 1rem;
@@ -100,7 +86,7 @@
   }
 }
 .verbose__info {
-  height: 209px;
+  height: 100%;
   border-left: 0.05rem solid $border-color;
 }
 

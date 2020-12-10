@@ -37,9 +37,10 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      padding-left: 0.3rem;
 
       .select__type {
-        width: 6rem;
+        width: 5.5rem;
         text-align-last: right;
         padding-right: 16px;
         background-color: rgb(32, 32, 32);
