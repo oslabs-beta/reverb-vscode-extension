@@ -153,11 +153,13 @@ export namespace ExtCmds {
      */
     export function savePreset(preset: any) {
         const data = ext.presetsObject();
-        if (data === undefined) return;
-        if (data[preset.url] === undefined) {
-            data[preset.url] = [];
+        if (data === undefined) {
+            ext.context.workspaceState.update(`presets`, {});
         }
-        data[preset.url].push(preset);
+        if (data![preset.url] === undefined) {
+            data![preset.url] = [];
+        }
+        data![preset.url].push(preset);
         ext.context.workspaceState.update(`presets`, data);
         ReverbPanel.currentPanel?.send({
             command: 'presetsObject',
