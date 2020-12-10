@@ -1,11 +1,11 @@
-import { createSlice } from "@reduxjs/toolkit";
+/* eslint-disable no-param-reassign */
+import { createSlice } from '@reduxjs/toolkit';
 
 export const routesSlice = createSlice({
-  name: "routes",
-  initialState: null,
+  name: 'routes',
+  initialState: {},
   reducers: {
     setRoutes: (state, action) => {
-      console.log("routesSlice.js => setRoutes => action:", action.payload);
       state = action.payload;
       return state;
     },
