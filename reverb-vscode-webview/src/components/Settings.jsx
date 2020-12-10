@@ -6,20 +6,10 @@ import { context, setWatchState } from '../redux/reducers/inputContext';
 import ParseForm from './ParseForm';
 
 function Settings() {
-  const { watchState } = useSelector(context);
-  const dispatch = useDispatch();
-
-  function toggle() {
-    dispatch(setWatchState(watchState === 'off' ? 'on' : 'off'));
-  }
-
   return (
     <div className="input__settings">
       <ParseForm />
-      <div className="setting__watch">
-        <div className={`switch ${watchState}`} onClick={toggle} />
-        <p>Toggle to enable/disable watching files</p>
-      </div>
+
       <div className="setting__wipe">
         <button
           type="button"

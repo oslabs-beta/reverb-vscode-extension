@@ -32,7 +32,7 @@ export default class Watcher {
 
     private getFullPathArray(editor: TextEditor) {
         let { path } = editor.document.uri;
-        if (path[0] === '/') path = path.slice(1);
+        if (path[2] === ':') path = path.slice(1);
         this.fullPathArray = this.data![path];
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * ************************************
  *
@@ -10,7 +11,7 @@
  * ************************************
  */
 
-import { workspace, commands, Uri, window, ViewColumn } from 'vscode';
+import { workspace, commands, Uri, window, ViewColumn, env } from 'vscode';
 import find from 'find-process';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
@@ -18,6 +19,7 @@ import Watcher from './modules/Watcher';
 import ReverbPanel from './webview/ReverbPanel';
 import { portFiles } from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
+import ReverbTreeProvider from './modules/reverbTreeProvider';
 
 export namespace ExtCmds {
     export function test(data: any) {
@@ -133,6 +135,16 @@ export namespace ExtCmds {
             stopWatch();
             startWatch();
         }
+        // wip, will move into own func later
+        ext.treeView = undefined;
+        ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
+        ext.treeView.tree = window.createTreeView('paths', {
+            treeDataProvider: ext.treeView,
+        });
+        ext.treeView.tree.onDidChangeSelection((e: { selection: { label: string }[] }) => {
+            const uri = utils.convert(e.selection[0].label);
+            commands.executeCommand('extension.openFileInEditor', uri);
+        });
     }
 
     /**
@@ -140,15 +152,12 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be stored
      */
     export function savePreset(preset: any) {
-        console.log(preset, 'preset1');
         const data = ext.presetsObject();
         if (data === undefined) return;
-        console.log(preset, 'preset2');
         if (data[preset.url] === undefined) {
             data[preset.url] = [];
         }
         data[preset.url].push(preset);
-        console.log(preset, 'preset3');
         ext.context.workspaceState.update(`presets`, data);
         ReverbPanel.currentPanel?.send({
             command: 'presetsObject',
@@ -261,5 +270,14 @@ export namespace ExtCmds {
             rootDir,
         });
         return 'sent';
+    }
+
+    /**
+     * Generates Axios req snippet based on selected tree item and copies to clipboard
+     */
+    export async function GenerateAxios(node: any) {
+        const snippet = utils.generateSnippet(utils.convert(node.label));
+        await env.clipboard.writeText(snippet);
+        window.showInformationMessage(`Axios Request snippet added to clipboard`);
     }
 }

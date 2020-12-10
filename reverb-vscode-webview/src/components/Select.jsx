@@ -202,18 +202,7 @@ function Select() {
             }}>
             -
           </button>
-          {/* <button
-            type="button"
-            className="button__terminal"
-            title="Show Terminal"
-            onClick={() => {
-              console.log('MSG => openTerminal');
-              return vscode.postMessage({
-                command: 'openTerminal',
-              });
-            }}>
-            {'>_'}
-          </button> */}
+          
         </div>
       </form>
     </>
