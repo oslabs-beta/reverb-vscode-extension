@@ -208,6 +208,7 @@ export namespace ExtCmds {
         sendUserConfigs();
         sendRoutes();
         sendPreset();
+        utils.resetTreeview();
     }
 
     /**
