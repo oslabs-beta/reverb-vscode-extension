@@ -1,4 +1,6 @@
-node_modules/*
-dist/*
-coverage/*
-out/*
+node_modules
+build
+out
+test-fixture/
+.vscode-test/
+reverb-vscode-webview
