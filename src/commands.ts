@@ -238,9 +238,9 @@ export namespace ExtCmds {
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
         sendRoutes();
 
-        setTimeout(function () {
-            commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        }, 1500);
+        // setTimeout(function () {
+        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        // }, 1500);
     }
 
     /**
