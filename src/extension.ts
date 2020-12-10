@@ -34,6 +34,7 @@ export function activate(context: ExtensionContext) {
     ext.registerCommand('extension.openTerminal', ExtCmds.OpenTerminal);
     ext.registerCommand('extension.openFileInEditor', ExtCmds.openFileInEditor);
     ext.registerCommand('extension.deleteRoutesObject', ExtCmds.deleteRoutesObject);
+    ext.registerCommand('paths.generateAxios', ExtCmds.GenerateAxios);
 }
 
 export function deactivate() {

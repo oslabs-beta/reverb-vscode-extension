@@ -59,7 +59,9 @@ export function initializeExtensionVariables(ctx: ExtensionContext) {
 
     if (!ext.treeView) {
         ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
-        window.registerTreeDataProvider('paths', ext.treeView);
+        window.createTreeView('paths', {
+            treeDataProvider: ext.treeView,
+        });
     }
 
     if (window.registerWebviewPanelSerializer) {

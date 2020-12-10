@@ -12,6 +12,7 @@
 
 import { workspace, commands, Uri, window, ViewColumn } from 'vscode';
 import find from 'find-process';
+import * as vscode from 'vscode';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
 import Watcher from './modules/Watcher';
@@ -261,5 +262,12 @@ export namespace ExtCmds {
             rootDir,
         });
         return 'sent';
+    }
+
+    export async function GenerateAxios(node: any) {
+        console.log(node);
+        const route: string = node.label;
+        await vscode.env.clipboard.writeText(route);
+        vscode.window.showInformationMessage(`${route} added to clipboard`);
     }
 }
