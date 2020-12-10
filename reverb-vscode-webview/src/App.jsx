@@ -11,6 +11,7 @@ import {
   setRootDir,
   setValidPort,
   setPossibleServerFilePaths,
+  setInputViewContext,
 } from './redux/reducers/inputContext';
 
 function App() {
@@ -32,7 +33,11 @@ function App() {
         }
         break;
       case 'userConfigsObject':
-        dispatch(setUserConfigs(message.data));
+        if (message.data) {
+          dispatch(setUserConfigs(message.data));
+        } else {
+          dispatch(setInputViewContext('settings'));
+        }
         break;
       case 'verboseResponse':
         dispatch(setVerboseOutput(message.data));
