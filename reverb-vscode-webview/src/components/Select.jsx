@@ -194,7 +194,15 @@ function Select() {
             title="remove preset"
             onClick={() => {
               const data = currentPreset;
-              // eslint-disable-next-line no-undef
+              dispatch(
+                setCurrentPreset({
+                  name: 'default',
+                  url: 'default',
+                  headerInputContext: [],
+                  cookieInputContext: [],
+                  dataInputContext: '{\n\n}',
+                })
+              );
               return vscode.postMessage({
                 command: 'deletePreset',
                 data,
@@ -202,7 +210,6 @@ function Select() {
             }}>
             -
           </button>
-
         </div>
       </form>
     </>
