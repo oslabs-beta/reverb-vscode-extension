@@ -1,19 +1,23 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "buildExtension",
-      "type": "npm",
-      "script": "compile",
-      "problemMatcher": [],
-      "dependsOn": ["buildReactApp"]
-    },
-    {
-      "label": "buildReactApp",
-      "type": "npm",
-      "script": "build",
-      "path": "react-app/",
-      "problemMatcher": []
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "extension",
+            "type": "npm",
+            "script": "compile"
+        },
+        {
+            "label": "webview",
+            "type": "npm",
+            "script": "dev",
+            "options": {
+                "cwd": "./reverb-vscode-webview"
+            }
+        },
+        {
+            "label": "build",
+            "dependsOrder": "sequence",
+            "dependsOn": ["extension", "webview"]
+        }
+    ]
 }

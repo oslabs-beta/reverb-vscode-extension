@@ -1,69 +1,91 @@
-/* eslint-disable no-shadow */
-import {
-  window,
-  TextEditor,
-  Range,
-  Position,
-  workspace,
-  ConfigurationTarget,
-} from 'vscode';
+/**
+ * ************************************
+ *
+ * @module  utils.ts
+ * @author  Amir Marcel, Christopher Johnson, Corey Van Splinter, Sean Arseneault
+ * @date 12/8/2020
+ * @description Various helper functions
+ *
+ * ************************************
+ */
+
+import { window, commands } from 'vscode';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-/**
- * Takes config and creates inline decorative text
- * @param {string} contentText Text to be printed.
- * @param {number} line Line number of document text will be printed to.
- * @param {number} column How many chars in (left to right) text will be printed
- * @param {TextEditor} activeEditor Current active text editor.
- */
-export const addDeco = (
-  contentText: string,
-  line: number,
-  column: number,
-  activeEditor: TextEditor,
-) => {
-  const decorationType = window.createTextEditorDecorationType({
-    after: {
-      contentText,
-      margin: '20px',
-      color: contentText === '200 : OK' ? 'green' : 'red',
-    },
-  });
+const { performance } = require('perf_hooks');
 
-  const range = new Range(
-    new Position(line, column),
-    new Position(line, column),
-  );
+const HTTPSnippet = require('httpsnippet');
 
-  activeEditor.setDecorations(decorationType, [{ range }]);
-};
+export function generateSnippet(data: any) {
+    console.log(data, '!');
+    let snippet = new HTTPSnippet({
+        method: 'GET',
+        url: data,
+    });
 
-/**
- * For things you want done on extension activation
- */
-export async function init() {
-  // Changes user setting to allow input box to stay open when focus is lost
-  await workspace
-    .getConfiguration()
-    .update(
-      'workbench.quickOpen.closeOnFocusLost',
-      false,
-      ConfigurationTarget.Global,
-    );
+    snippet = snippet.convert('javascript', 'axios');
+    console.log(snippet, '!!');
+    return snippet;
 }
 
 /**
  * Takes config and makes axios request
- * @param {AxiosRequestConfig | options} options Config option object of request.
+ * @param {AxiosRequestConfig | Options} Options Config option object of request.
  * @returns {AxiosResponse<any>} Response of the request made.
  */
-export function ping(options: AxiosRequestConfig) {
-  return axios
-    .request(options)
-    .then(function (response: AxiosResponse) {
-      return response;
-    })
-    .catch(function (error) {
-      return error;
-    });
+
+// transformResponse: [function (data) {
+//     // Do whatever you want to transform the data
+
+//     return data;
+//   }],
+export function ping(Options: AxiosRequestConfig) {
+    const config = { ...Options, validateStatus: undefined };
+    const time = performance.now();
+
+    return axios
+        .request(config)
+        .then(function (res: AxiosResponse) {
+            const resTime = (performance.now() - time).toFixed(1);
+            return {
+                status: res.status,
+                resTime,
+                headers: res.headers,
+                config: res.config,
+                data: res.data,
+            };
+        })
+        .catch(function (error) {
+            const resTime = (performance.now() - time).toFixed(1);
+            return {
+                status: error.code,
+                resTime,
+                headers: error.config.headers,
+                config: error.config,
+                data: error.message,
+            };
+        });
+}
+
+/**
+ * Clears away all panels so that webview can be in proper position
+ */
+export async function clearEditorPanels() {
+    const x = window.activeTextEditor;
+    await commands.executeCommand('workbench.action.focusBelowGroup');
+    let y = window.activeTextEditor;
+    while (x !== y) {
+        await commands.executeCommand('workbench.action.closeEditorsInGroup');
+        await commands.executeCommand('workbench.action.focusBelowGroup');
+        y = window.activeTextEditor;
+    }
+
+    const cmds = [
+        'workbench.action.closePanel',
+        'workbench.action.splitEditorDown',
+        'workbench.action.decreaseViewHeight',
+        'workbench.action.decreaseViewHeight',
+    ];
+
+    for (const cmd of cmds) await commands.executeCommand(cmd);
 }
