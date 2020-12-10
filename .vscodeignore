@@ -1,9 +1,38 @@
-.vscode/**
-.vscode-test/**
-src/**
+node_modules/
+
+# develop
+.vscode/
+typings/
+configs/
+scripts/
+src/
+
+# test and output
+.vscode-test/
+test/
+out/test/
+test-fixture/
+.nyc_output/
+coverage/
+build/
+
+# configs
 .gitignore
-.yarnrc
-**/tsconfig.json
-**/.eslintrc.json
-**/*.map
-**/*.ts
+.vscodeignore
+tsconfig.json
+tsconfig.test.json
+.nvmrc
+.editorconfig
+.eslintrc.js
+.eslintignore
+.prettierrc
+yarn.lock
+
+!out/**/*.js
+!CHANGELOG.md
+!packages.json
+!images
+!README.md
+!icon.png
+!notes-usage
+!upgrade
