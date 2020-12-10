@@ -179,4 +179,6 @@ class RouteItem extends vscode.TreeItem {
         light: path.join(__filename, '..', '.media', 'rr.png'),
         dark: path.join(__filename, '..', '.media', 'rr.png'),
     };
+
+    contextValue = 'routeItem';
 }

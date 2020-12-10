@@ -114,6 +114,10 @@
             {
                 "command": "extension.deleteRoutesObject",
                 "title": "Delete Local Routes Storage"
+            },
+            {
+                "command": "paths.generateAxios",
+                "title": "Generate Axios Request"
             }
         ],
         "menus": {
@@ -127,6 +131,12 @@
                     "when": "editorTextFocus",
                     "command": "extension.openWebview",
                     "group": "navigation@1"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "paths.generateAxios",
+                    "when": "viewItem == routeItem"
                 }
             ]
         },
