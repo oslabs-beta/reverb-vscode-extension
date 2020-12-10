@@ -28,6 +28,13 @@
   <br />
 </p>
 
+<p align="center">
+  <a href="https://github.com/oslabs-beta/reverb-vscode-extension">
+    <img alt="Github Actions Build Status" src="https://img.shields.io/badge/GitHub-reVerb-orange"></a>
+    <a href="https://github.com/oslabs-beta/reverb-vscode-extension/blob/staging/LICENSE">
+    <img alt="Github Actions Build Status" src="https://img.shields.io/badge/license-MIT-blue"></a>
+</p>
+
 ## Intro
 
 
