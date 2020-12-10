@@ -38,6 +38,7 @@ interface Config {
     headers: Record<any, never>;
     data: Record<any, never>;
     method: any;
+    params: Record<string, string>;
 }
 
 interface PresetsObject {
