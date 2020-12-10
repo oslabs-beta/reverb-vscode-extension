@@ -19,7 +19,6 @@ import Watcher from './modules/Watcher';
 import ReverbPanel from './webview/ReverbPanel';
 import { portFiles } from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
-import ReverbTreeProvider from './modules/reverbTreeProvider';
 
 export namespace ExtCmds {
     export function test(data: any) {
@@ -135,16 +134,7 @@ export namespace ExtCmds {
             stopWatch();
             startWatch();
         }
-        // wip, will move into own func later
-        ext.treeView = undefined;
-        ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
-        ext.treeView.tree = window.createTreeView('paths', {
-            treeDataProvider: ext.treeView,
-        });
-        ext.treeView.tree.onDidChangeSelection((e: { selection: { label: string }[] }) => {
-            const { url } = utils.convert(e.selection[0].label);
-            commands.executeCommand('extension.openFileInEditor', url);
-        });
+        utils.resetTreeview();
     }
 
     /**
@@ -195,15 +185,14 @@ export namespace ExtCmds {
      */
     export async function openFileInEditor(uri: string) {
         const _workspaceObj = ext.workspaceObj();
-
-        await commands.executeCommand('workbench.action.focusAboveGroup');
+        // await commands.executeCommand('workbench.action.focusAboveGroup');
         Object.keys(_workspaceObj!).forEach((el) => {
             if (_workspaceObj![el][uri.slice(7)]) {
                 const path = Uri.joinPath(workspace.workspaceFolders![0].uri, el);
 
                 workspace
                     .openTextDocument(path)
-                    .then((document) => window.showTextDocument(document, ViewColumn.Active));
+                    .then((document) => window.showTextDocument(document, ViewColumn.One));
             }
         });
     }
@@ -278,7 +267,6 @@ export namespace ExtCmds {
      * Generates Axios req snippet based on selected tree item and copies to clipboard
      */
     export async function GenerateAxios(node: any) {
-        console.log(node);
         const snippet = utils.generateSnippet(utils.convert(node.label));
         await env.clipboard.writeText(snippet);
         window.showInformationMessage(`Axios Request snippet added to clipboard`);

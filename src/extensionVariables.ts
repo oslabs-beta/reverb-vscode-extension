@@ -59,16 +59,12 @@ export function initializeExtensionVariables(ctx: ExtensionContext) {
     ext.decorator.initDecorator();
 
     if (!ext.treeView) {
-        ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
-        ext.treeView.tree = window.createTreeView('paths', {
-            treeDataProvider: ext.treeView,
-        });
-        ext.treeView.tree.onDidChangeSelection((e) => {
-            console.log(e);
-            const uri = utils.convert(e.selection[0].label);
-            commands.executeCommand('extension.openFileInEditor', uri);
-        });
+        utils.resetTreeview();
     }
+
+    window.onDidChangeActiveTextEditor(async (e) => {
+        console.log(window.activeTextEditor, '<>');
+    });
 
     if (window.registerWebviewPanelSerializer) {
         // Make sure we register a serializer in activation event
