@@ -10,10 +10,11 @@ export const inputContextSlice = createSlice({
     inputViewContext: 'header',
     urlInputContext: '',
     outputTabContext: 'response',
-    watchState: 'off',
+
     methodInputContext: 'GET',
     headerInputContext: [],
     cookieInputContext: [],
+    paramsInputContext: [],
     dataInputContext: '{\n\n}',
     possibleServerFilePaths: [],
     userConfigs: {},
@@ -23,17 +24,6 @@ export const inputContextSlice = createSlice({
     presets: {},
   },
   reducers: {
-    setWatchState: (state, action) => {
-      state.watchState = action.payload;
-      if (action.payload === 'on') {
-        vscode.postMessage({ command: 'startWatch' });
-        state.outputTabContext = 'main';
-      } else {
-        vscode.postMessage({ command: 'stopWatch' });
-        state.outputTabContext = 'response';
-      }
-      return state;
-    },
     setInputViewContext: (state, action) => {
       state.inputViewContext = action.payload;
       if (action.payload === 'settings') {
@@ -45,6 +35,11 @@ export const inputContextSlice = createSlice({
     },
     setOutputTabContext: (state, action) => {
       state.outputTabContext = action.payload;
+      if (action.payload === 'main') {
+        vscode.postMessage({ command: 'startWatch' });
+      } else {
+        vscode.postMessage({ command: 'stopWatch' });
+      }
       return state;
     },
     setMethodAndUrl: (state, action) => {
@@ -69,6 +64,10 @@ export const inputContextSlice = createSlice({
     },
     setDataInputContext: (state, action) => {
       state.dataInputContext = action.payload;
+      return state;
+    },
+    setParamsInputContext: (state, action) => {
+      state.paramsInputContext = action.payload;
       return state;
     },
     setPossibleServerFilePaths: (state, action) => {
@@ -153,6 +152,7 @@ export const {
   setHeaderInputContext,
   setCookieInputContext,
   setOutputTabContext,
+  setParamsInputContext,
   setPossibleServerFilePaths,
   setRootDir,
   setUserConfigs,
@@ -162,7 +162,6 @@ export const {
   savePreset,
   setDataInputContext,
   sendVerboseRequest,
-  setWatchState,
 } = inputContextSlice.actions;
 
 export const context = (state) => state.context;
