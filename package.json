@@ -101,7 +101,7 @@
             },
             {
                 "command": "extension.openWebview",
-                "title": "reVerb Config"
+                "title": "Open reVerb client"
             },
             {
                 "command": "extension.openTerminal",
@@ -122,11 +122,6 @@
         ],
         "menus": {
             "editor/context": [
-                {
-                    "when": "editorTextFocus",
-                    "command": "extension.testRoute",
-                    "group": "navigation"
-                },
                 {
                     "when": "editorTextFocus",
                     "command": "extension.openWebview",

@@ -21,11 +21,6 @@ import { portFiles } from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
 
 export namespace ExtCmds {
-    export function test(data: any) {
-        // utils.initWebviewForm();
-        return utils.generateSnippet(data);
-    }
-
     /**
      * Takes config and makes axios request returning detailed response
      * @param {any} query Config option object of request.
