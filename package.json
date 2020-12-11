@@ -1,10 +1,11 @@
 {
     "name": "reverb",
     "displayName": " reVerb VSCode extension",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "preview": true,
+    "icon": "images/logo.png",
     "description": "Its like Postman... but inside VSCode",
-    "publisher": "Team reVerb",
+    "publisher": "reverb-api",
     "author": {
         "name": "Team reVerb",
         "url": "https://github.com/reVerb-LLC",
@@ -27,7 +28,7 @@
         "yarn": ">= 1.19.1"
     },
     "categories": [
-        "Testing"
+        "Debuggers"
     ],
     "keywords": [
         "vscode",
