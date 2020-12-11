@@ -30,7 +30,7 @@ export default class Decorator {
         try {
             const decorations: DecorationOptions[] = [];
             const routes = await this.queryAll(editor, toDecorate!);
-            if (routes === undefined) return;
+            if (routes === undefined || typeof routes === 'string') return;
             const data = routes;
 
             ReverbPanel.currentPanel?.send({
@@ -38,8 +38,8 @@ export default class Decorator {
                 data,
             });
 
-            const _decorations = routes.reduce((acc: DecorationOptions[], el: Output) => {
-                return acc.concat({
+            const _decorations = routes.map((el: Output) => {
+                return {
                     renderOptions: {
                         before: { contentText: el.content, color: el.error ? 'red' : 'green' },
                     },
@@ -47,8 +47,9 @@ export default class Decorator {
                         new Position(el.line, el.column),
                         new Position(el.line, el.column),
                     ),
-                });
-            }, []);
+                };
+            });
+
             _decorations.forEach((d: DecorationOptions) => decorations.push(d));
 
             editor.setDecorations(ext.decorator.decorationType!, decorations);
