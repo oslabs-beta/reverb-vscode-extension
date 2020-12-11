@@ -4,10 +4,11 @@ import InputHeaders from '../components/InputHeaders';
 import InputData from '../components/InputData';
 import InputCookies from '../components/InputCookies';
 import Settings from '../components/Settings';
+import Params from '../components/Params';
 import { context } from '../redux/reducers/inputContext';
 
 function Input() {
-  console.log('input render');
+  
   const { inputViewContext } = useSelector(context);
 
   function renderGroup(x) {
@@ -18,6 +19,8 @@ function Input() {
         return <InputData />;
       case 'cookies':
         return <InputCookies />;
+      case 'params':
+        return <Params />;
       case 'settings':
         return <Settings />;
       default:

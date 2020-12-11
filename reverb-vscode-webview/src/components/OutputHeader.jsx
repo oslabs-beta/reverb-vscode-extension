@@ -28,8 +28,30 @@ function OutputHeader({ watchState }) {
   }
   return (
     <div className="output__header">
-      {watchState === 'on' ? (
-        <div className="header__watching">
+      <div className="header__verbose">
+        <div className="header__nav">
+          <button
+            type="button"
+            className={
+              outputTabContext === 'response' ? 'button__response selected' : 'button__response '
+            }
+            onClick={() => dispatch(setOutputTabContext('response'))}>
+            response
+          </button>
+          <button
+            type="button"
+            className={
+              outputTabContext === 'header' ? 'button__header selected' : 'button__header '
+            }
+            onClick={() => dispatch(setOutputTabContext('header'))}>
+            header
+          </button>
+          <button
+            type="button"
+            className={outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
+            onClick={() => dispatch(setOutputTabContext('info'))}>
+            info
+          </button>
           <button
             type="button"
             className={outputTabContext === 'main' ? 'button__main selected' : 'button__main '}
@@ -37,44 +59,29 @@ function OutputHeader({ watchState }) {
             watcher
           </button>
         </div>
-      ) : (
-        <div className="header__verbose">
-          <div className="header__nav">
-            <button
-              type="button"
-              className={
-                outputTabContext === 'response' ? 'button__response selected' : 'button__response '
-              }
-              onClick={() => dispatch(setOutputTabContext('response'))}>
-              response
-            </button>
-            <button
-              type="button"
-              className={
-                outputTabContext === 'header' ? 'button__header selected' : 'button__header '
-              }
-              onClick={() => dispatch(setOutputTabContext('header'))}>
-              header
-            </button>
-            <button
-              type="button"
-              className={outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
-              onClick={() => dispatch(setOutputTabContext('info'))}>
-              info
-            </button>
-          </div>
 
-          <div className="header__metrics">
-            <span style={{ backgroundColor: colorCode(verboseOutput.status) }}>
-              {verboseOutput.status ? verboseOutput.status : ' - '}
-            </span>
-            <span>
-              {verboseOutput.resTime === undefined ? ' - ' : `${verboseOutput.resTime}ms`}
-            </span>
-            <span>{size === undefined ? ' - ' : `${size}b`}</span>
-          </div>
+        <div className="header__metrics">
+          <span title="status code" style={{ backgroundColor: colorCode(verboseOutput.status) }}>
+            {verboseOutput.status ? verboseOutput.status : ' - '}
+          </span>
+          <span title={`${verboseOutput.resTime || ''} milliseconds`}>
+            {verboseOutput.resTime === undefined ? ' - ' : `${verboseOutput.resTime} ms`}
+          </span>
+          <span title={`${size || ''} bytes`}>{size === undefined ? ' - ' : `${size} b`}</span>
         </div>
-      )}
+
+        <button
+          type="button"
+          className="button__terminal"
+          title="Show Terminal"
+          onClick={() => {
+            return vscode.postMessage({
+              command: 'openTerminal',
+            });
+          }}>
+          {'>_'}
+        </button>
+      </div>
     </div>
   );
 }

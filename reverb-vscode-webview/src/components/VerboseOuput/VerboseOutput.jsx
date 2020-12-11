@@ -5,6 +5,7 @@ import { context } from '../../redux/reducers/inputContext';
 import VerboseResponseTab from './VerboseResponseTab';
 import VerboseHeaderTab from './VerboseHeaderTab';
 import VerboseInfoTab from './VerboseInfoTab';
+import WatchMainTab from './WatchMainTab';
 
 function VerboseOutput() {
   const { verboseOutput } = useSelector(output);
@@ -18,6 +19,8 @@ function VerboseOutput() {
         return <VerboseHeaderTab header={verboseOutput.headers} />;
       case 'info':
         return <VerboseInfoTab />;
+      case 'main':
+        return <WatchMainTab />;
       default:
         return <VerboseResponseTab />;
     }

@@ -10,10 +10,11 @@ export const inputContextSlice = createSlice({
     inputViewContext: 'header',
     urlInputContext: '',
     outputTabContext: 'response',
-    watchState: 'off',
+
     methodInputContext: 'GET',
     headerInputContext: [],
     cookieInputContext: [],
+    paramsInputContext: '',
     dataInputContext: '{\n\n}',
     possibleServerFilePaths: [],
     userConfigs: {},
@@ -23,17 +24,6 @@ export const inputContextSlice = createSlice({
     presets: {},
   },
   reducers: {
-    setWatchState: (state, action) => {
-      state.watchState = action.payload;
-      if (action.payload === 'on') {
-        vscode.postMessage({ command: 'startWatch' });
-        state.outputTabContext = 'main';
-      } else {
-        vscode.postMessage({ command: 'stopWatch' });
-        state.outputTabContext = 'response';
-      }
-      return state;
-    },
     setInputViewContext: (state, action) => {
       state.inputViewContext = action.payload;
       if (action.payload === 'settings') {
@@ -45,6 +35,11 @@ export const inputContextSlice = createSlice({
     },
     setOutputTabContext: (state, action) => {
       state.outputTabContext = action.payload;
+      if (action.payload === 'main') {
+        vscode.postMessage({ command: 'startWatch' });
+      } else {
+        vscode.postMessage({ command: 'stopWatch' });
+      }
       return state;
     },
     setMethodAndUrl: (state, action) => {
@@ -69,6 +64,10 @@ export const inputContextSlice = createSlice({
     },
     setDataInputContext: (state, action) => {
       state.dataInputContext = action.payload;
+      return state;
+    },
+    setParamsInputContext: (state, action) => {
+      state.paramsInputContext = action.payload;
       return state;
     },
     setPossibleServerFilePaths: (state, action) => {
@@ -110,9 +109,11 @@ export const inputContextSlice = createSlice({
     sendVerboseRequest: (state) => {
       const _cookies = JSON.parse(JSON.stringify(state.cookieInputContext));
       const _headers = JSON.parse(JSON.stringify(state.headerInputContext));
-      const _data = JSON.parse(JSON.stringify(state.dataInputContext));
-      const url = JSON.parse(JSON.stringify(state.urlInputContext));
+      const data = JSON.parse(JSON.stringify(state.dataInputContext));
+      const _url = JSON.parse(JSON.stringify(state.urlInputContext));
       const method = JSON.parse(JSON.stringify(state.methodInputContext));
+      const params = state.paramsInputContext;
+
       const cookiesArray = _cookies
         .filter((el) => {
           // No empty key/values
@@ -133,15 +134,18 @@ export const inputContextSlice = createSlice({
         headersObject[el.key] = el.value;
       });
       const headers = cookie.length ? { cookie, ...headersObject } : { ...headersObject };
-
-      const data = {
+      let baseURL = _url
+      const NO_PARAMS = baseURL.match(/(http:\/\/localhost\:\d*\S*)\:\S*/);
+      if (NO_PARAMS){
+        baseURL = NO_PARAMS[1]+= params
+    };
+      const req = {
         headers,
-        url,
+        baseURL,
         method,
-        _data,
+        data,
       };
-      console.log('MSG => verboseRequest', data);
-      vscode.postMessage({ command: 'verboseRequest', data });
+      vscode.postMessage({ command: 'verboseRequest', req });
       return state;
     },
   },
@@ -153,6 +157,7 @@ export const {
   setHeaderInputContext,
   setCookieInputContext,
   setOutputTabContext,
+  setParamsInputContext,
   setPossibleServerFilePaths,
   setRootDir,
   setUserConfigs,
@@ -162,7 +167,6 @@ export const {
   savePreset,
   setDataInputContext,
   sendVerboseRequest,
-  setWatchState,
 } = inputContextSlice.actions;
 
 export const context = (state) => state.context;

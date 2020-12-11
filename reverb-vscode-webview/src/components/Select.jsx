@@ -194,7 +194,15 @@ function Select() {
             title="remove preset"
             onClick={() => {
               const data = currentPreset;
-              // eslint-disable-next-line no-undef
+              dispatch(
+                setCurrentPreset({
+                  name: 'default',
+                  url: 'default',
+                  headerInputContext: [],
+                  cookieInputContext: [],
+                  dataInputContext: '{\n\n}',
+                })
+              );
               return vscode.postMessage({
                 command: 'deletePreset',
                 data,
@@ -202,18 +210,6 @@ function Select() {
             }}>
             -
           </button>
-          {/* <button
-            type="button"
-            className="button__terminal"
-            title="Show Terminal"
-            onClick={() => {
-              console.log('MSG => openTerminal');
-              return vscode.postMessage({
-                command: 'openTerminal',
-              });
-            }}>
-            {'>_'}
-          </button> */}
         </div>
       </form>
     </>

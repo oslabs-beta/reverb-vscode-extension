@@ -23,11 +23,12 @@ import ReverbTreeProvider from './modules/reverbTreeProvider';
 import Watcher from './modules/Watcher';
 import Decorator from './modules/Decorator';
 import ReverbPanel from './webview/ReverbPanel';
+import * as utils from './utils/utils';
 
 export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: OutputChannel;
-    export let treeView: ReverbTreeProvider;
+    export let treeView: ReverbTreeProvider | undefined;
     export let userConfig: UserConfigObject | undefined;
     export let watcher: Watcher | undefined;
     export let decorator: Decorator;
@@ -58,8 +59,7 @@ export function initializeExtensionVariables(ctx: ExtensionContext) {
     ext.decorator.initDecorator();
 
     if (!ext.treeView) {
-        ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
-        window.registerTreeDataProvider('paths', ext.treeView);
+        utils.resetTreeview();
     }
 
     if (window.registerWebviewPanelSerializer) {

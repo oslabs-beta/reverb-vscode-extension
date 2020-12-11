@@ -6,11 +6,11 @@
 
   button {
     width: 5.5rem;
-    height: 2.2rem;
-    background-color: var(--vscode-button-secondaryBackground);
+    height: 2.4rem;
+    background-color: #252525;
     border: 0.05rem solid $border-color;
     color: $font-color;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     outline: none;
   }
   button:hover {
@@ -19,5 +19,8 @@
   }
   button:active {
     border-color: var(--vscode-focusBorder);
+  }
+  .active {
+    background-color: #444444;
   }
 }

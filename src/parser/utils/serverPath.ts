@@ -79,7 +79,7 @@ const findCodeFiles = (dir: string | undefined) => {
     return codeFiles;
 };
 let pathStr = workspace.workspaceFolders![0].uri.path;
-if (pathStr[0] === '/') pathStr = pathStr.slice(1);
+if (pathStr[2] === ':') pathStr = pathStr.slice(1);
 const codeFileNames: string[] = findCodeFiles(pathStr);
 const codeFileContents: File[] = readCodeFiles(codeFileNames);
 export const portFiles: string[] = findPortFiles(codeFileContents);

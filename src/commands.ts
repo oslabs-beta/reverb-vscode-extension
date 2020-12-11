@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * ************************************
  *
@@ -10,7 +11,7 @@
  * ************************************
  */
 
-import { workspace, commands, Uri, window, ViewColumn } from 'vscode';
+import { workspace, commands, Uri, window, ViewColumn, env } from 'vscode';
 import find from 'find-process';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
@@ -20,11 +21,6 @@ import { portFiles } from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
 
 export namespace ExtCmds {
-    export function test(data: any) {
-        // utils.initWebviewForm();
-        return utils.generateSnippet(data);
-    }
-
     /**
      * Takes config and makes axios request returning detailed response
      * @param {any} query Config option object of request.
@@ -129,10 +125,10 @@ export namespace ExtCmds {
         sendUserConfigs();
         sendRoutes();
         if (ext.watcher) {
-            console.log('reset watcher');
             stopWatch();
             startWatch();
         }
+        utils.resetTreeview();
     }
 
     /**
@@ -140,15 +136,14 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be stored
      */
     export function savePreset(preset: any) {
-        console.log(preset, 'preset1');
         const data = ext.presetsObject();
-        if (data === undefined) return;
-        console.log(preset, 'preset2');
-        if (data[preset.url] === undefined) {
-            data[preset.url] = [];
+        if (data === undefined) {
+            ext.context.workspaceState.update(`presets`, {});
         }
-        data[preset.url].push(preset);
-        console.log(preset, 'preset3');
+        if (data![preset.url] === undefined) {
+            data![preset.url] = [];
+        }
+        data![preset.url].push(preset);
         ext.context.workspaceState.update(`presets`, data);
         ReverbPanel.currentPanel?.send({
             command: 'presetsObject',
@@ -165,11 +160,21 @@ export namespace ExtCmds {
         if (data === undefined) return;
 
         if (data[preset.url]) {
-            delete data[
-                data[preset.url].findIndex((el) => {
-                    return el.name === preset.name;
-                })
-            ];
+            console.log(data[preset.url], 'here');
+            const item = data[preset.url].findIndex((el) => {
+                return el.name === preset.name;
+            });
+            data[preset.url].splice(item, 1);
+            if (data[preset.url].length === 0) {
+                delete data[preset.url];
+            }
+            console.log(data, ',.');
+            // delete data[
+            //     data[preset.url].findIndex((el) => {
+            //         return el.name === preset.name;
+            //     })
+            // ];
+            // console.log(data,'!')
         }
         ext.context.workspaceState.update(`presets`, data);
         ReverbPanel.currentPanel?.send({
@@ -184,15 +189,14 @@ export namespace ExtCmds {
      */
     export async function openFileInEditor(uri: string) {
         const _workspaceObj = ext.workspaceObj();
-
-        await commands.executeCommand('workbench.action.focusAboveGroup');
+        // await commands.executeCommand('workbench.action.focusAboveGroup');
         Object.keys(_workspaceObj!).forEach((el) => {
             if (_workspaceObj![el][uri.slice(7)]) {
                 const path = Uri.joinPath(workspace.workspaceFolders![0].uri, el);
 
                 workspace
                     .openTextDocument(path)
-                    .then((document) => window.showTextDocument(document, ViewColumn.Active));
+                    .then((document) => window.showTextDocument(document, ViewColumn.One));
             }
         });
     }
@@ -208,6 +212,7 @@ export namespace ExtCmds {
         sendUserConfigs();
         sendRoutes();
         sendPreset();
+        utils.resetTreeview();
     }
 
     /**
@@ -243,9 +248,9 @@ export namespace ExtCmds {
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
         sendRoutes();
 
-        setTimeout(function () {
-            commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        }, 1500);
+        // setTimeout(function () {
+        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        // }, 1500);
     }
 
     /**
@@ -261,5 +266,14 @@ export namespace ExtCmds {
             rootDir,
         });
         return 'sent';
+    }
+
+    /**
+     * Generates Axios req snippet based on selected tree item and copies to clipboard
+     */
+    export async function GenerateAxios(node: any) {
+        const snippet = utils.generateSnippet(utils.convert(node.label));
+        await env.clipboard.writeText(snippet);
+        window.showInformationMessage(`Axios Request snippet added to clipboard`);
     }
 }

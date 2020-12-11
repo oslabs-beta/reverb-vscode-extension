@@ -7,7 +7,6 @@ import { context } from '../redux/reducers/inputContext';
 
 function Main() {
   const { inputViewContext } = useSelector(context);
-  console.log(inputViewContext, 'main render');
 
   return (
     <div className="container__main">

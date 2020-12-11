@@ -1,10 +1,11 @@
 {
     "name": "reverb",
     "displayName": " reVerb VSCode extension",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "preview": true,
+    "icon": "images/logo.png",
     "description": "Its like Postman... but inside VSCode",
-    "publisher": "Team reVerb",
+    "publisher": "reverb-api",
     "author": {
         "name": "Team reVerb",
         "url": "https://github.com/reVerb-LLC",
@@ -27,7 +28,7 @@
         "yarn": ">= 1.19.1"
     },
     "categories": [
-        "Testing"
+        "Debuggers"
     ],
     "keywords": [
         "vscode",
@@ -101,7 +102,7 @@
             },
             {
                 "command": "extension.openWebview",
-                "title": "reVerb Config"
+                "title": "Open reVerb client"
             },
             {
                 "command": "extension.openTerminal",
@@ -114,19 +115,24 @@
             {
                 "command": "extension.deleteRoutesObject",
                 "title": "Delete Local Routes Storage"
+            },
+            {
+                "command": "paths.generateAxios",
+                "title": "Generate Axios Request"
             }
         ],
         "menus": {
             "editor/context": [
                 {
                     "when": "editorTextFocus",
-                    "command": "extension.testRoute",
-                    "group": "navigation"
-                },
-                {
-                    "when": "editorTextFocus",
                     "command": "extension.openWebview",
                     "group": "navigation@1"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "paths.generateAxios",
+                    "when": "viewItem == routeItem"
                 }
             ]
         },

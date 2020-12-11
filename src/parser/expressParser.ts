@@ -276,6 +276,7 @@ class ExpressParser {
     buildUserConfigObject() {
         const output: UserConfigObject = {};
         this.routes.forEach((route) => {
+            const LOCAL_ROUTE = getLocalRoute(route.route);
             if (output[route.path] === undefined) output[route.path] = [];
             output[route.path].push({
                 serverFile: this.serverFile.path + this.serverFile.fileName,
@@ -286,6 +287,7 @@ class ExpressParser {
                     url: route.route,
                     headers: {},
                     data: {},
+                    params: this.findParams(LOCAL_ROUTE),
                 },
             });
         });

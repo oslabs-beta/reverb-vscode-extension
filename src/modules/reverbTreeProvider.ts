@@ -17,6 +17,8 @@ let routeData: WorkspaceObj | undefined;
 
 // Create a Reverb Tree Provider class that extends vscode Tree Data Provider class
 export default class ReverbTreeProvider implements vscode.TreeDataProvider<RouteItem | PathItem> {
+    tree: any;
+
     // Construct a new ReverbDependenciesProvider, pass workspaceRoot up to TreeDataProvider constructor
     constructor(private workspaceRoot: string, workspaceObj: WorkspaceObj | undefined) {
         routeData = workspaceObj;
@@ -179,4 +181,6 @@ class RouteItem extends vscode.TreeItem {
         light: path.join(__filename, '..', '.media', 'rr.png'),
         dark: path.join(__filename, '..', '.media', 'rr.png'),
     };
+
+    contextValue = 'routeItem';
 }
