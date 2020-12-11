@@ -18,7 +18,6 @@ export function activate(context: ExtensionContext) {
 
     initializeExtensionVariables(context);
 
-    ext.registerCommand('extension.testRoute', ExtCmds.test);
     ext.registerCommand('extension.sendRoutes', ExtCmds.sendRoutes);
     ext.registerCommand('extension.sendPreset', ExtCmds.sendPreset);
     ext.registerCommand('extension.sendUserConfigs', ExtCmds.sendUserConfigs);
