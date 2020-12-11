@@ -1,7 +1,7 @@
 {
     "name": "reverb",
     "displayName": " reVerb VSCode extension",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "preview": true,
     "icon": "images/logo.png",
     "description": "Its like Postman... but inside VSCode",
