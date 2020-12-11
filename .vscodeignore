@@ -1,0 +1,38 @@
+node_modules/
+reverb-vscode-webview/
+# develop
+.vscode/
+typings/
+configs/
+scripts/
+src/
+
+# test and output
+.vscode-test/
+test/
+out/test/
+test-fixture/
+.nyc_output/
+coverage/
+build/
+
+# configs
+.gitignore
+.vscodeignore
+tsconfig.json
+tsconfig.test.json
+.nvmrc
+.editorconfig
+.eslintrc.js
+.eslintignore
+.prettierrc
+yarn.lock
+
+!out/**/*.js
+!CHANGELOG.md
+!packages.json
+!images
+!README.md
+!icon.png
+!notes-usage
+!upgrade

@@ -1,0 +1,31 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "dev",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceRoot}"],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "outFiles": ["${workspaceRoot}/out/**/*.js"],
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "test",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--disable-extensions",
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/index"
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
+            "preLaunchTask": "npm: test-compile"
+        }
+    ]
+}
