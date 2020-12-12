@@ -1,34 +1,39 @@
 {
     "name": "reverb",
-    "displayName": " reVerb VSCode extension",
+    "displayName": " reVerb",
     "version": "0.0.4",
     "preview": true,
     "icon": "images/logo.png",
+    "galleryBanner": {
+        "color": "#0f2938",
+        "theme": "dark"
+    },
     "description": "Its like Postman... but inside VSCode",
     "publisher": "reverb-api",
     "author": {
         "name": "Team reVerb",
-        "url": "https://github.com/reVerb-LLC",
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension",
         "email": "reverb-api@protonmail.com"
     },
     "license": "SEE LICENSE IN LICENSE",
-    "homepage": "https://github.com/reVerb-LLC/reverb-vscode-extension",
+    "homepage": "http://www.reverb-vs.com",
     "bugs": {
-        "url": "https://github.com/reVerb-LLC/reverb-vscode-extension/issues",
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension/issues",
         "email": "reverb-api@protonmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/reVerb-LLC/reverb-vscode-extension.git"
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension.git"
     },
     "engines": {
         "vscode": "^1.51.0",
-        "node": ">=14.15.1",
+        "node": ">=14.14.1",
         "npm": "please-use-yarn",
         "yarn": ">= 1.19.1"
     },
     "categories": [
-        "Debuggers"
+        "Debuggers",
+        "Other"
     ],
     "keywords": [
         "vscode",
