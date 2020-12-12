@@ -52,12 +52,12 @@ function OutputHeader({ watchState }) {
             onClick={() => dispatch(setOutputTabContext('info'))}>
             preview
           </button>
-          <button
+          {/* <button
             type="button"
             className={outputTabContext === 'main' ? 'button__main selected' : 'button__main '}
             onClick={() => dispatch(setOutputTabContext('main'))}>
             watcher
-          </button>
+          </button> */}
         </div>
 
         <div className="header__metrics">
