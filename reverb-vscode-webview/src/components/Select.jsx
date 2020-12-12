@@ -73,7 +73,7 @@ function Select() {
           url: 'default',
           headerInputContext: [],
           cookieInputContext: [],
-          dataInputContext: '{\n\n}',
+          dataInputContext: '',
         })
       );
     }
@@ -200,7 +200,7 @@ function Select() {
                   url: 'default',
                   headerInputContext: [],
                   cookieInputContext: [],
-                  dataInputContext: '{\n\n}',
+                  dataInputContext: '',
                 })
               );
               return vscode.postMessage({

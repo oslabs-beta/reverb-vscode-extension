@@ -15,7 +15,7 @@ export const inputContextSlice = createSlice({
     headerInputContext: [],
     cookieInputContext: [],
     paramsInputContext: '',
-    dataInputContext: '{\n\n}',
+    dataInputContext: '',
     possibleServerFilePaths: [],
     userConfigs: {},
     rootDir: '',
@@ -35,11 +35,11 @@ export const inputContextSlice = createSlice({
     },
     setOutputTabContext: (state, action) => {
       state.outputTabContext = action.payload;
-      if (action.payload === 'main') {
-        vscode.postMessage({ command: 'startWatch' });
-      } else {
-        vscode.postMessage({ command: 'stopWatch' });
-      }
+      //   if (action.payload === 'main') {
+      //     vscode.postMessage({ command: 'startWatch' });
+      //   } else {
+      //     vscode.postMessage({ command: 'stopWatch' });
+      //   }
       return state;
     },
     setMethodAndUrl: (state, action) => {
@@ -64,6 +64,17 @@ export const inputContextSlice = createSlice({
     },
     setDataInputContext: (state, action) => {
       state.dataInputContext = action.payload;
+
+      // if user is adding to body and they have not set 'content type' headers, add 'application/json'
+      let _headers = 0;
+      JSON.parse(JSON.stringify(state.headerInputContext)).forEach((header) => {
+        if (header.key === 'Content-Type') {
+          _headers++;
+        }
+      });
+      if (state.dataInputContext.length > 0 && _headers === 0) {
+        state.headerInputContext.push({ key: 'Content-Type', value: 'application/json' });
+      }
       return state;
     },
     setParamsInputContext: (state, action) => {
@@ -134,11 +145,11 @@ export const inputContextSlice = createSlice({
         headersObject[el.key] = el.value;
       });
       const headers = cookie.length ? { cookie, ...headersObject } : { ...headersObject };
-      let baseURL = _url
+      let baseURL = _url;
       const NO_PARAMS = baseURL.match(/(http:\/\/localhost\:\d*\S*)\:\S*/);
-      if (NO_PARAMS){
-        baseURL = NO_PARAMS[1]+= params
-    };
+      if (NO_PARAMS) {
+        baseURL = NO_PARAMS[1] += params;
+      }
       const req = {
         headers,
         baseURL,

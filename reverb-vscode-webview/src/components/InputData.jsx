@@ -5,16 +5,14 @@ import { Controlled as CodeMirror } from 'react-codemirror2';
 import { context, setDataInputContext } from '../redux/reducers/inputContext';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/hint/javascript-hint';
 import 'codemirror/addon/hint/show-hint.css';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/fold/foldcode';
-import 'codemirror/addon/fold/foldgutter';
-import 'codemirror/addon/fold/brace-fold';
-import 'codemirror/addon/fold/comment-fold';
-import 'codemirror/addon/fold/foldgutter.css';
+import 'codemirror/addon/lint/lint';
+import 'codemirror/addon/lint/json-lint';
+import 'codemirror/addon/lint/lint.css';
+const jsonlint = require('jsonlint-mod');
+window.jsonlint = jsonlint;
 
 function InputData() {
   const { dataInputContext } = useSelector(context);
@@ -25,10 +23,12 @@ function InputData() {
       <CodeMirror
         value={dataInputContext}
         options={{
-          mode: 'javascript',
+          mode: 'application/json',
+          gutters: ['CodeMirror-lint-markers'],
+          styleActiveLine: true,
           lineNumbers: true,
-          foldGutter: true,
-          gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+          line: true,
+          lint: true,
           autoCloseTags: true,
           lineWrapping: true,
           matchBrackets: true,
