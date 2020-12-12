@@ -50,7 +50,7 @@ function OutputHeader({ watchState }) {
             type="button"
             className={outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
             onClick={() => dispatch(setOutputTabContext('info'))}>
-            info
+            preview
           </button>
           <button
             type="button"
