@@ -10,15 +10,7 @@
  * ************************************
  */
 
-import {
-    ExtensionContext,
-    workspace,
-    window,
-    OutputChannel,
-    ConfigurationTarget,
-    commands,
-    WebviewPanel,
-} from 'vscode';
+import { ExtensionContext, window, OutputChannel, commands, WebviewPanel } from 'vscode';
 import ReverbTreeProvider from './modules/reverbTreeProvider';
 import Watcher from './modules/Watcher';
 import Decorator from './modules/Decorator';
@@ -48,10 +40,6 @@ export namespace ext {
 }
 
 export function initializeExtensionVariables(ctx: ExtensionContext) {
-    workspace
-        .getConfiguration()
-        .update('workbench.quickOpen.closeOnFocusLost', false, ConfigurationTarget.Global);
-
     ext.context = ctx;
     ext.outputChannel = window.createOutputChannel('reVerb');
 
