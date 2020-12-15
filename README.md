@@ -1,10 +1,8 @@
 <meta name='keywords' content='rest, reVerb, vscode, vscode-extension'>
 
 <p align='center'>
-<img src='./images/reVerbLogo.png', width=100%>
+<img src='https://github.com/oslabs-beta/reverb-vscode-extension/blob/staging/images/reVerbLogo.png', width=100%>
 </p>
-
-<!-- # duolog-vscode-extension -->
 
 <h2 align="center">A Visual Studio Code Extension For Testing Express Server Endpoints
 </h2>
@@ -38,12 +36,16 @@
 
 reVerb is a RESTful api client for Visual Studio Code that offers an interactive GUI for testing Express endpoints, without ever having to leave the editor.
 
+## Still In Alpha
+
+Please note that reVerb an experimental tool and is in ALPHA. We will continue to make improvements and implement fixes but if you find any issues, please dont hesitate to report them in the issues tab or submit a PR and we'll happily take a look.
+
 ## Features
 
 reVerb automatically detects all routes handled by your server, making testing as simple as right clicking on the route itself.
 
 <p align='center'>
-<img src='./images/rightClick.png', width=100%>
+<img src='https://github.com/oslabs-beta/reverb-vscode-extension/blob/staging/images/rightClick.png', width=100%>
 </p>
 
 </br>
@@ -51,7 +53,7 @@ reVerb automatically detects all routes handled by your server, making testing a
 A global list of all endpoints is displayed in the reVerb Sidebar, which gives the front-end team instant visibility to all routes and their expected configurations. In addition, you can generate an Axios request for any of the listed routes with a simple mouse click. The list dynamically updates in response to changes.
 
 <p align='center'>
-<img src='./images/sidebar.png', width=100%>
+<img src='https://github.com/oslabs-beta/reverb-vscode-extension/blob/staging/images/sidebar.png', width=100%>
 </p>
 
 [![Image from Gyazo](https://i.gyazo.com/4e510fe0ed91ee304fb09f520d47ff91.gif)](https://gyazo.com/4e510fe0ed91ee304fb09f520d47ff91)
@@ -67,7 +69,7 @@ Click on the route to open the file which contains it.
 The Request Configuration Window is an interactive GUI that allows you to generate and test server requests, all within VS Code. After a request is sent, the Response Output Window displays the response, status, headers, and other information.
 
 <p align='center'>
-<img src='./images/config_output.png', width=100%, height=100%>
+<img src='https://github.com/oslabs-beta/reverb-vscode-extension/blob/staging/images/config_output.png', width=100%, height=100%>
 </p>
 
 [![Image from Gyazo](https://i.gyazo.com/9782d3878ea2b18bfc7b76bfc0de1090.gif)](https://gyazo.com/9782d3878ea2b18bfc7b76bfc0de1090)
