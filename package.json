@@ -27,7 +27,7 @@
     },
     "engines": {
         "vscode": "^1.51.0",
-        "node": ">=14.14.1",
+        "node": ">=14.14.0",
         "npm": "please-use-yarn",
         "yarn": ">= 1.19.1"
     },
