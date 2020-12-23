@@ -2,7 +2,6 @@
   display: flex;
   align-items: center;
   margin-top: 2px;
-
   .header__verbose {
     display: flex;
     width: 100%;
@@ -12,12 +11,11 @@
       .button__response,
       .button__header,
       .button__info {
-        outline: none;
         width: 7rem;
         height: 1.8rem;
-        background-color: rgb(32, 32, 32);
+        background-color: $background-color;
+        border:none;
         border-bottom: 0.05rem solid $border-color;
-        color: $font-color;
       }
       .selected {
         border: 0.05rem solid $border-color;
@@ -28,20 +26,16 @@
   .button__terminal {
     width: 4rem;
     height: 1.8rem;
-    background-color: rgb(32, 32, 32);
-    border: 0.05rem solid $border-color;
-    color: $font-color;
   }
   .header__metrics {
     display: flex;
-    border-bottom: 0.05rem solid $border-color;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
     padding-right: 1rem;
+    border-bottom: 0.05rem solid $border-color;
     span {
-      background-color: var(--vscode-button-secondaryBackground);
-      color: $font-color;
+      background-color: var(--vscode-dropdown-background);
       margin: 0 0.5rem;
       padding: 0 1rem;
     }
