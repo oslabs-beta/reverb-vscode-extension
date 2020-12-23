@@ -3,18 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>reVerb</title>
   </head>
-
   <body>
     <div id="index"></div>
     <script>
-      const vscode = acquireVsCodeApi();
-      window.onload = function () {
-        vscode.postMessage({ command: 'get-data' });
-        console.log('Ready to accept data.');
-      };
+        const vscode = acquireVsCodeApi()
     </script>
   </body>
 </html>

@@ -82,4 +82,4 @@ let pathStr = workspace.workspaceFolders![0].uri.path;
 if (pathStr[2] === ':') pathStr = pathStr.slice(1);
 const codeFileNames: string[] = findCodeFiles(pathStr);
 const codeFileContents: File[] = readCodeFiles(codeFileNames);
-export const portFiles: string[] = findPortFiles(codeFileContents);
+export const possibleServerFilePaths: string[] = findPortFiles(codeFileContents);

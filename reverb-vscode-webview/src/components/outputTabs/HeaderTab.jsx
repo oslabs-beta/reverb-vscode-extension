@@ -2,11 +2,15 @@ import React from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
-function VerboseHeaderTab({ header }) {
+import { useSelector } from 'react-redux';
+import { requestResult } from '../../redux/reducers/inputStateSlice';
+
+function HeaderTab() {
+  const { headers } = useSelector(requestResult);
   let data;
-  if (header !== undefined && header !== null) {
-    data = Object.keys(header).map((el) => {
-      return { key: el, value: header[el] };
+  if (headers !== undefined && headers !== null) {
+    data = Object.keys(headers).map((el) => {
+      return { key: el, value: headers[el] };
     });
   }
 
@@ -33,4 +37,4 @@ function VerboseHeaderTab({ header }) {
   );
 }
 
-export default VerboseHeaderTab;
+export default HeaderTab;

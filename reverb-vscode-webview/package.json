@@ -9,9 +9,11 @@
   "author": "Team reVerb",
   "license": "ISC",
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.12.10",
     "@reduxjs/toolkit": "^1.5.0",
     "babel-eslint": "^10.1.0",
     "codemirror": "^5.58.3",
+    "formik": "^2.2.6",
     "jsonlint-mod": "^1.7.6",
     "react": "^17.0.1",
     "react-codemirror2": "^7.2.1",

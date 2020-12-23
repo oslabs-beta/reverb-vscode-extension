@@ -148,3 +148,26 @@ body {
     background-color: $background-color !important;
   }
 }
+
+select {
+  background-color: var(--vscode-dropdown-background);
+  height: 1.8rem;
+  margin: 0 0.2rem 0 0.2rem;
+}
+
+input:hover,button:hover {
+  background-color: var(--vscode-editor-hoverHighlightBackground);
+}
+
+input, button {
+  background-color: var(--vscode-input-background);
+}
+
+select,
+button,
+input {
+  border: 0.05rem solid $border-color;
+  color: $font-color !important;
+  font: inherit !important;
+  outline: none !important;
+}

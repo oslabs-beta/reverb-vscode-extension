@@ -1,89 +1,80 @@
-import React, { useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+/**
+ * ************************************
+ *
+ * @module  inputHeaders.jsx
+ * @author  Amir Marcel, Christopher Johnson, Corey Van Splinter, Sean Arseneault
+ * @date 12/23/2020
+ * @description user input for header key/value pairs
+ *
+ * ************************************
+ */
+
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setHeaderInputContext, context } from '../redux/reducers/inputContext';
+import { Formik, Field, Form, FieldArray } from 'formik';
+
+import { setHeaderState, headerState } from '../redux/reducers/inputStateSlice';
+import { header } from '../redux/reducers/viewContextSlice';
 
 function InputHeaders() {
-  const { headerInputContext } = useSelector(context);
+  const _headerState = useSelector(headerState);
+  const headersView = useSelector(header);
   const dispatch = useDispatch();
 
-  const { register, control, watch } = useForm({
-    defaultValues: {
-      headers: headerInputContext,
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'headers',
-  });
-
-  function setHeaders() {
-    const headers = watch('headers');
-
-    if (headers) {
-      dispatch(setHeaderInputContext(headers));
-    } else {
-      dispatch(setHeaderInputContext([]));
-    }
-  }
-
-  useEffect(() => {
-    setHeaders();
-  }, [fields]);
-
   return (
-    <form className="input__header">
-      <ul>
-        {fields.map((item, index) => {
-          return (
-            <li key={item.id} className="header__li">
-              <input
-                name={`headers[${index}].key`}
-                onChange={() => setHeaders()}
-                placeholder="key"
-                defaultValue={item.key}
-                ref={register()}
-              />
-
-              <input
-                name={`headers[${index}].value`}
-                onChange={() => setHeaders()}
-                placeholder="value"
-                defaultValue={item.value}
-                ref={register()}
-              />
-
-              <button
-                type="button"
-                onClick={() => {
-                  remove(index);
-                }}>
-                x
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <section>
-        <li className="header__li">
-          <input
-            placeholder="new header"
-            defaultValue=""
-            onClick={() => {
-              if (fields.length < 4) append({ key: '', value: '' });
-            }}
-          />
-          <input
-            placeholder="new value"
-            defaultValue=""
-            onClick={() => {
-              if (fields.length < 4) append({ key: '', value: '' });
-            }}
-          />
-        </li>
-      </section>
-    </form>
+    <Formik initialValues={_headerState} enableReinitialize={true}>
+      {({ values }) => (
+        <Form className="header__form" style={{ display: headersView ? 'block' : 'none' }}>
+          <FieldArray name="headers">
+            {({ remove, push }) => (
+              <div className="input__header">
+                {values.headers.length > 0 &&
+                  values.headers.map((header, index) => (
+                    <div className="header__li" key={index}>
+                      <Field
+                        name={`headers.${index}.key`}
+                        placeholder="header"
+                        type="text"
+                        onBlur={() => {
+                          dispatch(setHeaderState(values));
+                        }}
+                      />
+                      <Field
+                        name={`headers.${index}.value`}
+                        placeholder="value"
+                        type="text"
+                        onBlur={() => {
+                          dispatch(setHeaderState(values));
+                        }}
+                      />
+                      <button type="button" onClick={() => remove(index)}>
+                        x
+                      </button>
+                    </div>
+                  ))}
+                <div className="header__li">
+                  {/* these look like inputs but are buttons that add a new row of inputs above them when clicked */}
+                  <input
+                    type="text"
+                    placeholder="header"
+                    value=""
+                    onClick={() => push({ key: '', value: '' })}
+                    readOnly
+                  />
+                  <input
+                    type="text"
+                    placeholder="value"
+                    value=""
+                    onClick={() => push({ key: '', value: '' })}
+                    readOnly
+                  />
+                </div>
+              </div>
+            )}
+          </FieldArray>
+        </Form>
+      )}
+    </Formik>
   );
 }
 

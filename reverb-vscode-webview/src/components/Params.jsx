@@ -1,48 +1,44 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { context, setParamsInputContext } from '../redux/reducers/inputContext';
+import { currentUrl } from '../redux/reducers/inputStateSlice';
 import { useForm } from 'react-hook-form';
-import { routes } from '../redux/reducers/routesSlice';
+
+import { params } from '../redux/reducers/viewContextSlice';
 
 function Params() {
-  const { register, handleSubmit, watch, errors } = useForm();
-  const dispatch = useDispatch();
-  const { paramsInputContext, urlInputContext } = useSelector(context);
-  const rts = useSelector(routes);
-  const url = urlInputContext.slice(7);
-  let params;
+  // redux
+//   const _currentUrl = useSelector(currentUrl);
+  const paramsView = useSelector(params);
+//   const _routes = useSelector(routes);
+//   const dispatch = useDispatch();
 
-  Object.keys(rts).forEach((el) => {
-    if (rts[el][url]) {
-      Object.keys(rts[el][url][Object.keys(rts[el][url])[0]].config.params).forEach((param) => {
-        params = param;
-      });
-    }
-  });
+//   const { register } = useForm();
 
-  let parami = watch('paramValue');
+//   const url = _currentUrl.slice(7);
 
-  useEffect(() => {
-    if (parami !== undefined) {
-      dispatch(setParamsInputContext(parami));
-    }
-  }, [parami]);
+//   // build params list and input
+//   let paramsArray;
+//   Object.keys(_routes).forEach((el) => {
+//     if (_routes[el][url]) {
+//       Object.keys(_routes[el][url][Object.keys(_routes[el][url])[0]].config.params).forEach(
+//         (param) => {
+//           paramsArray = param;
+//         }
+//       );
+//     }
+//   });
 
   return (
-    <div className="input__params">
-      <form>
-        {params && (
+    <div className="input__params" style={{ display: paramsView ? 'block' : 'none' }}>
+      {/* <form>
+        {paramsArray && (
           <div className="param">
-            <span>:{params}</span>
-            <input
-              defaultValue={paramsInputContext}
-              placeholder="param value"
-              name="paramValue"
-              ref={register()}
-            />
+            <span>:{paramsArray}</span>
+            <input placeholder="param value" name="paramValue" ref={register()} />
           </div>
         )}
-      </form>
+      </form> */}
+      test
     </div>
   );
 }

@@ -1,15 +1,15 @@
 import React from 'react';
 import Iframe from 'react-iframe';
 import { useSelector } from 'react-redux';
-import { context } from '../../redux/reducers/inputContext';
+import { requestResult } from '../../redux/reducers/inputStateSlice';
 
-function VerboseInfoTab() {
-  const { urlInputContext } = useSelector(context);
+function InfoTab() {
+  const _requestResult= useSelector(requestResult);
 
   return (
     <div className="verbose__info">
       <Iframe
-        url={urlInputContext}
+        src={_requestResult.config.baseURL}
         width="100%"
         height="100%"
         id="myId"
@@ -22,4 +22,4 @@ function VerboseInfoTab() {
   );
 }
 
-export default VerboseInfoTab;
+export default InfoTab;

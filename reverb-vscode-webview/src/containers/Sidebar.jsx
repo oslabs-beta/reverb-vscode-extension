@@ -1,12 +1,13 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setInputViewContext, context } from '../redux/reducers/inputContext';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setInputViewContext } from '../redux/reducers/viewContextSlice';
 
 function Sidebar() {
+  const [selected, setSelected] = useState('header');
   const dispatch = useDispatch();
-  const {inputViewContext} = useSelector(context)
 
-  const handleChange = (value) => {
+  const sync = (value) => {
+    setSelected(value);
     dispatch(setInputViewContext(value));
   };
 
@@ -15,49 +16,49 @@ function Sidebar() {
       <div className="sidebar">
         <button
           type="button"
-          className={inputViewContext === 'header' ? "button__header active" : "button__header"}
+          className={selected === 'header' ? 'button__header active' : 'button__header'}
           value="header"
           onClick={(e) => {
-            handleChange(e.target.value);
+            sync(e.target.value);
           }}>
-          Header
+          header
         </button>
         <button
           type="button"
-          className={inputViewContext === 'data' ? "button__body active" : "button__body"}
+          className={selected === 'data' ? 'button__body active' : 'button__body'}
           value="data"
           onClick={(e) => {
-            handleChange(e.target.value);
+            sync(e.target.value);
           }}>
-          Body
+          body
         </button>
 
         <button
           type="button"
-          className={inputViewContext === 'cookies' ? "button__cookies active" : "button__cookies"}
+          className={selected === 'cookies' ? 'button__cookies active' : 'button__cookies'}
           value="cookies"
           onClick={(e) => {
-            handleChange(e.target.value);
+            sync(e.target.value);
           }}>
-          Cookies
+          cookies
         </button>
         <button
           type="button"
-          className={inputViewContext === 'params' ? "button__params active" : "button__params"}
+          className={selected === 'params' ? 'button__params active' : 'button__params'}
           value="params"
           onClick={(e) => {
-            handleChange(e.target.value);
+            sync(e.target.value);
           }}>
-          Params
+          params
         </button>
         <button
           type="button"
-          className={inputViewContext === 'settings' ? "button__settings active" : "button__settings"}
+          className={selected === 'settings' ? 'button__settings active' : 'button__settings'}
           value="settings"
           onClick={(e) => {
-            handleChange(e.target.value);
+            sync(e.target.value);
           }}>
-          Settings
+          settings
         </button>
       </div>
     </div>

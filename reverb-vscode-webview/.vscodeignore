@@ -23,7 +23,7 @@ tsconfig.json
 tsconfig.test.json
 .nvmrc
 .editorconfig
-.eslintrc.js
+.eslintrc
 .eslintignore
 .prettierrc
 yarn.lock

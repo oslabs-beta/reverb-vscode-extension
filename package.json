@@ -1,7 +1,7 @@
 {
     "name": "reverb",
     "displayName": " reVerb",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "preview": true,
     "icon": "images/logo.png",
     "galleryBanner": {
@@ -58,26 +58,6 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.testRoute",
-                "title": "Test Endpoint"
-            },
-            {
-                "command": "extension.sendPreset",
-                "title": "Sends preset object to webview"
-            },
-            {
-                "command": "extension.initWebviewForm",
-                "title": "Sends message to webview to get server path and port"
-            },
-            {
-                "command": "extension.sendUserConfigs",
-                "title": "Sends userconfigs object to webview"
-            },
-            {
-                "command": "extension.sendRoutes",
-                "title": "Sends routes object to webview"
-            },
-            {
                 "command": "extension.savePreset",
                 "title": "Saves preset to presets object"
             },
@@ -98,14 +78,6 @@
                 "title": "Query given endpoint and return detailed response"
             },
             {
-                "command": "extension.startWatch",
-                "title": "Start watching all files for changes"
-            },
-            {
-                "command": "extension.stopWatch",
-                "title": "Stop watching"
-            },
-            {
                 "command": "extension.openWebview",
                 "title": "Open reVerb client"
             },
@@ -118,7 +90,7 @@
                 "title": "Make file active in editor"
             },
             {
-                "command": "extension.deleteRoutesObject",
+                "command": "extension.wipeStorageObject",
                 "title": "Delete Local Routes Storage"
             },
             {
@@ -174,12 +146,14 @@
         ]
     },
     "dependencies": {
+        "@types/uuid": "^8.3.0",
         "@typescript-eslint/typescript-estree": "^4.9.0",
         "axios": "^0.21.0",
         "estree-walker": "^2.0.1",
         "find-process": "^1.4.4",
         "httpsnippet": "^1.24.0",
-        "ts-node-dev": "^1.1.0"
+        "ts-node-dev": "^1.1.0",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@types/friendly-errors-webpack-plugin": "^0.1.2",

@@ -7,20 +7,9 @@
   button {
     width: 5.5rem;
     height: 2.4rem;
-    background-color: #252525;
-    border: 0.05rem solid $border-color;
-    color: $font-color;
     margin-bottom: 0.8rem;
-    outline: none;
-  }
-  button:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
-    color: white;
-  }
-  button:active {
-    border-color: var(--vscode-focusBorder);
   }
   .active {
-    background-color: #444444;
+    background-color: var(--vscode-statusBarItem-activeBackground);
   }
 }
