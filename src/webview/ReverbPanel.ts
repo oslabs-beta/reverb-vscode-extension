@@ -67,47 +67,83 @@ export default class ReverbPanel {
 
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
-            async (msg: Msg) => {
-                switch (msg.command) {
-                    case 'get-data':
-                        commands.executeCommand('extension.sendRoutes');
-                        commands.executeCommand('extension.sendPreset');
-                        commands.executeCommand('extension.sendUserConfigs');
+            async (msg: any) => {
+                console.log('MSG:', msg);
+                switch (msg.payload.command) {
+                    case 'dataObjects':
+                        commands.executeCommand('extension.dataObjects').then((e) => {
+                            ReverbPanel.currentPanel?.send({
+                                reqId: msg.reqId,
+                                data: { command: 'dataObjects', data: e },
+                            });
+                        });
                         break;
-                    case 'startWatch':
-                        commands.executeCommand('extension.startWatch');
+                    case 'parseServer':
+                        commands
+                            .executeCommand('extension.parseServer', msg.payload.data)
+                            .then((e) => {
+                                ReverbPanel.currentPanel?.send({
+                                    reqId: msg.reqId,
+                                    data: { command: 'parseServer', data: e },
+                                });
+                            });
                         break;
-                    case 'stopWatch':
-                        commands.executeCommand('extension.stopWatch');
+                    case 'deletePreset':
+                        commands
+                            .executeCommand('extension.deletePreset', msg.payload.data)
+                            .then((e) => {
+                                ReverbPanel.currentPanel?.send({
+                                    reqId: msg.reqId,
+                                    data: { command: 'deletePreset', data: e },
+                                });
+                            });
                         break;
-                    case 'verboseRequest':
-                        commands.executeCommand('extension.verboseRequest', msg.req);
+                    case 'wipeStorageObject':
+                        commands.executeCommand('extension.wipeStorageObject').then((e) => {
+                            ReverbPanel.currentPanel?.send({
+                                reqId: msg.reqId,
+                                data: { command: 'wipeStorageObject', data: e },
+                            });
+                        });
+                        break;
+                    case 'savePreset':
+                        commands
+                            .executeCommand('extension.savePreset', msg.payload.data)
+                            .then((e: any) => {
+                                ReverbPanel.currentPanel?.send({
+                                    reqId: msg.reqId,
+                                    data: { command: 'savePreset', data: e.data, preset: e.preset },
+                                });
+                            });
+                        break;
+                    case 'validatePort':
+                        commands
+                            .executeCommand('extension.validatePort', msg.payload.data)
+                            .then((e: any) => {
+                                ReverbPanel.currentPanel?.send({
+                                    reqId: msg.reqId,
+                                    data: { command: 'validatePort', data: e },
+                                });
+                            });
+                        break;
+                    case 'makeRequest':
+                        commands
+                            .executeCommand('extension.verboseRequest', msg.payload.data)
+                            .then((e: any) => {
+                                ReverbPanel.currentPanel?.send({
+                                    reqId: msg.reqId,
+                                    data: { command: 'makeRequest', data: e },
+                                });
+                            });
                         break;
                     case 'openTerminal':
                         commands.executeCommand('extension.openTerminal');
                         break;
-                    case 'parseServer':
-                        commands.executeCommand('extension.parseServer', msg.data);
-                        break;
-                    case 'validatePort':
-                        commands.executeCommand('extension.validatePort', msg.data);
-                        break;
-                    case 'savePreset':
-                        commands.executeCommand('extension.savePreset', msg.data);
-                        break;
-                    case 'deletePreset':
-                        commands.executeCommand('extension.deletePreset', msg.data);
-                        break;
-                    case 'userInputPrompt':
-                        commands.executeCommand('extension.initWebviewForm');
-                        break;
-                    case 'deleteRoutesObject':
-                        commands.executeCommand('extension.deleteRoutesObject').then((el) => {
-                            return el;
-                        });
-                        break;
                     case 'openFileInEditor':
-                        await commands.executeCommand('extension.openFileInEditor', msg.data);
+                        await commands.executeCommand(
+                            'extension.openFileInEditor',
+                            msg.payload.data,
+                        );
                         break;
                     default:
                 }
