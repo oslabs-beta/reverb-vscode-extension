@@ -1,22 +1,46 @@
-/* eslint-disable jsx-a11y/no-autofocus */
-/* eslint-disable react/no-array-index-key */
+/**
+ * ************************************
+ *
+ * @module  ParseForm.jsx
+ * @author  Amir Marcel, Christopher Johnson, Corey Van Splinter, Sean Arseneault
+ * @date 12/23/2020
+ * @description renders dropdown and inputfield so user can define main serverFile info to be sent to extension and parsed.
+ *
+ * ************************************
+ */
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
-import { context, setInputViewContext } from '../redux/reducers/inputContext';
+
+import {
+  possibleServerFilePaths,
+  rootDirectory,
+  vscApi,
+  validatePort,
+  validPort,
+} from '../redux/reducers/inputStateSlice';
 
 function ParseForm() {
+  // Redux
+  const _possibleServerFilePaths = useSelector(possibleServerFilePaths);
+  const _rootDirectory = useSelector(rootDirectory);
+  const _validPort = useSelector(validPort);
   const dispatch = useDispatch();
+
+  // Form base
   const { register, handleSubmit } = useForm({
     mode: 'onChange',
   });
+  const onSubmit = (serverData) => {
+    dispatch(vscApi({ command: 'parseServer', data: serverData }));
+  };
 
-  const { possibleServerFilePaths, rootDir, validPort } = useSelector(context);
-
+  // Build select options array
   const pathsArr = [];
-  if (possibleServerFilePaths) {
-    possibleServerFilePaths.forEach((path, i) => {
-      const substr = path.substring(path.indexOf(rootDir));
+  if (_possibleServerFilePaths) {
+    _possibleServerFilePaths.forEach((path, i) => {
+      const substr = path.substring(path.indexOf(_rootDirectory));
       pathsArr.push(
         <option key={path + i} value={path}>
           {substr}
@@ -25,14 +49,6 @@ function ParseForm() {
     });
   }
 
-  const onSubmit = (data) => {
-    if (validPort && data.port.length === 4) {
-      // eslint-disable-next-line no-undef
-      vscode.postMessage({ command: 'parseServer', data });
-      dispatch(setInputViewContext('header'));
-    }
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="input__parse">
       <p>enter port number and select main server file</p>
@@ -40,16 +56,15 @@ function ParseForm() {
         <input
           ref={register}
           onChange={({ target }) => {
-            const data = target.value;
-            // eslint-disable-next-line no-undef
-            if (data.length === 4) vscode.postMessage({ command: 'validatePort', data });
+            if (target.value.length === 4) {
+              dispatch(validatePort(target.value));
+            }
           }}
           name="port"
           placeholder="PORT"
           autoFocus
-          className={validPort ? 'input__port' : 'port__error input__port'}
+          className={_validPort ? 'input__port' : 'port__error input__port'}
         />
-        {/* {validPort === false && <p className="error__port">server not listening on port</p>} */}
 
         <select ref={register} name="file_path" className="select__path">
           {pathsArr}
