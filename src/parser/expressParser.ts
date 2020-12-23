@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable class-methods-use-this */
 /**
  * ************************************
@@ -10,40 +11,26 @@
  *
  * ************************************
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { getRanges } from './utils/ast';
 // Regex patterns used for file parsing
-import {
-    FILENAME_AND_PATH,
-    REQUIRE_PATH,
-    REQUIRED_PATH_JOIN,
-    ROUTE_PARAMS,
-} from '../constants/expressPatterns';
+import { FILENAME_AND_PATH, ROUTE_PARAMS } from '../constants/expressPatterns';
 // File and path manipulation functions
-import {
-    readFile,
-    findImportedFiles,
-    resolvePath,
-    getLocalPath,
-    getLocalRoute,
-} from './utils/genericFileOps';
+import { readFile, findImportedFiles } from './utils/genericFileOps';
 // Express specific file operations
 import {
     findExpressImport,
     findExpressServer,
     findRouters,
-    findPath,
     findRoutes,
     findRouterPath,
 } from './utils/expressFileOps';
-
-const pathUtil = require('path');
 
 /** Class representing parsed express server data */
 class ExpressParser {
     serverPort: number;
 
-    serverFile: File;
+    serverFile: any;
 
     supportFiles: Map<string, File>;
 
@@ -82,9 +69,9 @@ class ExpressParser {
 
     /**
      * Parses all endpoints from the express server
-     * @return {WorkspaceObj} A WorkspaceObj object containing info for all endpoints in the server
+     * @return {MasterDataObject} A WorkspaceObj object containing info for all endpoints in the server
      */
-    parse(): WorkspaceObj {
+    parse(): MasterDataObject {
         this.serverFile.contents = readFile(this.serverFile);
         this.findSupportFiles();
         this.findExpressImports();
@@ -93,7 +80,7 @@ class ExpressParser {
         this.supportFiles.forEach((file) => this.findRouterFiles(file));
         this.findAllRoutes();
         this.findRouteEndLines();
-        return [this.buildWorkspaceObject(), this.buildUserConfigObject()];
+        return this.buildMasterDataObject();
     }
 
     /**
@@ -243,55 +230,36 @@ class ExpressParser {
         });
     }
 
-    /**
-     * Builds the Workspace object used to model all routes in the express server
-     * @return {WorkspaceObj} The Workspace object
-     */
-    buildWorkspaceObject(): WorkspaceObj {
-        const output: WorkspaceObj = {};
-        this.routes.forEach((route) => {
-            // Trim unnecessary info from the path and route for improved readability
-            const LOCAL_PATH = getLocalPath(route.path);
-            const LOCAL_ROUTE = getLocalRoute(route.route);
-            // Add new path/route objects if no routes have been added for the current path/route
-            if (output[LOCAL_PATH] === undefined) output[LOCAL_PATH] = {};
-            if (output[LOCAL_PATH][LOCAL_ROUTE] === undefined) {
-                output[LOCAL_PATH][LOCAL_ROUTE] = {};
-            }
-            // Store the route information for the current route/method
-            output[LOCAL_PATH][LOCAL_ROUTE][route.method.toUpperCase()] = {
-                range: [route.startLine, route.endLine],
-                config: {
-                    method: route.method.toUpperCase(),
-                    url: route.route,
-                    headers: {},
-                    data: {},
-                    params: this.findParams(LOCAL_ROUTE),
-                },
+    buildMasterDataObject(): any {
+        const paths: { [x: string]: { path: string; serverFile: any; port: number } } = {};
+        const urls: {
+            [x: string]: {
+                path: string;
+                url: string;
+                method: string;
+                range: number[];
+                presets: never[];
             };
-        });
-        return output;
-    }
+        } = {};
+        const presets = {};
 
-    buildUserConfigObject() {
-        const output: UserConfigObject = {};
         this.routes.forEach((route) => {
-            const LOCAL_ROUTE = getLocalRoute(route.route);
-            if (output[route.path] === undefined) output[route.path] = [];
-            output[route.path].push({
+            paths[route.path] = {
+                path: route.path,
                 serverFile: this.serverFile.path + this.serverFile.fileName,
                 port: this.serverPort,
+            };
+
+            urls[route.route] = {
+                path: route.path,
+                url: route.route,
+                method: route.method,
                 range: [route.startLine, route.endLine],
-                config: {
-                    method: route.method.toUpperCase(),
-                    url: route.route,
-                    headers: {},
-                    data: {},
-                    params: this.findParams(LOCAL_ROUTE),
-                },
-            });
+                presets: [],
+            };
         });
-        return output;
+
+        return { paths, urls, presets };
     }
 
     /**
