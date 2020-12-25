@@ -230,17 +230,9 @@ class ExpressParser {
         });
     }
 
-    buildMasterDataObject(): any {
-        const paths: { [x: string]: { path: string; serverFile: any; port: number } } = {};
-        const urls: {
-            [x: string]: {
-                path: string;
-                url: string;
-                method: string;
-                range: number[];
-                presets: never[];
-            };
-        } = {};
+    buildMasterDataObject() {
+        const paths = {};
+        const urls = {};
         const presets = {};
 
         this.routes.forEach((route) => {
@@ -250,13 +242,25 @@ class ExpressParser {
                 port: this.serverPort,
             };
 
-            urls[route.route] = {
+            if (urls[route.route] === undefined) {
+                urls[route.route] = {
+                    get: {},
+                    post: {},
+                    put: {},
+                    delete: {},
+                    presets: [],
+                    path: route.path,
+                    url: route.route,
+                    ranges: {},
+                };
+            }
+            urls[route.route][route.method] = {
                 path: route.path,
                 url: route.route,
                 method: route.method,
                 range: [route.startLine, route.endLine],
-                presets: [],
             };
+            urls[route.route].ranges[route.method] = [route.startLine, route.endLine];
         });
 
         return { paths, urls, presets };
