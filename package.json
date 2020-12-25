@@ -94,8 +94,24 @@
                 "title": "Delete Local Routes Storage"
             },
             {
+                "command": "extension.rightClickQuery",
+                "title": "Quick Query "
+            },
+            {
                 "command": "paths.generateAxios",
-                "title": "Generate Axios Request"
+                "title": "Generate Axios Request",
+                "icon": {
+                    "light": "resources/light/edit.svg",
+                    "dark": "resources/dark/axios.svg"
+                }
+            },
+            {
+                "command": "paths.simpleQuery",
+                "title": "Send a simple query to this endpoint",
+                "icon": {
+                    "light": "resources/light/edit.svg",
+                    "dark": "images/icon.png"
+                }
             }
         ],
         "menus": {
@@ -104,12 +120,30 @@
                     "when": "editorTextFocus",
                     "command": "extension.openWebview",
                     "group": "navigation@1"
+                },
+                {
+                    "when": "editorTextFocus",
+                    "command": "extension.rightClickQuery",
+                    "group": "navigation"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "extension.openWebview",
+                    "group": "navigation",
+                    "when": "view == paths"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "paths.generateAxios",
-                    "when": "viewItem == routeItem"
+                    "when": "viewItem == routeItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "paths.simpleQuery",
+                    "when": "viewItem == routeItem",
+                    "group": "inline@2"
                 }
             ]
         },
@@ -126,11 +160,17 @@
             "reverb-explorer": [
                 {
                     "id": "paths",
-                    "name": "paths",
-                    "contextualTitle": "paths"
+                    "name": "Control Panel",
+                    "contextualTitle": "Control Panel"
                 }
             ]
-        }
+        },
+        "viewsWelcome": [
+            {
+                "view": "paths",
+                "contents": "No Endpoints found. Search workspace for Endpoints?\n[Open Webview](command:extension.openWebview)"
+            }
+        ]
     },
     "husky": {
         "hooks": {
