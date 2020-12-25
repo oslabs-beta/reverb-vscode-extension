@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * ************************************
@@ -14,6 +15,7 @@
 import { workspace, commands, window, ViewColumn, env } from 'vscode';
 import find from 'find-process';
 import { v4 as uuidv4 } from 'uuid';
+import { AxiosRequestConfig } from 'axios';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
 import ReverbPanel from './webview/ReverbPanel';
@@ -31,7 +33,6 @@ export namespace ExtCmds {
 
         query.baseURL = masterObject!.urls[query.baseURL].url;
         const data = await utils.ping(query);
-        console.log(data);
         return data;
     }
 
@@ -119,10 +120,15 @@ export namespace ExtCmds {
      * Opens provided file in editor
      * @param {string} uri uri of file to be opened.
      */
-    export async function openFileInEditor(uri: string) {
+    export async function openFileInEditor(uri: string, range: any) {
         workspace
             .openTextDocument(uri)
-            .then((document) => window.showTextDocument(document, ViewColumn.One));
+            .then((document) => window.showTextDocument(document, ViewColumn.One))
+            .then(() => {
+                if (range !== undefined) {
+                    ext.decoration.highlightDeco(range, undefined);
+                }
+            });
     }
 
     /**
@@ -175,9 +181,61 @@ export namespace ExtCmds {
     /**
      * Generates Axios req snippet based on selected tree item and copies to clipboard
      */
-    export async function GenerateAxios(node: any) {
-        const snippet = utils.generateSnippet(utils.convert(node.label));
+    export async function GenerateAxios(endpoint: any) {
+        endpoint = { method: endpoint.method, url: endpoint.url };
+        const snippet = utils.generateSnippet(endpoint);
         await env.clipboard.writeText(snippet);
         window.showInformationMessage(`Axios Request snippet added to clipboard`);
+    }
+
+    /**
+     * Initiate query from content menu click on specific endpoint function
+     */
+    export async function rightClickQuery({ path }) {
+        if (window.activeTextEditor === undefined) return;
+        if (path[2] === ':') path = path.slice(1);
+
+        let range;
+        let config;
+        const { urls } = ext.workspaceObj();
+        const line = window.activeTextEditor.selection.active.line + 1;
+
+        for (const url in urls) {
+            if (urls[url].path === path) {
+                for (const method in urls[url].ranges) {
+                    if (
+                        urls[url].ranges[method][0] <= line &&
+                        urls[url].ranges[method][1] >= line
+                    ) {
+                        range = urls[url].ranges[method];
+                        config = {
+                            url: urls[url].url,
+                            method,
+                        };
+                    }
+                }
+            }
+        }
+
+        const data = await utils.ping(config);
+        const text = `-=:> ${data.resTime}ms | status: ${data.status} | data: ${JSON.stringify(
+            data.data,
+        )}`;
+        ext.decoration.highlightDeco(range, text);
+    }
+
+    /**
+     * Querys single endpoint with minimal options
+     */
+    export async function simpleQuery(routeItem: { url: any; method: any; range: any }) {
+        const config = {
+            url: routeItem.url,
+            method: routeItem.method,
+        };
+        const data = await utils.ping(config);
+        const text = `-=:> ${data.resTime}ms | status: ${data.status} | data: ${JSON.stringify(
+            data.data,
+        )}`;
+        ext.decoration.highlightDeco(routeItem.range, text);
     }
 }
