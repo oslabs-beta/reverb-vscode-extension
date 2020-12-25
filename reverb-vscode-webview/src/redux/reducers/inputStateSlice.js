@@ -51,6 +51,14 @@ export const vscApi = createAsyncThunk('inputState/vscApi', async (payload) => {
   return data;
 });
 
+export const wipeStorageObject = createAsyncThunk(
+  'inputState/wipeStorageObject',
+  async (payload, { dispatch }) => {
+    const data = await vscodeFetch(payload);
+    return data;
+  }
+);
+
 /**
  * sends port number and returns boolean
  */
@@ -166,9 +174,9 @@ export const inputStateSlice = createSlice({
         paths: {},
         urls: {},
         presets: {},
+        serverPaths: [],
+        rootDirectory: '',
       },
-      possibleServerFilePaths: [],
-      rootDirectory: '',
     },
     requestResult: {},
     currentPreset: 'default',
@@ -232,14 +240,14 @@ export const inputStateSlice = createSlice({
   },
   extraReducers: {
     [getMasterObject.fulfilled]: (state, action) => {
-      state.storage.masterObject = action.payload.data.masterObject;
-      state.storage.possibleServerFilePaths = action.payload.data.possibleServerFilePaths;
-      state.storage.rootDirectory = action.payload.data.rootDirectory;
+      state.storage.masterObject = action.payload.data;
       state.loading = false;
       return state;
     },
     [vscApi.fulfilled]: (state, action) => {
-      state.storage.masterObject = action.payload.data;
+      if (action.payload.command !== 'wipeStorageObject') {
+        state.storage.masterObject = action.payload.data;
+      }
       return state;
     },
     [savePreset.fulfilled]: (state, action) => {
@@ -253,6 +261,11 @@ export const inputStateSlice = createSlice({
     },
     [makeRequest.fulfilled]: (state, action) => {
       state.requestResult = action.payload.data;
+      return state;
+    },
+    [wipeStorageObject.fulfilled]: (state, action) => {
+        console.log(action.payload);
+      state.storage.masterObject = action.payload.data;
       return state;
     },
   },
@@ -281,7 +294,7 @@ export const currentPreset = (state) => state.inputState.currentPreset;
 export const paths = (state) => state.inputState.storage.masterObject.paths;
 export const urls = (state) => state.inputState.storage.masterObject.urls;
 export const presets = (state) => state.inputState.storage.masterObject.presets;
-export const possibleServerFilePaths = (state) => state.inputState.storage.possibleServerFilePaths;
-export const rootDirectory = (state) => state.inputState.storage.rootDirectory;
+export const serverPaths = (state) => state.inputState.storage.masterObject.serverPaths;
+export const rootDirectory = (state) => state.inputState.storage.masterObject.rootDirectory;
 
 export default inputStateSlice.reducer;

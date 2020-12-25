@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
-  possibleServerFilePaths,
+  serverPaths,
   rootDirectory,
   vscApi,
   validatePort,
@@ -23,7 +23,7 @@ import {
 
 function ParseForm() {
   // Redux
-  const _possibleServerFilePaths = useSelector(possibleServerFilePaths);
+  const _serverPaths = useSelector(serverPaths);
   const _rootDirectory = useSelector(rootDirectory);
   const _validPort = useSelector(validPort);
   const dispatch = useDispatch();
@@ -38,8 +38,8 @@ function ParseForm() {
 
   // Build select options array
   const pathsArr = [];
-  if (_possibleServerFilePaths) {
-    _possibleServerFilePaths.forEach((path, i) => {
+  if (_serverPaths) {
+    _serverPaths.forEach((path, i) => {
       const substr = path.substring(path.indexOf(_rootDirectory));
       pathsArr.push(
         <option key={path + i} value={path}>
