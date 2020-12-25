@@ -2,7 +2,7 @@ import React from 'react';
 import ParseForm from './ParseForm';
 import { useSelector, useDispatch } from 'react-redux';
 import { settings } from '../redux/reducers/viewContextSlice';
-import { vscApi } from '../redux/reducers/inputStateSlice';
+import { vscApi, setLoading } from '../redux/reducers/inputStateSlice';
 
 function Settings() {
   const settingsView = useSelector(settings);
@@ -18,6 +18,7 @@ function Settings() {
           title="ERASE"
           onClick={() => {
             dispatch(vscApi({command: 'wipeStorageObject'}));
+            dispatch(setLoading(true));
           }}>
           ERASE
         </button>

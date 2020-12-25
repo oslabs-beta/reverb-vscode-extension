@@ -214,6 +214,10 @@ export const inputStateSlice = createSlice({
       }
       return state;
     },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+      return state;
+    },
     setCurrentPreset: (state, action) => {
       if (action.payload === 'default' || action.payload === undefined) {
         state = resetInputs(state);
@@ -260,6 +264,7 @@ export const {
   setHeaderState,
   setCookieState,
   setDataState,
+  setLoading,
   setCurrentPreset,
 } = inputStateSlice.actions;
 

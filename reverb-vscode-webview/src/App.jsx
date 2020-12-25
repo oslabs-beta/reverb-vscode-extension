@@ -8,11 +8,8 @@ function App() {
   const _loading = useSelector(loading);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  if (_loading === true) {
     dispatch(getMasterObject());
-  }, []);
-
-  if (_loading) {
     return <p>Loading...</p>;
   } else {
     return (
