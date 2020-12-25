@@ -15,11 +15,10 @@
 import { workspace, commands, window, ViewColumn, env } from 'vscode';
 import find from 'find-process';
 import { v4 as uuidv4 } from 'uuid';
-import { AxiosRequestConfig } from 'axios';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
 import ReverbPanel from './webview/ReverbPanel';
-import { possibleServerFilePaths } from './parser/utils/serverPath';
+import getServerPaths from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
 
 export namespace ExtCmds {
@@ -40,23 +39,17 @@ export namespace ExtCmds {
      * Sends routes object to webview or prompts for server info if no routes exist in storage
      */
     export function dataObjects() {
-        const rootDirectory = workspace.workspaceFolders![0].name;
-
         let masterObject = ext.workspaceObj();
         if (masterObject === undefined)
             masterObject = {
                 paths: {},
                 urls: {},
                 presets: {},
+                serverPaths: getServerPaths(),
+                rootDirectory: workspace.workspaceFolders![0].name,
             };
 
-        const data = {
-            masterObject,
-            possibleServerFilePaths,
-            rootDirectory,
-        };
-
-        return data;
+        return masterObject;
     }
 
     /**
@@ -66,7 +59,9 @@ export namespace ExtCmds {
     export function parseServer(data: any) {
         const expressParser = new ExpressParser(data.file_path, data.port);
         const parseOutput = expressParser.parse();
-        const { paths, urls, presets } = ext.workspaceObj()!;
+        const { paths, urls, presets, serverPaths, rootDirectory } = ext.workspaceObj()!;
+
+        serverPaths.splice(serverPaths.indexOf(data.file_path), 1);
 
         const currentMasterObject = {
             paths: {
@@ -81,6 +76,8 @@ export namespace ExtCmds {
                 ...presets,
                 ...parseOutput.presets,
             },
+            serverPaths,
+            rootDirectory,
         };
 
         ext.context.workspaceState.update(`obj`, currentMasterObject);
@@ -139,6 +136,8 @@ export namespace ExtCmds {
             paths: {},
             urls: {},
             presets: {},
+            serverPaths: getServerPaths(),
+            rootDirectory: workspace.workspaceFolders![0].name,
         });
         utils.resetTreeview();
         return ext.workspaceObj();
@@ -173,9 +172,9 @@ export namespace ExtCmds {
         ReverbPanel.createOrShow(ext.context.extensionUri);
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
 
-        setTimeout(function () {
-            commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        }, 1500);
+        // setTimeout(function () {
+        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        // }, 1500);
     }
 
     /**
