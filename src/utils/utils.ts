@@ -19,8 +19,11 @@ const { performance } = require('perf_hooks');
 const HTTPSnippet = require('httpsnippet');
 
 export function generateSnippet(data: any) {
-    let snippet = new HTTPSnippet(data);
-    snippet = snippet.convert('javascript', 'axios');
+    let text = new HTTPSnippet(data);
+    text = text.convert('javascript', 'axios');
+    const lines = text.split('\n');
+    lines.splice(0, 2);
+    const snippet = lines.join('\n');
     return snippet;
 }
 
@@ -62,25 +65,6 @@ export function ping(Options: AxiosRequestConfig) {
         });
 }
 
-/**
- *
- * @param
- * @returns
- */
-export function convert(route: string): any {
-    let output = {
-        method: '',
-        url: '',
-    };
-    const METHOD_AND_URL = route.match(/(\S*):\s+(\S*)/);
-    if (METHOD_AND_URL) {
-        const method = METHOD_AND_URL[1];
-        const url = 'http://'.concat(METHOD_AND_URL[2]);
-        output = { method, url };
-    }
-    return output;
-}
-
 export function resetTreeview() {
     ext.treeView = undefined;
     ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
@@ -88,10 +72,17 @@ export function resetTreeview() {
         treeDataProvider: ext.treeView,
     });
 
-    ext.treeView.tree.onDidChangeSelection(async (e: { selection: { label: string }[] }) => {
-        const { url } = convert(e.selection[0].label);
-        commands.executeCommand('extension.openFileInEditor', url);
-    });
+    ext.treeView.tree.onDidChangeSelection(
+        async (e: { selection: { uri: any; contextValue: any; range: any }[] }) => {
+            if (e.selection[0].contextValue === 'routeItem') {
+                commands.executeCommand(
+                    'extension.openFileInEditor',
+                    e.selection[0].uri,
+                    e.selection[0].range,
+                );
+            }
+        },
+    );
 }
 
 /**

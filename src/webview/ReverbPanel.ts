@@ -68,7 +68,7 @@ export default class ReverbPanel {
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
             async (msg: any) => {
-                console.log('MSG:', msg);
+                // console.log('MSG:', msg);
                 switch (msg.payload.command) {
                     case 'dataObjects':
                         commands.executeCommand('extension.dataObjects').then((e) => {
@@ -164,9 +164,6 @@ export default class ReverbPanel {
 
         // Clean up our resources
         this._panel.dispose();
-        ext.watcher?.dis1?.dispose();
-        ext.watcher?.dis2?.dispose();
-        ext.watcher = undefined;
 
         while (this._disposables.length) {
             const x = this._disposables.pop();
@@ -176,5 +173,3 @@ export default class ReverbPanel {
         }
     }
 }
-
-type Msg = Record<string, unknown>;
