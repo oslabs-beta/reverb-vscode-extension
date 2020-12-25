@@ -28,11 +28,12 @@ export function activate(context: ExtensionContext) {
     ext.registerCommand('extension.openFileInEditor', ExtCmds.openFileInEditor);
     ext.registerCommand('extension.wipeStorageObject', ExtCmds.wipeStorageObject);
     ext.registerCommand('paths.generateAxios', ExtCmds.GenerateAxios);
+    ext.registerCommand('paths.simpleQuery', ExtCmds.simpleQuery);
+    ext.registerCommand('extension.rightClickQuery', ExtCmds.rightClickQuery);
 
     if (window.registerWebviewPanelSerializer) {
         window.registerWebviewPanelSerializer(ReverbPanel.viewType, {
-            async deserializeWebviewPanel(webviewPanel: WebviewPanel, state: any) {
-                console.log(`Got state: ${state}`);
+            async deserializeWebviewPanel(webviewPanel: WebviewPanel) {
                 ReverbPanel.revive(webviewPanel, ext.context.extensionUri);
             },
         });

@@ -12,6 +12,7 @@
 
 import { ExtensionContext, window, OutputChannel, commands } from 'vscode';
 import ReverbTreeProvider from './modules/reverbTreeProvider';
+import Decorator from './modules/Decorator';
 
 import * as utils from './utils/utils';
 
@@ -19,6 +20,7 @@ export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: OutputChannel;
     export let treeView: ReverbTreeProvider | undefined;
+    export let decoration: Decorator;
 
     export const workspaceObj: () => MasterDataObject | undefined = () =>
         ext.context.workspaceState.get(`obj`);
@@ -38,4 +40,6 @@ export function initializeExtensionVariables(ctx: ExtensionContext) {
     if (!ext.treeView) {
         utils.resetTreeview();
     }
+
+    ext.decoration = new Decorator();
 }
