@@ -47,11 +47,15 @@
     display: flex;
     align-items: center;
     .button__wipe {
-      width: 3.5rem;
+      width: fit-content;
+      padding: 0 0.5rem;
       height: 1.8rem;
-      color: rgb(255, 37, 37);
       margin-right: 1rem;
       cursor: pointer;
+    }
+    .yes,
+    .no {
+      margin: 0 0.5rem;
     }
   }
 }
