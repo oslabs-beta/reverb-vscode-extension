@@ -47,7 +47,7 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
         }
         // If an element was passed in, create elements for its children
         if (element?.contextValue === 'pathItem') {
-            return Promise.resolve(this.getRoutes(element.label));
+            return Promise.resolve(this.getRoutes(element.uri));
         }
 
         // If no element was passed in, create elements for the entire workspace
@@ -109,7 +109,10 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
         const output: PathItem[] | undefined = [];
 
         for (const itemPath in masterDataObject.paths) {
-            output.push(new PathItem(itemPath, vscode.TreeItemCollapsibleState.Collapsed));
+            const substr = itemPath.slice(
+                Math.max(0, itemPath.indexOf(vscode.workspace.workspaceFolders![0].name)),
+            );
+            output.push(new PathItem(substr, itemPath, vscode.TreeItemCollapsibleState.Collapsed));
         }
 
         return output;
@@ -119,6 +122,7 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
 class PathItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
+        public readonly uri: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
