@@ -20,7 +20,8 @@ import * as path from 'path';
 let masterDataObject: MasterDataObject | undefined;
 
 // Create a Reverb Tree Provider class that extends vscode Tree Data Provider class
-export default class ReverbTreeProvider implements vscode.TreeDataProvider<RouteItem | PathItem> {
+export default class ReverbTreeProvider
+    implements vscode.TreeDataProvider<RouteItem | PathItem | RootItem> {
     tree: any;
 
     // Construct a new ReverbDependenciesProvider, pass workspaceRoot up to TreeDataProvider constructor
@@ -29,12 +30,12 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
     }
 
     // Returns the UI representation (TreeItem) of the element that gets displayed in the view.
-    getTreeItem(element: RouteItem | PathItem): vscode.TreeItem {
+    getTreeItem(element: RouteItem | PathItem | RootItem): vscode.TreeItem {
         return element;
     }
 
     // Returns the children for the given element or root (if no element is passed).
-    getChildren(element?: RouteItem | PathItem) {
+    getChildren(element?: RouteItem | PathItem | RootItem) {
         // Throw an error if no workspace is open
         if (!this.workspaceRoot) {
             vscode.window.showInformationMessage('No path in empty workspace');
@@ -49,29 +50,23 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
         if (element?.contextValue === 'pathItem') {
             return Promise.resolve(this.getRoutes(element.uri));
         }
+        if (element?.contextValue === 'rootItem') {
+            return Promise.resolve(this.getPaths());
+        }
 
         // If no element was passed in, create elements for the entire workspace
-        return Promise.resolve(this.getPaths());
+        return Promise.resolve([
+            new RootItem(
+                `${vscode.workspace.workspaceFolders![0].name}/`,
+                this.workspaceRoot,
+                vscode.TreeItemCollapsibleState.Expanded,
+            ),
+        ]);
     }
 
     private getRoutes(label: string): Array<RouteItem> | undefined {
         if (masterDataObject === undefined) return;
         const output: RouteItem[] | undefined = [];
-
-        function methodLabeler(x: string) {
-            switch (true) {
-                case x === 'get':
-                    return 'GET      :: ';
-                case x === 'put':
-                    return 'PUT      :: ';
-                case x === 'post':
-                    return 'POST    :: ';
-                case x === 'delete':
-                    return 'DELETE :: ';
-                default:
-                    return 'GET      :: ';
-            }
-        }
 
         for (const item in masterDataObject.urls) {
             if (masterDataObject.urls[item].path === label) {
@@ -80,9 +75,7 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
                         ['get', 'put', 'post', 'delete'].includes(method) &&
                         masterDataObject.urls[item][method].method !== undefined
                     ) {
-                        const name = `${methodLabeler(method)}${masterDataObject.urls[
-                            item
-                        ].url.slice(7)}`;
+                        const name = `${masterDataObject.urls[item].url.slice(7)}`;
                         const uri = masterDataObject.urls[item].path;
                         const { url } = masterDataObject.urls[item];
                         const { range } = masterDataObject.urls[item][method];
@@ -107,10 +100,11 @@ export default class ReverbTreeProvider implements vscode.TreeDataProvider<Route
     private getPaths(): Array<PathItem> | undefined {
         if (masterDataObject === undefined) return;
         const output: PathItem[] | undefined = [];
+        const dirName = vscode.workspace.workspaceFolders![0].name;
 
         for (const itemPath in masterDataObject.paths) {
             const substr = itemPath.slice(
-                Math.max(0, itemPath.indexOf(vscode.workspace.workspaceFolders![0].name)),
+                Math.max(0, itemPath.indexOf(dirName) + dirName.length + 1),
             );
             output.push(new PathItem(substr, itemPath, vscode.TreeItemCollapsibleState.Collapsed));
         }
@@ -154,10 +148,56 @@ class RouteItem extends vscode.TreeItem {
         this.description = '';
     }
 
-    iconPath = {
-        light: path.join(__filename, '..', '..', 'resources', 'light', 'boolean.svg'),
-        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'arrow.svg'),
-    };
+    methodLabeler(x: string) {
+        switch (true) {
+            case x === 'get':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'GET.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'GET.svg'),
+                };
+            case x === 'put':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'PUT.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'PUT.svg'),
+                };
+            case x === 'post':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'POST.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'POST.svg'),
+                };
+            case x === 'delete':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'DELETE.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'DELETE.svg'),
+                };
+            default:
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'http.svg'),
+                };
+        }
+    }
+
+    iconPath = this.methodLabeler(this.method);
 
     contextValue = 'routeItem';
+}
+
+class RootItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly uri: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    ) {
+        super(label, collapsibleState);
+        this.tooltip = this.label;
+        this.description = '';
+    }
+
+    iconPath = {
+        light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg'),
+    };
+
+    contextValue = 'rootItem';
 }
