@@ -120,7 +120,6 @@ class PathItem extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
-        // Define text that should be displayed when the mouse is hovering over the dependency
         this.tooltip = this.label;
         this.description = '';
     }
@@ -143,8 +142,7 @@ class RouteItem extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
-        // Define text that should be displayed when the mouse is hovering over the dependency
-        this.tooltip = this.uri;
+        this.tooltip = `${this.method}: ${this.url}`;
         this.description = '';
     }
 
