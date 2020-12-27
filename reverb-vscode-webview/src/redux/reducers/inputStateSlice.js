@@ -186,12 +186,13 @@ export const inputStateSlice = createSlice({
   reducers: {
     setUrlState: (state, action) => {
       const { url, path } = JSON.parse(action.payload);
-      state.inputs.urlState = url;
-      state.currentPreset = 'default';
+      const newState = resetInputs(state);
+      newState.inputs.urlState = url;
       if (path !== 'default') {
         vscode.postMessage({ payload: { command: 'openFileInEditor', data: path } });
       }
-      return state;
+
+      return newState;
     },
     setMethodState: (state, action) => {
       const method = action.payload;
@@ -232,10 +233,12 @@ export const inputStateSlice = createSlice({
       if (action.payload === 'default' || action.payload === undefined) {
         state = resetInputs(state);
       } else {
-        state.currentPreset = action.payload.id;
-        state.inputs.headerState = action.payload.headerState;
-        state.inputs.cookieState = action.payload.cookieState;
-        state.inputs.dataState = action.payload.dataState;
+        state.currentPreset = action.payload;
+        state.inputs.headerState =
+          state.storage.masterObject.presets[action.payload].headerState;
+        state.inputs.cookieState =
+          state.storage.masterObject.presets[action.payload].cookieState;
+        state.inputs.dataState = state.storage.masterObject.presets[action.payload].dataState;
       }
       return state;
     },
@@ -266,7 +269,6 @@ export const inputStateSlice = createSlice({
       return state;
     },
     [wipeStorageObject.fulfilled]: (state, action) => {
-      console.log(action.payload);
       state.storage.masterObject = action.payload.data;
       return state;
     },

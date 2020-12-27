@@ -60,7 +60,7 @@ function SelectPreset() {
             if (_presets[e.target.value] === undefined) {
               dispatch(setCurrentPreset('default'));
             } else {
-              dispatch(setCurrentPreset(_presets[e.target.value]));
+              dispatch(setCurrentPreset(e.target.value));
             }
           }}>
           <option key="default" value="default">
