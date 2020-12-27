@@ -49,12 +49,12 @@ function SelectPreset() {
   }, [_currentUrl, _presets]);
 
   return (
-    <form className="select__preset">
+    <form className="select__preset flexR">
       {inputVisible ? (
         <input placeholder="Preset name" className="preset_name" />
       ) : (
         <select
-          className="select__preset"
+          className="select__preset flexR"
           value={_currentPreset}
           onChange={(e) => {
             if (_presets[e.target.value] === undefined) {
@@ -81,11 +81,9 @@ function SelectPreset() {
           save
         </button>
       ) : (
-        <div>
-          <button type="button" className="button__add" onClick={() => setInputVisible(true)}>
-            +
-          </button>
-        </div>
+        <button type="button" className="button__add" onClick={() => setInputVisible(true)}>
+          +
+        </button>
       )}
       <button
         type="button"

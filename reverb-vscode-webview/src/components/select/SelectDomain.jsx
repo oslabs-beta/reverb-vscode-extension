@@ -38,7 +38,7 @@ function SelectDomain() {
   }, [_urls]);
 
   return (
-    <form className="select__domain">
+    <form className="select__domain flexR">
       <select
         onChange={(e) => {
           dispatch(setMethodState(e.target.value));
