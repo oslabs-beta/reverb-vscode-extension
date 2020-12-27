@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Main from './containers/Main';
 import Output from './containers/Output';
 import { useDispatch, useSelector } from 'react-redux';

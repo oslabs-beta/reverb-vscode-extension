@@ -18,7 +18,7 @@ import {
   vscApi,
   validatePort,
   validPort,
-} from '../redux/reducers/inputStateSlice';
+} from '../../redux/reducers/inputStateSlice';
 
 function ParseForm() {
   // Redux

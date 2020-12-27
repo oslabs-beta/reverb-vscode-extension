@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
+import { makeRequest } from '../redux/reducers/inputStateSlice';
 import SelectDomain from './select/SelectDomain';
 import SelectPreset from './select/SelectPreset';
-import { makeRequest } from '../redux/reducers/inputStateSlice';
 
 function Select() {
   const dispatch = useDispatch();
