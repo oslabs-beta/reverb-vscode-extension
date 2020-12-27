@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { currentUrl } from '../redux/reducers/inputStateSlice';
-import { useForm } from 'react-hook-form';
 
 import { params } from '../redux/reducers/viewContextSlice';
 
