@@ -55,7 +55,7 @@ function SelectDomain() {
           dispatch(setUrlState(e.target.value));
         }}
         className="select__endpoint">
-        <option key="tester" value="default">
+        <option key="tester" value={JSON.stringify({ url: 'default', path: 'default' })}>
           choose domain
         </option>
         {urlOptions}

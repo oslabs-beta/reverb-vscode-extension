@@ -188,7 +188,9 @@ export const inputStateSlice = createSlice({
       const { url, path } = JSON.parse(action.payload);
       state.inputs.urlState = url;
       state.currentPreset = 'default';
-      vscode.postMessage({ payload: { command: 'openFileInEditor', data: path } });
+      if (path !== 'default') {
+        vscode.postMessage({ payload: { command: 'openFileInEditor', data: path } });
+      }
       return state;
     },
     setMethodState: (state, action) => {
@@ -264,7 +266,7 @@ export const inputStateSlice = createSlice({
       return state;
     },
     [wipeStorageObject.fulfilled]: (state, action) => {
-        console.log(action.payload);
+      console.log(action.payload);
       state.storage.masterObject = action.payload.data;
       return state;
     },

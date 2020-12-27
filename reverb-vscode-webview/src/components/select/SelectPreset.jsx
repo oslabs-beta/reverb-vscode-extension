@@ -33,6 +33,7 @@ function SelectPreset() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    if (_urls[_currentUrl] === undefined) return;
     if (_currentUrl === 'default' || !_urls[_currentUrl].presets.length) {
       return setPresetOptions([]);
     }
