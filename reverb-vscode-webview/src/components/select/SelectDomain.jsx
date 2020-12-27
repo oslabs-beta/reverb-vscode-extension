@@ -12,12 +12,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { setMethodState, setUrlState, urls } from '../../redux/reducers/inputStateSlice';
+import {
+  setMethodState,
+  setUrlState,
+  urls,
+  currentUrl,
+} from '../../redux/reducers/inputStateSlice';
 
 function SelectDomain() {
   const [urlOptions, setUrlOptions] = useState([]);
+  const [methodOptions, setMethodOptions] = useState([]);
 
   const _urls = useSelector(urls);
+  const _currentUrl = useSelector(currentUrl);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,6 +44,23 @@ function SelectDomain() {
     }
   }, [_urls]);
 
+  useEffect(() => {
+    if (_currentUrl === 'default') {
+      setMethodOptions([]);
+    } else {
+      setMethodOptions(
+        Object.keys(_urls[_currentUrl].ranges).map((el) => {
+          el = el.toUpperCase();
+          return (
+            <option key={el} value={el}>
+              {el}
+            </option>
+          );
+        })
+      );
+    }
+  }, [_currentUrl]);
+
   return (
     <form className="select__domain flexR">
       <select
@@ -44,10 +68,7 @@ function SelectDomain() {
           dispatch(setMethodState(e.target.value));
         }}
         className="select__type">
-        <option value="GET">GET</option>
-        <option value="POST">POST</option>
-        <option value="PUT">PUT</option>
-        <option value="DELETE">DELETE</option>
+        {methodOptions}
       </select>
 
       <select
