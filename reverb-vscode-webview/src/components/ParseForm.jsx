@@ -9,7 +9,7 @@
  * ************************************
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -27,15 +27,20 @@ function ParseForm() {
   const _validPort = useSelector(validPort);
   const dispatch = useDispatch();
 
+  const [parsed, setParsed] = useState(null);
   const port = useRef(null);
   const url = useRef(null);
 
   const handleSubmit = (e) => {
+    e.preventDefault();
     const serverData = {
       file_path: url.current.value,
       port: port.current.value,
     };
+    if (url.current.value === 'default' || port.current.value.length < 1) return;
     port.current.value = '';
+    setParsed('Parse successful!');
+    setTimeout(() => setParsed(''), 3500);
     dispatch(vscApi({ command: 'parseServer', data: serverData }));
   };
 
@@ -75,6 +80,7 @@ function ParseForm() {
         />
 
         <input type="submit" value="Confirm" className="button__send" />
+        <p className="parsed">{parsed}</p>
       </div>
     </form>
   );
