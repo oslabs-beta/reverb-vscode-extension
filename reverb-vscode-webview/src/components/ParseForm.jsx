@@ -51,8 +51,13 @@ function ParseForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="input__parse">
-      <p>enter port number and select main server file</p>
       <div>
+        <select ref={register} name="file_path" className="select__path">
+          <option key="default" value="default">
+            select server file
+          </option>
+          {pathsArr}
+        </select>
         <input
           ref={register}
           onChange={({ target }) => {
@@ -65,10 +70,6 @@ function ParseForm() {
           autoFocus
           className={_validPort ? 'input__port' : 'port__error input__port'}
         />
-
-        <select ref={register} name="file_path" className="select__path">
-          {pathsArr}
-        </select>
 
         <input type="submit" value="Confirm" className="button__send" />
       </div>
