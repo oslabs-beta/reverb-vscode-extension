@@ -35,6 +35,7 @@ function InputCookies() {
                         name={`cookies.${index}.key`}
                         placeholder="cookie"
                         type="text"
+                        autoFocus={true}
                         onBlur={() => {
                           dispatch(setCookieState(values));
                         }}

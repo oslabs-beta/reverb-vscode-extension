@@ -35,6 +35,7 @@ function InputHeaders() {
                         name={`headers.${index}.key`}
                         placeholder="header"
                         type="text"
+                        autoFocus={true}
                         onBlur={() => {
                           dispatch(setHeaderState(values));
                         }}
