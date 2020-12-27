@@ -27,10 +27,10 @@ function InputHeaders() {
         <Form className="header__form" style={{ display: headersView ? 'block' : 'none' }}>
           <FieldArray name="headers">
             {({ remove, push }) => (
-              <div className="input__header">
+              <div className="input__header flexC">
                 {values.headers.length > 0 &&
                   values.headers.map((header, index) => (
-                    <div className="header__li" key={index}>
+                    <div className="header__li flexR" key={index}>
                       <Field
                         name={`headers.${index}.key`}
                         placeholder="header"
@@ -52,7 +52,7 @@ function InputHeaders() {
                       </button>
                     </div>
                   ))}
-                <div className="header__li">
+                <div className="header__li flexR">
                   {/* these look like inputs but are buttons that add a new row of inputs above them when clicked */}
                   <input
                     type="text"

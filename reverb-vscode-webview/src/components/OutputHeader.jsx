@@ -43,9 +43,9 @@ function OutputHeader() {
     size = _requestResult.headers['content-length'];
   }
   return (
-    <div className="output__header">
-      <div className="header__verbose">
-        <div className="header__nav">
+    <div className="output__header flexR">
+      <div className="header__verbose flexR">
+        <div className="header__nav flexR">
           <button
             type="button"
             className={
@@ -70,7 +70,7 @@ function OutputHeader() {
           </button>
         </div>
 
-        <div className="header__metrics">
+        <div className="header__metrics flexR">
           <span title="status code" style={{ backgroundColor: colorCode(_requestResult.status) }}>
             {_requestResult.status ? _requestResult.status : ' - '}
           </span>

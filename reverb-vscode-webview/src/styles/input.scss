@@ -7,15 +7,12 @@
   }
   .input__header,
   .input__cookie {
-    display: flex;
-    flex-direction: column;
     width: 100%;
     height: 100%;
     justify-content: flex-start;
     padding-top: 15px;
     .header__li,
     .cookie__li {
-      display: flex;
       justify-content: flex-start;
       margin-bottom: 0.8rem;
       padding-left: 2rem;

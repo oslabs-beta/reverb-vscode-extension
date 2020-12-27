@@ -1,12 +1,9 @@
 .output__header {
-  display: flex;
   align-items: center;
   margin-top: 2px;
   .header__verbose {
-    display: flex;
     width: 100%;
     .header__nav {
-      display: flex;
       .button__main,
       .button__response,
       .button__header,
@@ -29,7 +26,6 @@
     border-bottom: 0.05rem solid $border-color;
   }
   .header__metrics {
-    display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
@@ -40,25 +36,6 @@
       margin: 0 0.5rem;
       padding: 0 1rem;
     }
-  }
-}
-
-.watch__main {
-  border-left: 0.05rem solid $border-color;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-
-  justify-content: flex-start;
-  align-items: flex-start;
-  overflow-y: scroll;
-  .output__item {
-    margin: 0.4rem 0 0.4rem 0;
-    color: green;
-  }
-  .error {
-    color: rgb(211, 1, 1);
   }
 }
 
@@ -108,7 +85,4 @@
   .ReactTable.-striped .rt-tr.-odd {
     background: rgba(0, 0, 0, 0.175);
   }
-  // .ReactTable.-highlight .rt-tbody .rt-tr:not(.-padRow):hover {
-  //   background: rgba(0, 0, 0, 0.02);
-  // }
 }

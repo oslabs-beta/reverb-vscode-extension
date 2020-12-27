@@ -27,10 +27,10 @@ function InputCookies() {
         <Form className="cookie__form" style={{ display: cookiesView ? 'block' : 'none' }}>
           <FieldArray name="cookies">
             {({ remove, push }) => (
-              <div className="input__cookie">
+              <div className="input__cookie flexC">
                 {values.cookies.length > 0 &&
                   values.cookies.map((cookie, index) => (
-                    <div className="cookie__li" key={index}>
+                    <div className="cookie__li flexR" key={index}>
                       <Field
                         name={`cookies.${index}.key`}
                         placeholder="cookie"
@@ -53,7 +53,7 @@ function InputCookies() {
                     </div>
                   ))}
 
-                <div className="cookie__li">
+                <div className="cookie__li flexR">
                   {/* these look like inputs but are buttons that add a new row of inputs above them when clicked */}
                   <input
                     type="text"
