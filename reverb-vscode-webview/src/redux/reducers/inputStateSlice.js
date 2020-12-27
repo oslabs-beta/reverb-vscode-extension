@@ -94,8 +94,14 @@ export const savePreset = createAsyncThunk(
  */
 export const makeRequest = createAsyncThunk(
   'inputState/makeRequest',
-  async (payload, { getState }) => {
+  async (payload, { getState, dispatch }) => {
+    dispatch(setWaiting(true));
     const { inputs } = getState().inputState;
+
+    if (inputs.urlState === 'default') {
+      dispatch(setWaiting(false));
+      return;
+    }
 
     const baseURL = inputs.urlState;
     const method = inputs.methodState;
@@ -181,6 +187,7 @@ export const inputStateSlice = createSlice({
     requestResult: {},
     currentPreset: 'default',
     validPort: true,
+    waiting: false,
     loading: true,
   },
   reducers: {
@@ -229,15 +236,17 @@ export const inputStateSlice = createSlice({
       state.loading = action.payload;
       return state;
     },
+    setWaiting: (state, action) => {
+      state.waiting = action.payload;
+      return state;
+    },
     setCurrentPreset: (state, action) => {
       if (action.payload === 'default' || action.payload === undefined) {
         state = resetInputs(state);
       } else {
         state.currentPreset = action.payload;
-        state.inputs.headerState =
-          state.storage.masterObject.presets[action.payload].headerState;
-        state.inputs.cookieState =
-          state.storage.masterObject.presets[action.payload].cookieState;
+        state.inputs.headerState = state.storage.masterObject.presets[action.payload].headerState;
+        state.inputs.cookieState = state.storage.masterObject.presets[action.payload].cookieState;
         state.inputs.dataState = state.storage.masterObject.presets[action.payload].dataState;
       }
       return state;
@@ -266,6 +275,7 @@ export const inputStateSlice = createSlice({
     },
     [makeRequest.fulfilled]: (state, action) => {
       state.requestResult = action.payload.data;
+      state.waiting = false;
       return state;
     },
     [wipeStorageObject.fulfilled]: (state, action) => {
@@ -282,6 +292,7 @@ export const {
   setCookieState,
   setDataState,
   setLoading,
+  setWaiting,
   setCurrentPreset,
 } = inputStateSlice.actions;
 
@@ -292,6 +303,7 @@ export const headerState = (state) => state.inputState.inputs.headerState;
 export const cookieState = (state) => state.inputState.inputs.cookieState;
 export const dataState = (state) => state.inputState.inputs.dataState;
 export const loading = (state) => state.inputState.loading;
+export const waiting = (state) => state.inputState.waiting;
 export const validPort = (state) => state.inputState.validPort;
 export const requestResult = (state) => state.inputState.requestResult;
 export const currentPreset = (state) => state.inputState.currentPreset;
