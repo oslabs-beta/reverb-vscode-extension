@@ -9,8 +9,7 @@
  * ************************************
  */
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -28,11 +27,15 @@ function ParseForm() {
   const _validPort = useSelector(validPort);
   const dispatch = useDispatch();
 
-  // Form base
-  const { register, handleSubmit } = useForm({
-    mode: 'onChange',
-  });
-  const onSubmit = (serverData) => {
+  const port = useRef(null);
+  const url = useRef(null);
+
+  const handleSubmit = (e) => {
+    const serverData = {
+      file_path: url.current.value,
+      port: port.current.value,
+    };
+    port.current.value = '';
     dispatch(vscApi({ command: 'parseServer', data: serverData }));
   };
 
@@ -50,16 +53,16 @@ function ParseForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="input__parse">
+    <form onSubmit={handleSubmit} className="input__parse">
       <div>
-        <select ref={register} name="file_path" className="select__path">
+        <select ref={url} name="file_path" className="select__path">
           <option key="default" value="default">
             select server file
           </option>
           {pathsArr}
         </select>
         <input
-          ref={register}
+          ref={port}
           onChange={({ target }) => {
             if (target.value.length === 4) {
               dispatch(validatePort(target.value));
