@@ -278,7 +278,9 @@ export const inputStateSlice = createSlice({
       return state;
     },
     [makeRequest.fulfilled]: (state, action) => {
-      state.requestResult = action.payload.data;
+      if (action.payload !== undefined) {
+        state.requestResult = action.payload.data;
+      }
       state.waiting = false;
       return state;
     },
