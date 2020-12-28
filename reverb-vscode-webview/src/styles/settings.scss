@@ -21,7 +21,7 @@
       }
 
       .select__path {
-        width: 25rem;
+        width: 19rem;
         cursor: pointer;
       }
       .button__send {
@@ -35,6 +35,11 @@
           margin-left: 1rem;
           color: green;
           font-size: 1rem;
+      }
+      .valid__port {
+        margin-left: 1rem;
+        color: red;
+        font-size: 1rem;
       }
     }
   }

@@ -240,6 +240,10 @@ export const inputStateSlice = createSlice({
       state.waiting = action.payload;
       return state;
     },
+    setValidPort: (state, action) => {
+      state.validPort = action.payload;
+      return state;
+    },
     setCurrentPreset: (state, action) => {
       if (action.payload === 'default' || action.payload === undefined) {
         state = resetInputs(state);
@@ -293,6 +297,7 @@ export const {
   setDataState,
   setLoading,
   setWaiting,
+  setValidPort,
   setCurrentPreset,
 } = inputStateSlice.actions;
 

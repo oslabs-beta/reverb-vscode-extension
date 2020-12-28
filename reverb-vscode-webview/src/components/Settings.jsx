@@ -9,10 +9,12 @@ function Settings() {
   const settingsView = useSelector(settings);
 
   return (
-    <div className="input__settings" style={{ display: settingsView ? 'block' : 'none' }}>
-      <ParseForm />
-      <EraseStorage />
-    </div>
+    settingsView && (
+      <div className="input__settings">
+        <ParseForm />
+        <EraseStorage />
+      </div>
+    )
   );
 }
 

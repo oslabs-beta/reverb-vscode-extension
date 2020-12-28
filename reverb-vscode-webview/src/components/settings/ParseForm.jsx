@@ -9,7 +9,7 @@
  * ************************************
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -18,6 +18,7 @@ import {
   vscApi,
   validatePort,
   validPort,
+  setValidPort,
 } from '../../redux/reducers/inputStateSlice';
 
 function ParseForm() {
@@ -30,14 +31,23 @@ function ParseForm() {
   const [parsed, setParsed] = useState(null);
   const port = useRef(null);
   const url = useRef(null);
+  const portWarningText = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (url.current.value === 'default' || !_validPort) {
+      portWarningText.current.innerHTML = 'FAILED: invalid port';
+      setTimeout(() => {
+        portWarningText.current.innerHTML = `server not listening on port`;
+      }, 2000);
+      return;
+    }
+
     const serverData = {
       file_path: url.current.value,
       port: port.current.value,
     };
-    if (url.current.value === 'default' || port.current.value.length < 1) return;
     port.current.value = '';
     setParsed('Parse successful!');
     setTimeout(() => setParsed(''), 3500);
@@ -57,6 +67,24 @@ function ParseForm() {
     });
   }
 
+  // checks port validity every n seconds until _validPort becomes true
+  useEffect(() => {
+    console.log('62');
+    if (_validPort === true) return;
+    let int = setInterval(() => {
+      console.log('65');
+      dispatch(validatePort(port.current.value));
+    }, 1000);
+
+    return () => {
+      console.log('70');
+      if (int !== undefined) {
+        clearInterval(int);
+        dispatch(setValidPort(true));
+      }
+    };
+  }, [_validPort]);
+  console.log('76');
   return (
     <form onSubmit={handleSubmit} className="input__parse">
       <div>
@@ -69,7 +97,7 @@ function ParseForm() {
         <input
           ref={port}
           onChange={({ target }) => {
-            if (target.value.length === 4) {
+            if (target.value.length >= 4 && _validPort) {
               dispatch(validatePort(target.value));
             }
           }}
@@ -80,6 +108,11 @@ function ParseForm() {
         />
 
         <input type="submit" value="Confirm" className="button__send" />
+        {_validPort ? null : (
+          <p ref={portWarningText} className="valid__port">
+            server not listening on port
+          </p>
+        )}
         <p className="parsed">{parsed}</p>
       </div>
     </form>

@@ -10,7 +10,7 @@ function Sidebar() {
     setSelected(value);
     dispatch(setInputViewContext(value));
   };
-  console.log('123');
+
   return (
     <div className="container__sidebar">
       <div className="sidebar flexC">
