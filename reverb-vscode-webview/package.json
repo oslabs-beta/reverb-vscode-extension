@@ -33,6 +33,7 @@
     "@types/codemirror": "0.0.102",
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^6.3.2",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "eslint": "^7.15.0",
     "eslint-config-airbnb": "^18.2.1",

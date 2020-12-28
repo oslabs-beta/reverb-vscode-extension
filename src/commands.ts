@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable guard-for-in */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /**
@@ -46,7 +47,7 @@ export namespace ExtCmds {
                 urls: {},
                 presets: {},
                 serverPaths: getServerPaths(),
-                rootDirectory: workspace.workspaceFolders![0].name,
+                rootDirectory: workspace.workspaceFolders![0].name, // uh o what if nothings open?
             };
 
         return masterObject;
@@ -56,28 +57,30 @@ export namespace ExtCmds {
      * Parses files with supplied port and server file
      * @param {string} data object with port and serverFile
      */
-    export function parseServer(data: any) {
-        const expressParser = new ExpressParser(data.file_path, data.port);
+    export function parseServer(serverInfo: any) {
+        const expressParser = new ExpressParser(serverInfo.file_path, serverInfo.port);
         const parseOutput = expressParser.parse();
-        const { paths, urls, presets, serverPaths, rootDirectory } = ext.workspaceObj()!;
 
-        serverPaths.splice(serverPaths.indexOf(data.file_path), 1);
+        const data = ext.workspaceObj() === undefined ? dataObjects() : ext.workspaceObj();
+        if (data === undefined) return;
+
+        data.serverPaths.splice(data.serverPaths.indexOf(serverInfo.file_path), 1);
 
         const currentMasterObject = {
             paths: {
-                ...paths,
+                ...data.paths,
                 ...parseOutput.paths,
             },
             urls: {
-                ...urls,
+                ...data.urls,
                 ...parseOutput.urls,
             },
             presets: {
-                ...presets,
+                ...data.presets,
                 ...parseOutput.presets,
             },
-            serverPaths,
-            rootDirectory,
+            serverPaths: data.serverPaths,
+            rootDirectory: data.rootDirectory,
         };
 
         ext.context.workspaceState.update(`obj`, currentMasterObject);
