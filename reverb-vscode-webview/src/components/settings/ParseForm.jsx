@@ -22,7 +22,6 @@ import {
 } from '../../redux/reducers/inputStateSlice';
 
 function ParseForm() {
-  // Redux
   const _serverPaths = useSelector(serverPaths);
   const _rootDirectory = useSelector(rootDirectory);
   const _validPort = useSelector(validPort);

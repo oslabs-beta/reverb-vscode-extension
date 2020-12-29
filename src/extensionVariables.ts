@@ -10,7 +10,7 @@
  * ************************************
  */
 
-import { ExtensionContext, window, OutputChannel, commands } from 'vscode';
+import { ExtensionContext, commands } from 'vscode';
 import ReverbTreeProvider from './modules/reverbTreeProvider';
 import Decorator from './modules/Decorator';
 
@@ -18,7 +18,6 @@ import * as utils from './utils/utils';
 
 export namespace ext {
     export let context: ExtensionContext;
-    export let outputChannel: OutputChannel;
     export let treeView: ReverbTreeProvider | undefined;
     export let decoration: Decorator;
 
@@ -35,7 +34,6 @@ export namespace ext {
 
 export function initializeExtensionVariables(ctx: ExtensionContext) {
     ext.context = ctx;
-    ext.outputChannel = window.createOutputChannel('reVerb');
 
     if (!ext.treeView) {
         utils.resetTreeview();

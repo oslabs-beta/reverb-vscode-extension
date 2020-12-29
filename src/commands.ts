@@ -46,7 +46,6 @@ export namespace ExtCmds {
                 serverPaths: getServerPaths(),
                 rootDirectory: workspace.workspaceFolders![0].name, // uh o what if nothings open?
             };
-
         return masterObject;
     }
 
@@ -168,13 +167,8 @@ export namespace ExtCmds {
      */
     export async function OpenWebview() {
         await utils.clearEditorPanels();
-
         ReverbPanel.createOrShow(ext.context.extensionUri);
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
-
-        // setTimeout(function () {
-        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        // }, 1500);
     }
 
     /**
@@ -190,13 +184,14 @@ export namespace ExtCmds {
     /**
      * Initiate query from content menu click on specific endpoint function
      */
-    export async function rightClickQuery({ path }) {
+    export async function rightClickQuery(label: { path: any }) {
+        let { path } = label;
         if (window.activeTextEditor === undefined) return;
         if (path[2] === ':') path = path.slice(1);
 
         let range;
         let config;
-        const { urls } = ext.workspaceObj();
+        const { urls } = ext.workspaceObj()!;
         const line = window.activeTextEditor.selection.active.line + 1;
 
         for (const url in urls) {
@@ -215,7 +210,7 @@ export namespace ExtCmds {
                 }
             }
         }
-
+        if (config === undefined) return;
         const data = await utils.ping(config);
         const text = `-=:> ${data.resTime}ms | status: ${data.status} | data: ${JSON.stringify(
             data.data,

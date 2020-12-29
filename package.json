@@ -53,7 +53,7 @@
         "postinstall": "cd ./reverb-vscode-webview && yarn install"
     },
     "activationEvents": [
-        "*"
+        "workspaceContains:**/*.js"
     ],
     "contributes": {
         "commands": [

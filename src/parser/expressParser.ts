@@ -11,7 +11,7 @@
  *
  * ************************************
  */
-import { v4 as uuidv4 } from 'uuid';
+
 import { getRanges } from './utils/ast';
 // Regex patterns used for file parsing
 import { FILENAME_AND_PATH, ROUTE_PARAMS } from '../constants/expressPatterns';
@@ -59,7 +59,7 @@ class ExpressParser {
      * @param {string} serverPath The path of the top-level server file
      * @return {File} A File object containing info about the server file
      */
-    initializeServerFile(serverPath: string): File {
+    initializeServerFile(serverPath: string): Partial<File> {
         const SPLIT_PATH = serverPath.match(FILENAME_AND_PATH);
         if (SPLIT_PATH !== null)
             return { path: SPLIT_PATH[1], fileName: SPLIT_PATH[2], contents: '' };
@@ -71,7 +71,7 @@ class ExpressParser {
      * Parses all endpoints from the express server
      * @return {MasterDataObject} A WorkspaceObj object containing info for all endpoints in the server
      */
-    parse(): MasterDataObject {
+    parse(): Partial<MasterDataObject> {
         this.serverFile.contents = readFile(this.serverFile);
         this.findSupportFiles();
         this.findExpressImports();
@@ -231,9 +231,9 @@ class ExpressParser {
     }
 
     buildMasterDataObject() {
-        const paths = {};
-        const urls = {};
-        const presets = {};
+        const paths: Record<any, any> = {};
+        const urls: Record<any, any> = {};
+        const presets: Record<any, any> = {};
 
         this.routes.forEach((route) => {
             const urlObject = new URL(route.route);

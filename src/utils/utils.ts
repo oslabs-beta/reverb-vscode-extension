@@ -10,7 +10,7 @@
  */
 
 import { window, commands, workspace } from 'vscode';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { ext } from '../extensionVariables';
 import ReverbTreeProvider from '../modules/reverbTreeProvider';
 
@@ -32,14 +32,8 @@ export function generateSnippet(data: any) {
  * @param {AxiosRequestConfig | Options} Options Config option object of request.
  * @returns {AxiosResponse<any>} Response of the request made.
  */
-
-// transformResponse: [function (data) {
-//     // Do whatever you want to transform the data
-
-//     return data;
-//   }],
-export function ping(Options: AxiosRequestConfig) {
-    const config = { ...Options, validateStatus: undefined };
+export function ping(options: { url: any; method: any }) {
+    const config = { ...options, validateStatus: undefined };
     const time = performance.now();
     return axios
         .request(config)
