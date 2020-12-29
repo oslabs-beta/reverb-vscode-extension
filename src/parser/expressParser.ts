@@ -16,7 +16,7 @@ import { getRanges } from './utils/ast';
 // Regex patterns used for file parsing
 import { FILENAME_AND_PATH, ROUTE_PARAMS } from '../constants/expressPatterns';
 // File and path manipulation functions
-import { readFile, findImportedFiles } from './utils/genericFileOps';
+import { readFile, findImportedFiles, getLocalRoute } from './utils/genericFileOps';
 // Express specific file operations
 import {
     findExpressImport,
@@ -236,6 +236,8 @@ class ExpressParser {
         const presets = {};
 
         this.routes.forEach((route) => {
+            const urlObject = new URL(route.route);
+
             paths[route.path] = {
                 path: route.path,
                 serverFile: this.serverFile.path + this.serverFile.fileName,
@@ -251,6 +253,8 @@ class ExpressParser {
                     presets: [],
                     path: route.path,
                     url: route.route,
+                    pathname: urlObject.pathname,
+                    port: this.serverPort,
                     ranges: {},
                 };
             }
@@ -258,6 +262,7 @@ class ExpressParser {
                 path: route.path,
                 url: route.route,
                 method: route.method,
+                params: this.findParams(getLocalRoute(route.route)),
                 range: [route.startLine, route.endLine],
             };
             urls[route.route].ranges[route.method] = [route.startLine, route.endLine];

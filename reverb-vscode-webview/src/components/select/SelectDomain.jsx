@@ -28,7 +28,6 @@ function SelectDomain() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // populate dropdown options
     if (_urls !== undefined) {
       setUrlOptions(
         Object.keys(_urls).map((el) => {
@@ -36,7 +35,7 @@ function SelectDomain() {
             <option
               key={_urls[el].url}
               value={JSON.stringify({ url: _urls[el].url, path: _urls[el].path })}>
-              {_urls[el].url.slice(7)}
+              {`:${_urls[el].port}${_urls[el].pathname}`}
             </option>
           );
         })

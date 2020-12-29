@@ -26,12 +26,9 @@ export namespace ExtCmds {
     /**
      * Takes config and makes axios request returning detailed response
      * @param {any} query Config option object of request.
-     * @returns {any}  Response of the request made.
+     * @returns {any} Response of the request made.
      */
     export async function verboseRequest(query: any) {
-        const masterObject = ext.workspaceObj();
-
-        query.baseURL = masterObject!.urls[query.baseURL].url;
         const data = await utils.ping(query);
         return data;
     }

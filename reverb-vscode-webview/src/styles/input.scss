@@ -69,13 +69,11 @@
   padding-top: 15px;
   .param {
     margin-left: 2rem;
+    width: 14rem;
     margin-top: 1rem;
+    justify-content: space-between;
     input {
-      border: none;
-      border-bottom: 1px solid $font-color;
-      margin-left: 1rem;
-      line-height: 1.4rem;
-      width: 30%;
+      padding-left: 0.2rem;
     }
   }
   button {

@@ -69,22 +69,19 @@ function ParseForm() {
 
   // checks port validity every n seconds until _validPort becomes true
   useEffect(() => {
-    console.log('62');
     if (_validPort === true) return;
     let int = setInterval(() => {
-      console.log('65');
       dispatch(validatePort(port.current.value));
     }, 1000);
 
     return () => {
-      console.log('70');
       if (int !== undefined) {
         clearInterval(int);
         dispatch(setValidPort(true));
       }
     };
   }, [_validPort]);
-  console.log('76');
+
   return (
     <form onSubmit={handleSubmit} className="input__parse">
       <div>

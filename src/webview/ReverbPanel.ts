@@ -50,25 +50,18 @@ export default class ReverbPanel {
         this._panel = panel;
         this._extensionUri = extensionUri;
 
-        // Listen for when the panel is disposed
-        // This happens when the user closes the panel or when the panel is closed programatically
         this._panel.onDidDispose(() => this.dispose(), undefined, this._disposables);
 
-        // Update the content based on view changes
         // this._panel.onDidChangeViewState(
         //     (e) => {
-        //         if (this._panel.visible) {
-        //             this._update();
-        //         }
+
         //     },
         //     undefined,
         //     this._disposables,
         // );
 
-        // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
             async (msg: any) => {
-                // console.log('MSG:', msg);
                 switch (msg.payload.command) {
                     case 'dataObjects':
                         commands.executeCommand('extension.dataObjects').then((e) => {

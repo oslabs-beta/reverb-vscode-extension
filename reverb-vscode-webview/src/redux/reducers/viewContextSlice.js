@@ -18,7 +18,7 @@ export const viewContextSlice = createSlice({
     header: true,
     data: false,
     cookies: false,
-    param: false,
+    params: false,
     settings: false,
     currentView: 'header',
     outputTabContext: 'response',

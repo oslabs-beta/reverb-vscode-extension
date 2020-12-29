@@ -103,9 +103,17 @@ export const makeRequest = createAsyncThunk(
       return;
     }
 
-    const baseURL = inputs.urlState;
     const method = inputs.methodState;
     const jsonData = inputs.dataState;
+    const urlParams = inputs.paramState;
+    const currentUrl = new URL(inputs.urlState);
+
+    // insert path parameters into url
+    Object.entries(urlParams || {}).forEach(([k, v]) => {
+      if (v.length > 0) {
+        currentUrl.pathname = currentUrl.pathname.replace(`:${k}`, encodeURIComponent(v));
+      }
+    });
 
     const cookiesArray = inputs.cookieState.cookies
       .filter((el) => {
@@ -131,7 +139,7 @@ export const makeRequest = createAsyncThunk(
 
     const request = {
       headers,
-      baseURL,
+      baseURL: currentUrl.href,
       method,
       data: jsonData,
     };
@@ -157,6 +165,7 @@ function resetInputs(state) {
         cookies: [],
       },
       dataState: '',
+      paramState: {},
     },
   };
 }
@@ -166,7 +175,7 @@ export const inputStateSlice = createSlice({
   initialState: {
     inputs: {
       urlState: 'default',
-      methodState: 'GET',
+      methodState: '',
       headerState: {
         headers: [],
       },
@@ -174,6 +183,7 @@ export const inputStateSlice = createSlice({
         cookies: [],
       },
       dataState: '',
+      paramState: {},
     },
     storage: {
       masterObject: {
@@ -198,7 +208,7 @@ export const inputStateSlice = createSlice({
       if (path !== 'default') {
         vscode.postMessage({ payload: { command: 'openFileInEditor', data: path } });
       }
-
+      newState.inputs.methodState = Object.keys(newState.storage.masterObject.urls[url].ranges)[0];
       return newState;
     },
     setMethodState: (state, action) => {
@@ -230,6 +240,10 @@ export const inputStateSlice = createSlice({
           value: 'application/json',
         });
       }
+      return state;
+    },
+    setParamState: (state, action) => {
+      state.inputs.paramState[action.payload.name] = action.payload.value;
       return state;
     },
     setLoading: (state, action) => {
@@ -297,6 +311,7 @@ export const {
   setHeaderState,
   setCookieState,
   setDataState,
+  setParamState,
   setLoading,
   setWaiting,
   setValidPort,
@@ -309,6 +324,7 @@ export const currentMethod = (state) => state.inputState.inputs.methodState;
 export const headerState = (state) => state.inputState.inputs.headerState;
 export const cookieState = (state) => state.inputState.inputs.cookieState;
 export const dataState = (state) => state.inputState.inputs.dataState;
+export const paramState = (state) => state.inputState.inputs.paramState;
 export const loading = (state) => state.inputState.loading;
 export const waiting = (state) => state.inputState.waiting;
 export const validPort = (state) => state.inputState.validPort;
