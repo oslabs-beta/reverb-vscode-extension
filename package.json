@@ -1,34 +1,39 @@
 {
     "name": "reverb",
-    "displayName": " reVerb VSCode extension",
-    "version": "0.0.4",
+    "displayName": " reVerb",
+    "version": "0.0.8",
     "preview": true,
     "icon": "images/logo.png",
+    "galleryBanner": {
+        "color": "#0f2938",
+        "theme": "dark"
+    },
     "description": "Its like Postman... but inside VSCode",
     "publisher": "reverb-api",
     "author": {
         "name": "Team reVerb",
-        "url": "https://github.com/reVerb-LLC",
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension",
         "email": "reverb-api@protonmail.com"
     },
     "license": "SEE LICENSE IN LICENSE",
-    "homepage": "https://github.com/reVerb-LLC/reverb-vscode-extension",
+    "homepage": "http://www.reverb-vs.com",
     "bugs": {
-        "url": "https://github.com/reVerb-LLC/reverb-vscode-extension/issues",
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension/issues",
         "email": "reverb-api@protonmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/reVerb-LLC/reverb-vscode-extension.git"
+        "url": "https://github.com/oslabs-beta/reverb-vscode-extension.git"
     },
     "engines": {
         "vscode": "^1.51.0",
-        "node": ">=14.15.1",
+        "node": ">=14.14.0",
         "npm": "please-use-yarn",
         "yarn": ">= 1.19.1"
     },
     "categories": [
-        "Debuggers"
+        "Debuggers",
+        "Other"
     ],
     "keywords": [
         "vscode",
@@ -48,30 +53,10 @@
         "postinstall": "cd ./reverb-vscode-webview && yarn install"
     },
     "activationEvents": [
-        "*"
+        "workspaceContains:**/*.js"
     ],
     "contributes": {
         "commands": [
-            {
-                "command": "extension.testRoute",
-                "title": "Test Endpoint"
-            },
-            {
-                "command": "extension.sendPreset",
-                "title": "Sends preset object to webview"
-            },
-            {
-                "command": "extension.initWebviewForm",
-                "title": "Sends message to webview to get server path and port"
-            },
-            {
-                "command": "extension.sendUserConfigs",
-                "title": "Sends userconfigs object to webview"
-            },
-            {
-                "command": "extension.sendRoutes",
-                "title": "Sends routes object to webview"
-            },
             {
                 "command": "extension.savePreset",
                 "title": "Saves preset to presets object"
@@ -93,14 +78,6 @@
                 "title": "Query given endpoint and return detailed response"
             },
             {
-                "command": "extension.startWatch",
-                "title": "Start watching all files for changes"
-            },
-            {
-                "command": "extension.stopWatch",
-                "title": "Stop watching"
-            },
-            {
                 "command": "extension.openWebview",
                 "title": "Open reVerb client"
             },
@@ -113,12 +90,28 @@
                 "title": "Make file active in editor"
             },
             {
-                "command": "extension.deleteRoutesObject",
+                "command": "extension.wipeStorageObject",
                 "title": "Delete Local Routes Storage"
             },
             {
+                "command": "extension.rightClickQuery",
+                "title": "Quick Query "
+            },
+            {
                 "command": "paths.generateAxios",
-                "title": "Generate Axios Request"
+                "title": "Generate Axios Request",
+                "icon": {
+                    "light": "resources/light/edit.svg",
+                    "dark": "resources/dark/axios.svg"
+                }
+            },
+            {
+                "command": "paths.simpleQuery",
+                "title": "Send a simple query to this endpoint",
+                "icon": {
+                    "light": "resources/light/edit.svg",
+                    "dark": "images/icon.png"
+                }
             }
         ],
         "menus": {
@@ -127,12 +120,30 @@
                     "when": "editorTextFocus",
                     "command": "extension.openWebview",
                     "group": "navigation@1"
+                },
+                {
+                    "when": "editorTextFocus",
+                    "command": "extension.rightClickQuery",
+                    "group": "navigation"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "extension.openWebview",
+                    "group": "navigation",
+                    "when": "view == paths"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "paths.generateAxios",
-                    "when": "viewItem == routeItem"
+                    "when": "viewItem == routeItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "paths.simpleQuery",
+                    "when": "viewItem == routeItem",
+                    "group": "inline@2"
                 }
             ]
         },
@@ -149,11 +160,17 @@
             "reverb-explorer": [
                 {
                     "id": "paths",
-                    "name": "paths",
-                    "contextualTitle": "paths"
+                    "name": "Control Panel",
+                    "contextualTitle": "Control Panel"
                 }
             ]
-        }
+        },
+        "viewsWelcome": [
+            {
+                "view": "paths",
+                "contents": "No Endpoints found. Search workspace for Endpoints?\n[Open Webview](command:extension.openWebview)"
+            }
+        ]
     },
     "husky": {
         "hooks": {
@@ -169,12 +186,14 @@
         ]
     },
     "dependencies": {
+        "@types/uuid": "^8.3.0",
         "@typescript-eslint/typescript-estree": "^4.9.0",
         "axios": "^0.21.0",
         "estree-walker": "^2.0.1",
         "find-process": "^1.4.4",
         "httpsnippet": "^1.24.0",
-        "ts-node-dev": "^1.1.0"
+        "ts-node-dev": "^1.1.0",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@types/friendly-errors-webpack-plugin": "^0.1.2",

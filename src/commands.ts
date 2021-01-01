@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable guard-for-in */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * ************************************
@@ -11,124 +13,65 @@
  * ************************************
  */
 
-import { workspace, commands, Uri, window, ViewColumn, env } from 'vscode';
+import { workspace, commands, window, ViewColumn, env } from 'vscode';
 import find from 'find-process';
+import { v4 as uuidv4 } from 'uuid';
 import { ext } from './extensionVariables';
 import * as utils from './utils/utils';
-import Watcher from './modules/Watcher';
 import ReverbPanel from './webview/ReverbPanel';
-import { portFiles } from './parser/utils/serverPath';
+import getServerPaths from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
 
 export namespace ExtCmds {
+    export let _data: MasterDataObject | undefined;
+
     /**
      * Takes config and makes axios request returning detailed response
      * @param {any} query Config option object of request.
-     * @returns {any}  Response of the request made.
+     * @returns {any} Response of the request made.
      */
     export async function verboseRequest(query: any) {
         const data = await utils.ping(query);
-        ReverbPanel.currentPanel?.send({
-            command: 'verboseResponse',
-            data,
-        });
+        return data;
     }
 
     /**
      * Sends routes object to webview or prompts for server info if no routes exist in storage
      */
-    export function sendRoutes() {
-        let data = ext.workspaceObj();
-        if (!data) {
-            data = {};
-            const rootDir = workspace.workspaceFolders![0].name;
-            ReverbPanel.currentPanel?.send({
-                command: 'getServerInfo',
-                portFiles,
-                rootDir,
-            });
-            ReverbPanel.currentPanel?.send({
-                command: 'routesObject',
-                data,
-            });
-        } else {
-            ReverbPanel.currentPanel?.send({
-                command: 'routesObject',
-                data,
-            });
+    export function dataObjects() {
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (!_data) {
+            return {
+                serverPaths: getServerPaths(),
+                rootDirectory: workspace.workspaceFolders![0].name,
+            };
         }
-
-        return data;
-    }
-
-    /**
-     * Sends preset object to webview
-     */
-    export function sendPreset() {
-        let data = ext.presetsObject();
-        if (data === undefined) data = {};
-        ReverbPanel.currentPanel?.send({
-            command: 'presetsObject',
-            data,
-        });
-    }
-
-    /**
-     * Sends userconfig object to webview
-     */
-    export function sendUserConfigs() {
-        const data = ext.userConfigObj();
-        ReverbPanel.currentPanel?.send({
-            command: 'userConfigsObject',
-            data,
-        });
-
-        return data;
-    }
-    /**
-     * Starts watcher
-     */
-    export function startWatch() {
-        if (!ext.watcher) {
-            ext.watcher = new Watcher();
-            ext.watcher.initWatcher();
-        }
-    }
-
-    /**
-     * Stops watcher
-     */
-    export function stopWatch() {
-        if (ext.watcher) {
-            ext.watcher?.dis1?.dispose();
-            ext.watcher?.dis2?.dispose();
-            ext.watcher = undefined;
-        }
+        return _data;
     }
 
     /**
      * Parses files with supplied port and server file
      * @param {string} data object with port and serverFile
      */
-    export function parseServer(data: any) {
-        const expressParser = new ExpressParser(data.file_path, data.port);
-        const obj = expressParser.parse();
+    export function parseServer(serverInfo: { file_path: string; port: number }) {
+        const expressParser = new ExpressParser(serverInfo.file_path, serverInfo.port);
+        const parsed = expressParser.parse();
 
-        const _routesObject = ext.workspaceObj();
-        const _configObject = ext.userConfigObj();
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined)
+            _data = {
+                domains: {},
+                index: {},
+                serverPaths: getServerPaths(),
+                rootDirectory: workspace.workspaceFolders![0].name,
+            };
 
-        const routesObject = { ..._routesObject, ...obj[0] };
-        const configObject = { ..._configObject, ...obj[1] };
+        _data.domains[serverInfo.file_path] = { urls: parsed.urls, paths: parsed.paths };
+        _data.index = { ..._data.index, ...parsed.index };
 
-        ext.context.workspaceState.update(`obj`, routesObject);
-        ext.context.workspaceState.update(`userConfigs`, configObject);
-        sendUserConfigs();
-        sendRoutes();
-        if (ext.watcher) {
-            stopWatch();
-            startWatch();
-        }
+        ext.context.workspaceState.update(`masterDataObject`, _data);
         utils.resetTreeview();
+        return _data;
     }
 
     /**
@@ -136,19 +79,16 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be stored
      */
     export function savePreset(preset: any) {
-        const data = ext.presetsObject();
-        if (data === undefined) {
-            ext.context.workspaceState.update(`presets`, {});
-        }
-        if (data![preset.url] === undefined) {
-            data![preset.url] = [];
-        }
-        data![preset.url].push(preset);
-        ext.context.workspaceState.update(`presets`, data);
-        ReverbPanel.currentPanel?.send({
-            command: 'presetsObject',
-            data,
-        });
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined) return;
+
+        const { serverPath, href } = preset.urlState;
+        const uuid = uuidv4();
+        preset.id = uuid;
+
+        _data.domains[serverPath].urls[href].presets[uuid] = preset;
+        ext.context.workspaceState.update(`masterDataObject`, _data);
+        return { data: _data, preset };
     }
 
     /**
@@ -156,63 +96,37 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be deleted
      */
     export function deletePreset(preset: any) {
-        const data = ext.presetsObject();
-        if (data === undefined) return;
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined) return;
 
-        if (data[preset.url]) {
-            console.log(data[preset.url], 'here');
-            const item = data[preset.url].findIndex((el) => {
-                return el.name === preset.name;
-            });
-            data[preset.url].splice(item, 1);
-            if (data[preset.url].length === 0) {
-                delete data[preset.url];
-            }
-            console.log(data, ',.');
-            // delete data[
-            //     data[preset.url].findIndex((el) => {
-            //         return el.name === preset.name;
-            //     })
-            // ];
-            // console.log(data,'!')
-        }
-        ext.context.workspaceState.update(`presets`, data);
-        ReverbPanel.currentPanel?.send({
-            command: 'presetsObject',
-            data,
-        });
+        const { serverPath, href } = preset.urlState;
+        delete _data.domains[serverPath].urls[href].presets[preset.id];
+        ext.context.workspaceState.update(`masterDataObject`, _data);
+        return _data;
     }
 
     /**
      * Opens provided file in editor
      * @param {string} uri uri of file to be opened.
      */
-    export async function openFileInEditor(uri: string) {
-        const _workspaceObj = ext.workspaceObj();
-        // await commands.executeCommand('workbench.action.focusAboveGroup');
-        Object.keys(_workspaceObj!).forEach((el) => {
-            if (_workspaceObj![el][uri.slice(7)]) {
-                const path = Uri.joinPath(workspace.workspaceFolders![0].uri, el);
-
-                workspace
-                    .openTextDocument(path)
-                    .then((document) => window.showTextDocument(document, ViewColumn.One));
-            }
-        });
+    export async function openFileInEditor(uri: string, range: any) {
+        workspace
+            .openTextDocument(uri)
+            .then((document) => window.showTextDocument(document, ViewColumn.One))
+            .then(() => {
+                if (range !== undefined) {
+                    ext.decoration.highlightDeco(range, undefined);
+                }
+            });
     }
 
     /**
      * Deletes all stored info
      */
-    export function deleteRoutesObject() {
-        ext.context.workspaceState.update(`obj`, {});
-        ext.context.workspaceState.update(`userConfigs`, undefined);
-        ext.context.workspaceState.update(`presets`, {});
-
-        sendUserConfigs();
-        sendRoutes();
-        sendPreset();
+    export function wipeStorageObject() {
+        ext.context.workspaceState.update(`masterDataObject`, undefined);
         utils.resetTreeview();
+        return undefined;
     }
 
     /**
@@ -231,10 +145,7 @@ export namespace ExtCmds {
     export function validatePort(port: number) {
         return find('port', port).then(function (list) {
             const data = !!list.length;
-            ReverbPanel.currentPanel?.send({
-                command: 'validPort',
-                data,
-            });
+            return data;
         });
     }
 
@@ -243,37 +154,74 @@ export namespace ExtCmds {
      */
     export async function OpenWebview() {
         await utils.clearEditorPanels();
-
         ReverbPanel.createOrShow(ext.context.extensionUri);
         await commands.executeCommand('workbench.action.closeEditorsToTheLeft');
-        sendRoutes();
-
-        // setTimeout(function () {
-        //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
-        // }, 1500);
-    }
-
-    /**
-     * Sends msg to webview to get server path and port
-     */
-    export async function initWebviewForm() {
-        const rootDir = workspace.workspaceFolders![0].name;
-        if (!ReverbPanel.currentPanel) await OpenWebview();
-
-        ReverbPanel.currentPanel?.send({
-            command: 'getServerInfo',
-            portFiles,
-            rootDir,
-        });
-        return 'sent';
     }
 
     /**
      * Generates Axios req snippet based on selected tree item and copies to clipboard
      */
-    export async function GenerateAxios(node: any) {
-        const snippet = utils.generateSnippet(utils.convert(node.label));
+    export async function GenerateAxios(endpoint: any) {
+        const snippet = utils.generateSnippet({ method: endpoint.method, url: endpoint.uri });
         await env.clipboard.writeText(snippet);
         window.showInformationMessage(`Axios Request snippet added to clipboard`);
+    }
+
+    /**
+     * Initiate query from content menu click on specific endpoint function
+     */
+    export async function rightClickQuery(label: { path: any }) {
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (window.activeTextEditor === undefined) return;
+        if (_data === undefined) return;
+
+        let { path } = label;
+        if (path[2] === ':') path = path.slice(1);
+
+        const line = window.activeTextEditor.selection.active.line + 1;
+        const { serverPath } = _data.index[path];
+
+        const ranges = _data.domains[serverPath].paths[path];
+        let range: number[];
+        let config;
+
+        for (const _range in ranges) {
+            const split = _range.split('-');
+
+            if (
+                line >= Number.parseInt(split[0], 10) &&
+                line <= Number.parseInt(split[1] || split[0], 10)
+            ) {
+                range = [
+                    Number.parseInt(split[0], 10),
+                    Number.parseInt(split[1], 10) || Number.parseInt(split[0], 10),
+                ];
+                config = {
+                    url: ranges[_range].origin.concat(ranges[_range].pathname),
+                    method: ranges[_range].method,
+                };
+            }
+        }
+        if (config === undefined) return;
+        const res = await utils.ping(config);
+        const text = `-=:> ${res.resTime}ms | status: ${res.status} | data: ${JSON.stringify(
+            res.data,
+        )}`;
+        ext.decoration.highlightDeco(range!, text);
+    }
+
+    /**
+     * Querys single endpoint with minimal options
+     */
+    export async function simpleQuery(routeItem: { uri: any; method: any; range: number[] }) {
+        const config = {
+            url: routeItem.uri,
+            method: routeItem.method,
+        };
+        const data = await utils.ping(config);
+        const text = `-=:> ${data.resTime}ms | status: ${data.status} | data: ${JSON.stringify(
+            data.data,
+        )}`;
+        ext.decoration.highlightDeco(routeItem.range, text);
     }
 }

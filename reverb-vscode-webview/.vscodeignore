@@ -23,7 +23,7 @@ tsconfig.json
 tsconfig.test.json
 .nvmrc
 .editorconfig
-.eslintrc.js
+.eslintrc
 .eslintignore
 .prettierrc
 yarn.lock
@@ -31,7 +31,7 @@ yarn.lock
 !out/**/*.js
 !CHANGELOG.md
 !packages.json
-!images
+!images/**/*.png
 !README.md
 !icon.png
 !notes-usage

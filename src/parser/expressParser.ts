@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable class-methods-use-this */
 /**
  * ************************************
@@ -13,37 +14,24 @@
 
 import { getRanges } from './utils/ast';
 // Regex patterns used for file parsing
-import {
-    FILENAME_AND_PATH,
-    REQUIRE_PATH,
-    REQUIRED_PATH_JOIN,
-    ROUTE_PARAMS,
-} from '../constants/expressPatterns';
+import { FILENAME_AND_PATH, ROUTE_PARAMS } from '../constants/expressPatterns';
 // File and path manipulation functions
-import {
-    readFile,
-    findImportedFiles,
-    resolvePath,
-    getLocalPath,
-    getLocalRoute,
-} from './utils/genericFileOps';
+import { readFile, findImportedFiles, getLocalRoute } from './utils/genericFileOps';
 // Express specific file operations
 import {
     findExpressImport,
     findExpressServer,
     findRouters,
-    findPath,
     findRoutes,
     findRouterPath,
 } from './utils/expressFileOps';
-
-const pathUtil = require('path');
+import { ext } from '../extensionVariables';
 
 /** Class representing parsed express server data */
 class ExpressParser {
     serverPort: number;
 
-    serverFile: File;
+    serverFile: any;
 
     supportFiles: Map<string, File>;
 
@@ -72,7 +60,7 @@ class ExpressParser {
      * @param {string} serverPath The path of the top-level server file
      * @return {File} A File object containing info about the server file
      */
-    initializeServerFile(serverPath: string): File {
+    initializeServerFile(serverPath: string): Partial<File> {
         const SPLIT_PATH = serverPath.match(FILENAME_AND_PATH);
         if (SPLIT_PATH !== null)
             return { path: SPLIT_PATH[1], fileName: SPLIT_PATH[2], contents: '' };
@@ -82,9 +70,9 @@ class ExpressParser {
 
     /**
      * Parses all endpoints from the express server
-     * @return {WorkspaceObj} A WorkspaceObj object containing info for all endpoints in the server
+     * @return {MasterDataObject} A WorkspaceObj object containing info for all endpoints in the server
      */
-    parse(): WorkspaceObj {
+    parse() {
         this.serverFile.contents = readFile(this.serverFile);
         this.findSupportFiles();
         this.findExpressImports();
@@ -93,7 +81,7 @@ class ExpressParser {
         this.supportFiles.forEach((file) => this.findRouterFiles(file));
         this.findAllRoutes();
         this.findRouteEndLines();
-        return [this.buildWorkspaceObject(), this.buildUserConfigObject()];
+        return this.buildMasterDataObject();
     }
 
     /**
@@ -243,54 +231,62 @@ class ExpressParser {
         });
     }
 
-    /**
-     * Builds the Workspace object used to model all routes in the express server
-     * @return {WorkspaceObj} The Workspace object
-     */
-    buildWorkspaceObject(): WorkspaceObj {
-        const output: WorkspaceObj = {};
-        this.routes.forEach((route) => {
-            // Trim unnecessary info from the path and route for improved readability
-            const LOCAL_PATH = getLocalPath(route.path);
-            const LOCAL_ROUTE = getLocalRoute(route.route);
-            // Add new path/route objects if no routes have been added for the current path/route
-            if (output[LOCAL_PATH] === undefined) output[LOCAL_PATH] = {};
-            if (output[LOCAL_PATH][LOCAL_ROUTE] === undefined) {
-                output[LOCAL_PATH][LOCAL_ROUTE] = {};
-            }
-            // Store the route information for the current route/method
-            output[LOCAL_PATH][LOCAL_ROUTE][route.method.toUpperCase()] = {
-                range: [route.startLine, route.endLine],
-                config: {
-                    method: route.method.toUpperCase(),
-                    url: route.route,
-                    headers: {},
-                    data: {},
-                    params: this.findParams(LOCAL_ROUTE),
-                },
-            };
-        });
-        return output;
-    }
+    buildMasterDataObject() {
+        const data: MasterDataObject | undefined = ext.context.workspaceState.get(
+            `masterDataObject`,
+        );
+        const serverPath = this.serverFile.path.concat(this.serverFile.fileName);
+        const urls: Record<any, any> = {};
+        const paths: Record<any, any> = {};
+        const index: Record<any, any> = {};
 
-    buildUserConfigObject() {
-        const output: UserConfigObject = {};
         this.routes.forEach((route) => {
-            const LOCAL_ROUTE = getLocalRoute(route.route);
-            if (output[route.path] === undefined) output[route.path] = [];
-            output[route.path].push({
-                serverFile: this.serverFile.path + this.serverFile.fileName,
-                port: this.serverPort,
+            const { origin, pathname, port, href } = new URL(route.route);
+            const params = this.findParams(getLocalRoute(route.route));
+            let presets = {};
+            const range =
+                route.startLine === route.endLine
+                    ? route.startLine
+                    : `${route.startLine}-${route.endLine}`;
+
+            index[route.path] = {
+                serverPath,
+                port,
+            };
+
+            if (paths[route.path] === undefined) {
+                paths[route.path] = {};
+            }
+
+            paths[route.path][range] = {
+                method: route.method,
+                origin,
+                pathname,
+                port,
+                params,
                 range: [route.startLine, route.endLine],
-                config: {
-                    method: route.method.toUpperCase(),
-                    url: route.route,
-                    headers: {},
-                    data: {},
-                    params: this.findParams(LOCAL_ROUTE),
-                },
-            });
+            };
+
+            if (data && data.domains[serverPath] && data.domains[serverPath].urls[href]) {
+                presets = data.domains[serverPath].urls[href].presets;
+            }
+            if (!urls[href]) {
+                urls[href] = {
+                    serverPath,
+                    filePath: route.path,
+                    href,
+                    port,
+                    pathname,
+                    methods: [route.method],
+                    presets,
+                    params,
+                };
+            } else if (!urls[href].methods.includes(route.method)) {
+                urls[href].methods.push(route.method);
+            }
         });
+
+        const output = { paths, urls, index };
         return output;
     }
 

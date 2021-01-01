@@ -148,3 +148,35 @@ body {
     background-color: $background-color !important;
   }
 }
+
+select {
+  background-color: var(--vscode-dropdown-background);
+}
+
+input:hover,
+button:hover {
+  background-color: var(--vscode-editor-hoverHighlightBackground);
+}
+
+input,
+button {
+  background-color: var(--vscode-input-background);
+}
+
+select,
+button,
+input {
+  font: inherit !important;
+  color: $font-color !important;
+  border: none;
+  outline: none !important;
+}
+
+.flexR {
+  display: flex;
+  flex-direction: row;
+}
+.flexC {
+  display: flex;
+  flex-direction: column;
+}

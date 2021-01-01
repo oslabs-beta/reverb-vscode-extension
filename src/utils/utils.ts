@@ -10,7 +10,7 @@
  */
 
 import { window, commands, workspace } from 'vscode';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { ext } from '../extensionVariables';
 import ReverbTreeProvider from '../modules/reverbTreeProvider';
 
@@ -19,8 +19,11 @@ const { performance } = require('perf_hooks');
 const HTTPSnippet = require('httpsnippet');
 
 export function generateSnippet(data: any) {
-    let snippet = new HTTPSnippet(data);
-    snippet = snippet.convert('javascript', 'axios');
+    let text = new HTTPSnippet(data);
+    text = text.convert('javascript', 'axios');
+    const lines = text.split('\n');
+    lines.splice(0, 2);
+    const snippet = lines.join('\n');
     return snippet;
 }
 
@@ -29,14 +32,8 @@ export function generateSnippet(data: any) {
  * @param {AxiosRequestConfig | Options} Options Config option object of request.
  * @returns {AxiosResponse<any>} Response of the request made.
  */
-
-// transformResponse: [function (data) {
-//     // Do whatever you want to transform the data
-
-//     return data;
-//   }],
-export function ping(Options: AxiosRequestConfig) {
-    const config = { ...Options, validateStatus: undefined };
+export function ping(options: { url: any; method: any }) {
+    const config = { ...options, validateStatus: undefined };
     const time = performance.now();
     return axios
         .request(config)
@@ -62,35 +59,25 @@ export function ping(Options: AxiosRequestConfig) {
         });
 }
 
-/**
- *
- * @param
- * @returns
- */
-export function convert(route: string): any {
-    let output = {
-        method: '',
-        url: '',
-    };
-    const METHOD_AND_URL = route.match(/(\S*):\s+(\S*)/);
-    if (METHOD_AND_URL) {
-        const method = METHOD_AND_URL[1];
-        const url = 'http://'.concat(METHOD_AND_URL[2]);
-        output = { method, url };
-    }
-    return output;
-}
-
 export function resetTreeview() {
     ext.treeView = undefined;
-    ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
+    ext.treeView = new ReverbTreeProvider(
+        workspace.rootPath || '',
+        ext.context.workspaceState.get(`masterDataObject`),
+    );
     ext.treeView.tree = window.createTreeView('paths', {
         treeDataProvider: ext.treeView,
     });
 
-    ext.treeView.tree.onDidChangeSelection(async (e: { selection: { label: string }[] }) => {
-        const { url } = convert(e.selection[0].label);
-        commands.executeCommand('extension.openFileInEditor', url);
+    ext.treeView.tree.onDidChangeSelection(async (e: any) => {
+        if (e.selection[0].contextValue === 'routeItem') {
+            console.log(e.selection[0]);
+            commands.executeCommand(
+                'extension.openFileInEditor',
+                e.selection[0].filePath,
+                e.selection[0].range,
+            );
+        }
     });
 }
 

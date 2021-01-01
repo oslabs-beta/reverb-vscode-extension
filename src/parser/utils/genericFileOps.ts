@@ -31,9 +31,9 @@ export const readFile = (file: File): string => {
  * @param {string[]} fileList The list of files for which to create objects
  * @return {File[]} An array containing all of the generated File objects
  */
-const createFileObjects = (fileList: string[]): File[] => {
-    const output: File[] = [];
-    fileList.forEach((path) => {
+const createFileObjects = (fileList: string[]) => {
+    const output: { path: string; fileName: string; contents: string }[] = [];
+    fileList.forEach((path: string) => {
         // Split the extract the file name from the merged path
         const PATH_SPLIT = path.match(FILENAME_AND_PATH);
         if (PATH_SPLIT)
