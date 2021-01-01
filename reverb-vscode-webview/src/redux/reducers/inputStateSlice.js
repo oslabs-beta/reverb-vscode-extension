@@ -54,6 +54,7 @@ export const vscApi = createAsyncThunk('inputState/vscApi', async (payload) => {
 export const wipeStorageObject = createAsyncThunk(
   'inputState/wipeStorageObject',
   async (payload, { dispatch }) => {
+    dispatch(setLoading(true));
     const data = await vscodeFetch(payload);
     return data;
   }
@@ -106,7 +107,7 @@ export const makeRequest = createAsyncThunk(
     const method = inputs.methodState;
     const jsonData = inputs.dataState;
     const urlParams = inputs.paramState;
-    const currentUrl = new URL(inputs.urlState);
+    const currentUrl = inputs.urlState;
 
     // insert path parameters into url
     Object.entries(urlParams || {}).forEach(([k, v]) => {
@@ -155,9 +156,9 @@ export const makeRequest = createAsyncThunk(
 function resetInputs(state) {
   return {
     ...state,
-    currentPreset: 'default',
     inputs: {
       ...state.inputs,
+      presetState: 'default',
       headerState: {
         headers: [],
       },
@@ -175,6 +176,7 @@ export const inputStateSlice = createSlice({
   initialState: {
     inputs: {
       urlState: 'default',
+      presetState: 'default',
       methodState: '',
       headerState: {
         headers: [],
@@ -185,30 +187,27 @@ export const inputStateSlice = createSlice({
       dataState: '',
       paramState: {},
     },
-    storage: {
-      masterObject: {
-        paths: {},
-        urls: {},
-        presets: {},
-        serverPaths: [],
-        rootDirectory: '',
-      },
+    masterObject: {
+      domains: {},
+      serverPaths: [],
+      rootDirectory: '',
     },
     requestResult: {},
-    currentPreset: 'default',
     validPort: true,
     waiting: false,
     loading: true,
   },
   reducers: {
     setUrlState: (state, action) => {
-      const { url, path } = JSON.parse(action.payload);
-      const newState = resetInputs(state);
-      newState.inputs.urlState = url;
-      if (path !== 'default') {
-        vscode.postMessage({ payload: { command: 'openFileInEditor', data: path } });
+      if (action.payload === 'default') {
+        state.inputs.urlState = 'default';
+        return state;
       }
-      newState.inputs.methodState = Object.keys(newState.storage.masterObject.urls[url].ranges)[0];
+      const object = JSON.parse(action.payload);
+      const newState = resetInputs(state);
+      newState.inputs.urlState = object;
+
+      vscode.postMessage({ payload: { command: 'openFileInEditor', data: object.filePath } });
       return newState;
     },
     setMethodState: (state, action) => {
@@ -259,34 +258,54 @@ export const inputStateSlice = createSlice({
       return state;
     },
     setCurrentPreset: (state, action) => {
-      if (action.payload === 'default' || action.payload === undefined) {
+      if (action.payload === 'default') {
         state = resetInputs(state);
       } else {
-        state.currentPreset = action.payload;
-        state.inputs.headerState = state.storage.masterObject.presets[action.payload].headerState;
-        state.inputs.cookieState = state.storage.masterObject.presets[action.payload].cookieState;
-        state.inputs.dataState = state.storage.masterObject.presets[action.payload].dataState;
+        const data = JSON.parse(action.payload);
+        state.inputs.presetState = data;
+        state.inputs.headerState = data.headerState;
+        state.inputs.cookieState = data.cookieState;
+        state.inputs.dataState = data.dataState;
       }
+      return state;
+    },
+    setMasterObject: (state, action) => {
+      state.masterObject = action.payload.data;
       return state;
     },
   },
   extraReducers: {
     [getMasterObject.fulfilled]: (state, action) => {
-      state.storage.masterObject = action.payload.data;
+      if (action.payload.data.domains === undefined) {
+        state.masterObject.serverPaths = action.payload.data.serverPaths;
+        state.masterObject.rootDirectory = action.payload.data.rootDirectory;
+        return state;
+      }
+
+      state.masterObject = action.payload.data;
       state.loading = false;
       return state;
     },
     [vscApi.fulfilled]: (state, action) => {
       if (action.payload.command !== 'wipeStorageObject') {
-        state.storage.masterObject = action.payload.data;
+        state.masterObject = action.payload.data;
+        state.loading = false;
+      }
+      if (action.payload.command === 'deletePreset') {
+        const id = state.inputs.presetState.id;
+        state.masterObject = action.payload.data;
+        state.inputs.presetState = 'default';
+        delete state.inputs.urlState.presets[id];
       }
       return state;
     },
     [savePreset.fulfilled]: (state, action) => {
-      state.storage.masterObject = action.payload.data;
-      state.currentPreset = action.payload.preset;
+      state.masterObject = action.payload.data;
+      state.inputs.presetState = action.payload.preset;
+      state.inputs.urlState.presets[action.payload.preset.id] = action.payload.preset;
       return state;
     },
+
     [validatePort.fulfilled]: (state, action) => {
       state.validPort = action.payload.data;
       return state;
@@ -299,7 +318,6 @@ export const inputStateSlice = createSlice({
       return state;
     },
     [wipeStorageObject.fulfilled]: (state, action) => {
-      state.storage.masterObject = action.payload.data;
       return state;
     },
   },
@@ -316,11 +334,13 @@ export const {
   setWaiting,
   setValidPort,
   setCurrentPreset,
+  setMasterObject,
 } = inputStateSlice.actions;
 
 export const inputState = (state) => state.inputState;
 export const currentUrl = (state) => state.inputState.inputs.urlState;
 export const currentMethod = (state) => state.inputState.inputs.methodState;
+export const currentPreset = (state) => state.inputState.inputs.presetState;
 export const headerState = (state) => state.inputState.inputs.headerState;
 export const cookieState = (state) => state.inputState.inputs.cookieState;
 export const dataState = (state) => state.inputState.inputs.dataState;
@@ -329,11 +349,18 @@ export const loading = (state) => state.inputState.loading;
 export const waiting = (state) => state.inputState.waiting;
 export const validPort = (state) => state.inputState.validPort;
 export const requestResult = (state) => state.inputState.requestResult;
-export const currentPreset = (state) => state.inputState.currentPreset;
-export const paths = (state) => state.inputState.storage.masterObject.paths;
-export const urls = (state) => state.inputState.storage.masterObject.urls;
-export const presets = (state) => state.inputState.storage.masterObject.presets;
-export const serverPaths = (state) => state.inputState.storage.masterObject.serverPaths;
-export const rootDirectory = (state) => state.inputState.storage.masterObject.rootDirectory;
+export const paths = (state) => state.inputState.masterObject.paths;
+export const urls = (state) => {
+  const output = [];
+  Object.keys(state.inputState.masterObject.domains).forEach((domain) => {
+    Object.keys(state.inputState.masterObject.domains[domain].urls).forEach((url) => {
+      output.push(state.inputState.masterObject.domains[domain].urls[url]);
+    });
+  });
+  return output;
+};
+export const presets = (state) => state.inputState.inputs.urlState.presets;
+export const serverPaths = (state) => state.inputState.masterObject.serverPaths;
+export const rootDirectory = (state) => state.inputState.masterObject.rootDirectory;
 
 export default inputStateSlice.reducer;

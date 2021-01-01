@@ -6,17 +6,18 @@ import { params } from '../redux/reducers/viewContextSlice';
 
 function Params() {
   const [paramsArray, setParamsArray] = useState([]);
-  // redux
+
   const _currentUrl = useSelector(currentUrl);
-  const _currentMethod = useSelector(currentMethod);
   const paramsView = useSelector(params);
-  const _urls = useSelector(urls);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (_currentUrl === 'default') return;
+    if (_currentUrl === 'default') {
+      setParamsArray([]);
+      return;
+    }
     setParamsArray(
-      Object.keys(_urls[_currentUrl][_currentMethod.toLowerCase()].params).map((param) => {
+      Object.keys(_currentUrl.params).map((param) => {
         return (
           <div className="param flexR" key={param}>
             <span>:{param}</span>

@@ -1,0 +1,52 @@
+.welcome__view {
+  margin-top: 1rem;
+  h1 {
+    width: 35%;
+    border-bottom: 1px solid white;
+    margin-bottom: 0.5rem;
+  }
+  ul {
+    margin-left: 2rem;
+  }
+  select,
+  input {
+    height: 2rem;
+  }
+  .input__parse {
+    margin: 1rem 0;
+
+    div {
+      display: flex;
+      align-items: center;
+      height: 2rem;
+
+      .input__port {
+        margin: 0 0.3rem;
+        width: 3.5rem;
+        padding-left: 0.6rem;
+      }
+
+      .select__path {
+        width: 19rem;
+        cursor: pointer;
+      }
+      .button__send {
+        width: 4rem;
+        cursor: pointer;
+      }
+      .port__error {
+        color: red !important;
+      }
+      .parsed {
+        margin-left: 1rem;
+        color: green;
+        font-size: 1rem;
+      }
+      .valid__port {
+        margin-left: 1rem;
+        color: red;
+        font-size: 1rem;
+      }
+    }
+  }
+}

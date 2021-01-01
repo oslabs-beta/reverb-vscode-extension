@@ -23,6 +23,8 @@ import getServerPaths from './parser/utils/serverPath';
 import ExpressParser from './parser/expressParser';
 
 export namespace ExtCmds {
+    export let _data: MasterDataObject | undefined;
+
     /**
      * Takes config and makes axios request returning detailed response
      * @param {any} query Config option object of request.
@@ -37,51 +39,39 @@ export namespace ExtCmds {
      * Sends routes object to webview or prompts for server info if no routes exist in storage
      */
     export function dataObjects() {
-        let masterObject = ext.workspaceObj();
-        if (masterObject === undefined)
-            masterObject = {
-                paths: {},
-                urls: {},
-                presets: {},
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (!_data) {
+            return {
                 serverPaths: getServerPaths(),
-                rootDirectory: workspace.workspaceFolders![0].name, // uh o what if nothings open?
+                rootDirectory: workspace.workspaceFolders![0].name,
             };
-        return masterObject;
+        }
+        return _data;
     }
 
     /**
      * Parses files with supplied port and server file
      * @param {string} data object with port and serverFile
      */
-    export function parseServer(serverInfo: any) {
+    export function parseServer(serverInfo: { file_path: string; port: number }) {
         const expressParser = new ExpressParser(serverInfo.file_path, serverInfo.port);
-        const parseOutput = expressParser.parse();
+        const parsed = expressParser.parse();
 
-        const data = ext.workspaceObj() === undefined ? dataObjects() : ext.workspaceObj();
-        if (data === undefined) return;
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined)
+            _data = {
+                domains: {},
+                index: {},
+                serverPaths: getServerPaths(),
+                rootDirectory: workspace.workspaceFolders![0].name,
+            };
 
-        data.serverPaths.splice(data.serverPaths.indexOf(serverInfo.file_path), 1);
+        _data.domains[serverInfo.file_path] = { urls: parsed.urls, paths: parsed.paths };
+        _data.index = { ..._data.index, ...parsed.index };
 
-        const currentMasterObject = {
-            paths: {
-                ...data.paths,
-                ...parseOutput.paths,
-            },
-            urls: {
-                ...data.urls,
-                ...parseOutput.urls,
-            },
-            presets: {
-                ...data.presets,
-                ...parseOutput.presets,
-            },
-            serverPaths: data.serverPaths,
-            rootDirectory: data.rootDirectory,
-        };
-
-        ext.context.workspaceState.update(`obj`, currentMasterObject);
+        ext.context.workspaceState.update(`masterDataObject`, _data);
         utils.resetTreeview();
-        return ext.workspaceObj();
+        return _data;
     }
 
     /**
@@ -89,13 +79,16 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be stored
      */
     export function savePreset(preset: any) {
-        const _data = ext.workspaceObj();
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined) return;
+
+        const { serverPath, href } = preset.urlState;
         const uuid = uuidv4();
         preset.id = uuid;
-        _data!.urls[preset.urlState].presets.push(uuid);
-        _data!.presets[uuid] = preset;
-        ext.context.workspaceState.update(`obj`, _data);
-        return { data: ext.workspaceObj(), preset: preset.id };
+
+        _data.domains[serverPath].urls[href].presets[uuid] = preset;
+        ext.context.workspaceState.update(`masterDataObject`, _data);
+        return { data: _data, preset };
     }
 
     /**
@@ -103,13 +96,13 @@ export namespace ExtCmds {
      * @param {string} preset preset object to be deleted
      */
     export function deletePreset(preset: any) {
-        const _data = ext.workspaceObj();
-        const temp = _data!.presets[preset].urlState;
-        _data!.urls[temp].presets = _data!.urls[temp].presets.filter(
-            (item: any) => !preset.includes(item),
-        );
-        ext.context.workspaceState.update(`obj`, _data);
-        return ext.workspaceObj();
+        _data = ext.context.workspaceState.get(`masterDataObject`);
+        if (_data === undefined) return;
+
+        const { serverPath, href } = preset.urlState;
+        delete _data.domains[serverPath].urls[href].presets[preset.id];
+        ext.context.workspaceState.update(`masterDataObject`, _data);
+        return _data;
     }
 
     /**
@@ -131,15 +124,9 @@ export namespace ExtCmds {
      * Deletes all stored info
      */
     export function wipeStorageObject() {
-        ext.context.workspaceState.update(`obj`, {
-            paths: {},
-            urls: {},
-            presets: {},
-            serverPaths: getServerPaths(),
-            rootDirectory: workspace.workspaceFolders![0].name,
-        });
+        ext.context.workspaceState.update(`masterDataObject`, undefined);
         utils.resetTreeview();
-        return ext.workspaceObj();
+        return undefined;
     }
 
     /**
@@ -175,8 +162,7 @@ export namespace ExtCmds {
      * Generates Axios req snippet based on selected tree item and copies to clipboard
      */
     export async function GenerateAxios(endpoint: any) {
-        endpoint = { method: endpoint.method, url: endpoint.url };
-        const snippet = utils.generateSnippet(endpoint);
+        const snippet = utils.generateSnippet({ method: endpoint.method, url: endpoint.uri });
         await env.clipboard.writeText(snippet);
         window.showInformationMessage(`Axios Request snippet added to clipboard`);
     }
@@ -185,45 +171,51 @@ export namespace ExtCmds {
      * Initiate query from content menu click on specific endpoint function
      */
     export async function rightClickQuery(label: { path: any }) {
-        let { path } = label;
+        _data = ext.context.workspaceState.get(`masterDataObject`);
         if (window.activeTextEditor === undefined) return;
+        if (_data === undefined) return;
+
+        let { path } = label;
         if (path[2] === ':') path = path.slice(1);
 
-        let range;
-        let config;
-        const { urls } = ext.workspaceObj()!;
         const line = window.activeTextEditor.selection.active.line + 1;
+        const { serverPath } = _data.index[path];
 
-        for (const url in urls) {
-            if (urls[url].path === path) {
-                for (const method in urls[url].ranges) {
-                    if (
-                        urls[url].ranges[method][0] <= line &&
-                        urls[url].ranges[method][1] >= line
-                    ) {
-                        range = urls[url].ranges[method];
-                        config = {
-                            url: urls[url].url,
-                            method,
-                        };
-                    }
-                }
+        const ranges = _data.domains[serverPath].paths[path];
+        let range: number[];
+        let config;
+
+        for (const _range in ranges) {
+            const split = _range.split('-');
+
+            if (
+                line >= Number.parseInt(split[0], 10) &&
+                line <= Number.parseInt(split[1] || split[0], 10)
+            ) {
+                range = [
+                    Number.parseInt(split[0], 10),
+                    Number.parseInt(split[1], 10) || Number.parseInt(split[0], 10),
+                ];
+                config = {
+                    url: ranges[_range].origin.concat(ranges[_range].pathname),
+                    method: ranges[_range].method,
+                };
             }
         }
         if (config === undefined) return;
-        const data = await utils.ping(config);
-        const text = `-=:> ${data.resTime}ms | status: ${data.status} | data: ${JSON.stringify(
-            data.data,
+        const res = await utils.ping(config);
+        const text = `-=:> ${res.resTime}ms | status: ${res.status} | data: ${JSON.stringify(
+            res.data,
         )}`;
-        ext.decoration.highlightDeco(range, text);
+        ext.decoration.highlightDeco(range!, text);
     }
 
     /**
      * Querys single endpoint with minimal options
      */
-    export async function simpleQuery(routeItem: { url: any; method: any; range: any }) {
+    export async function simpleQuery(routeItem: { uri: any; method: any; range: number[] }) {
         const config = {
-            url: routeItem.url,
+            url: routeItem.uri,
             method: routeItem.method,
         };
         const data = await utils.ping(config);

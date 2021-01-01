@@ -21,8 +21,6 @@ export namespace ext {
     export let treeView: ReverbTreeProvider | undefined;
     export let decoration: Decorator;
 
-    export const workspaceObj: () => MasterDataObject | undefined = () =>
-        ext.context.workspaceState.get(`obj`);
     export const setContext = <T>(ctx: string, value: T) =>
         commands.executeCommand('setContext', ctx, value);
     export const registerCommand = (
@@ -35,9 +33,7 @@ export namespace ext {
 export function initializeExtensionVariables(ctx: ExtensionContext) {
     ext.context = ctx;
 
-    if (!ext.treeView) {
-        utils.resetTreeview();
-    }
+    if (!ext.treeView) utils.resetTreeview();
 
     ext.decoration = new Decorator();
 }

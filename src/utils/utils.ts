@@ -61,22 +61,24 @@ export function ping(options: { url: any; method: any }) {
 
 export function resetTreeview() {
     ext.treeView = undefined;
-    ext.treeView = new ReverbTreeProvider(workspace.rootPath || '', ext.workspaceObj());
+    ext.treeView = new ReverbTreeProvider(
+        workspace.rootPath || '',
+        ext.context.workspaceState.get(`masterDataObject`),
+    );
     ext.treeView.tree = window.createTreeView('paths', {
         treeDataProvider: ext.treeView,
     });
 
-    ext.treeView.tree.onDidChangeSelection(
-        async (e: { selection: { uri: any; contextValue: any; range: any }[] }) => {
-            if (e.selection[0].contextValue === 'routeItem') {
-                commands.executeCommand(
-                    'extension.openFileInEditor',
-                    e.selection[0].uri,
-                    e.selection[0].range,
-                );
-            }
-        },
-    );
+    ext.treeView.tree.onDidChangeSelection(async (e: any) => {
+        if (e.selection[0].contextValue === 'routeItem') {
+            console.log(e.selection[0]);
+            commands.executeCommand(
+                'extension.openFileInEditor',
+                e.selection[0].filePath,
+                e.selection[0].range,
+            );
+        }
+    });
 }
 
 /**

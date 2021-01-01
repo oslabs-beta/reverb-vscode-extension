@@ -9,13 +9,15 @@
  * ************************************
  */
 
-import { ExtensionContext, WebviewPanel, window } from 'vscode';
+import { ExtensionContext, WebviewPanel, window, workspace, commands } from 'vscode';
 import { ext, initializeExtensionVariables } from './extensionVariables';
 import ReverbPanel from './webview/ReverbPanel';
 import { ExtCmds } from './commands';
 
 export function activate(context: ExtensionContext) {
     initializeExtensionVariables(context);
+
+    console.log(ext.context.workspaceState.get(`masterDataObject`));
 
     ext.registerCommand('extension.dataObjects', ExtCmds.dataObjects);
     ext.registerCommand('extension.savePreset', ExtCmds.savePreset);
@@ -38,6 +40,33 @@ export function activate(context: ExtensionContext) {
             },
         });
     }
+
+    workspace.onDidSaveTextDocument((e) => {
+        const _data: MasterDataObject | undefined = ext.context.workspaceState.get(
+            `masterDataObject`,
+        );
+        if (_data === undefined) return;
+        if (e === undefined) return;
+
+        let pathStr = e.uri.path;
+        if (e.uri.path[2] === ':') {
+            pathStr = pathStr.slice(1);
+        }
+
+        if (_data.index[pathStr]) {
+            commands
+                .executeCommand('extension.parseServer', {
+                    file_path: _data.index[pathStr].serverPath,
+                    port: _data.index[pathStr].port,
+                })
+                .then((res) => {
+                    ReverbPanel.currentPanel?.send({
+                        update: true,
+                        data: { command: 'parseServer', data: res },
+                    });
+                });
+        }
+    });
 }
 
 export function deactivate() {

@@ -26,27 +26,22 @@ function SelectPreset() {
   const [inputVisible, setInputVisible] = useState(false);
   const [presetOptions, setPresetOptions] = useState([]);
 
-  const _currentUrl = useSelector(currentUrl);
   const _currentPreset = useSelector(currentPreset);
   const _presets = useSelector(presets);
-  const _urls = useSelector(urls);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (_urls[_currentUrl] === undefined) return;
-    if (_currentUrl === 'default' || !_urls[_currentUrl].presets.length) {
-      return setPresetOptions([]);
-    }
+    if (_presets === undefined) return setPresetOptions([]);
     setPresetOptions(
-      _urls[_currentUrl].presets.map((id) => {
+      Object.keys(_presets).map((preset) => {
         return (
-          <option key={id} value={id}>
-            {_presets[id].name}
+          <option key={_presets[preset].id} value={JSON.stringify(_presets[preset])}>
+            {_presets[preset].name}
           </option>
         );
       })
     );
-  }, [_currentUrl, _presets]);
+  }, [_presets, _currentPreset]);
 
   return (
     <form className="select__preset flexR">
@@ -55,13 +50,9 @@ function SelectPreset() {
       ) : (
         <select
           className="select__preset flexR"
-          value={_currentPreset}
+          value={JSON.stringify(_currentPreset)}
           onChange={(e) => {
-            if (_presets[e.target.value] === undefined) {
-              dispatch(setCurrentPreset('default'));
-            } else {
-              dispatch(setCurrentPreset(e.target.value));
-            }
+            dispatch(setCurrentPreset(e.target.value));
           }}>
           <option key="default" value="default">
             no preset on endpoint

@@ -15,8 +15,8 @@ function OutputTabs() {
         return <ResponseTab />;
       case 'header':
         return <HeaderTab />;
-      case 'info':
-        return <InfoTab />;
+    //   case 'info':
+    //     return <InfoTab />;
       default:
         return <ResponseTab />;
     }

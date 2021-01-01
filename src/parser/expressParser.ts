@@ -25,6 +25,7 @@ import {
     findRoutes,
     findRouterPath,
 } from './utils/expressFileOps';
+import { ext } from '../extensionVariables';
 
 /** Class representing parsed express server data */
 class ExpressParser {
@@ -71,7 +72,7 @@ class ExpressParser {
      * Parses all endpoints from the express server
      * @return {MasterDataObject} A WorkspaceObj object containing info for all endpoints in the server
      */
-    parse(): Partial<MasterDataObject> {
+    parse() {
         this.serverFile.contents = readFile(this.serverFile);
         this.findSupportFiles();
         this.findExpressImports();
@@ -231,44 +232,62 @@ class ExpressParser {
     }
 
     buildMasterDataObject() {
-        const paths: Record<any, any> = {};
+        const data: MasterDataObject | undefined = ext.context.workspaceState.get(
+            `masterDataObject`,
+        );
+        const serverPath = this.serverFile.path.concat(this.serverFile.fileName);
         const urls: Record<any, any> = {};
-        const presets: Record<any, any> = {};
+        const paths: Record<any, any> = {};
+        const index: Record<any, any> = {};
 
         this.routes.forEach((route) => {
-            const urlObject = new URL(route.route);
+            const { origin, pathname, port, href } = new URL(route.route);
+            const params = this.findParams(getLocalRoute(route.route));
+            let presets = {};
+            const range =
+                route.startLine === route.endLine
+                    ? route.startLine
+                    : `${route.startLine}-${route.endLine}`;
 
-            paths[route.path] = {
-                path: route.path,
-                serverFile: this.serverFile.path + this.serverFile.fileName,
-                port: this.serverPort,
+            index[route.path] = {
+                serverPath,
+                port,
             };
 
-            if (urls[route.route] === undefined) {
-                urls[route.route] = {
-                    get: {},
-                    post: {},
-                    put: {},
-                    delete: {},
-                    presets: [],
-                    path: route.path,
-                    url: route.route,
-                    pathname: urlObject.pathname,
-                    port: this.serverPort,
-                    ranges: {},
-                };
+            if (paths[route.path] === undefined) {
+                paths[route.path] = {};
             }
-            urls[route.route][route.method] = {
-                path: route.path,
-                url: route.route,
+
+            paths[route.path][range] = {
                 method: route.method,
-                params: this.findParams(getLocalRoute(route.route)),
+                origin,
+                pathname,
+                port,
+                params,
                 range: [route.startLine, route.endLine],
             };
-            urls[route.route].ranges[route.method] = [route.startLine, route.endLine];
+
+            if (data && data.domains[serverPath] && data.domains[serverPath].urls[href]) {
+                presets = data.domains[serverPath].urls[href].presets;
+            }
+            if (!urls[href]) {
+                urls[href] = {
+                    serverPath,
+                    filePath: route.path,
+                    href,
+                    port,
+                    pathname,
+                    methods: [route.method],
+                    presets,
+                    params,
+                };
+            } else if (!urls[href].methods.includes(route.method)) {
+                urls[href].methods.push(route.method);
+            }
         });
 
-        return { paths, urls, presets };
+        const output = { paths, urls, index };
+        return output;
     }
 
     /**

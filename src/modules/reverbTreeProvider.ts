@@ -17,7 +17,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-let masterDataObject: MasterDataObject | undefined;
+let masterDataObject;
 
 // Create a Reverb Tree Provider class that extends vscode Tree Data Provider class
 export default class ReverbTreeProvider
@@ -25,7 +25,7 @@ export default class ReverbTreeProvider
     tree: any;
 
     // Construct a new ReverbDependenciesProvider, pass workspaceRoot up to TreeDataProvider constructor
-    constructor(private workspaceRoot: string, workspaceObj: MasterDataObject | undefined) {
+    constructor(private workspaceRoot: string, workspaceObj: any) {
         masterDataObject = workspaceObj;
     }
 
@@ -37,6 +37,7 @@ export default class ReverbTreeProvider
     // Returns the children for the given element or root (if no element is passed).
     getChildren(element?: RouteItem | PathItem | RootItem) {
         // Throw an error if no workspace is open
+
         if (!this.workspaceRoot) {
             vscode.window.showInformationMessage('No path in empty workspace');
             return Promise.resolve([]);
@@ -48,7 +49,7 @@ export default class ReverbTreeProvider
         }
         // If an element was passed in, create elements for its children
         if (element?.contextValue === 'pathItem') {
-            return Promise.resolve(this.getRoutes(element.uri));
+            return Promise.resolve(this.getRoutes(element));
         }
         if (element?.contextValue === 'rootItem') {
             return Promise.resolve(this.getPaths());
@@ -64,34 +65,27 @@ export default class ReverbTreeProvider
         ]);
     }
 
-    private getRoutes(label: string): Array<RouteItem> | undefined {
+    private getRoutes({ filePath, serverPath, href }): Array<RouteItem> | undefined {
         if (masterDataObject === undefined) return;
         const output: RouteItem[] | undefined = [];
 
-        for (const item in masterDataObject.urls) {
-            if (masterDataObject.urls[item].path === label) {
-                for (const method in masterDataObject.urls[item]) {
-                    if (
-                        ['get', 'put', 'post', 'delete'].includes(method) &&
-                        masterDataObject.urls[item][method].method !== undefined
-                    ) {
-                        const name = `${masterDataObject.urls[item].url.slice(7)}`;
-                        const uri = masterDataObject.urls[item].path;
-                        const { url } = masterDataObject.urls[item];
-                        const { range } = masterDataObject.urls[item][method];
-                        output.push(
-                            new RouteItem(
-                                name,
-                                uri,
-                                method,
-                                url,
-                                range,
-                                vscode.TreeItemCollapsibleState.None,
-                            ),
-                        );
-                    }
-                }
-            }
+        for (const item in masterDataObject.domains[serverPath].paths[filePath]) {
+            const route = masterDataObject.domains[serverPath].paths[filePath][item];
+            const name = `${route.pathname}`;
+            const uri = href;
+            const { method } = route;
+            console.log(route);
+            const { range } = route;
+            output.push(
+                new RouteItem(
+                    name,
+                    filePath,
+                    method,
+                    uri,
+                    range,
+                    vscode.TreeItemCollapsibleState.None,
+                ),
+            );
         }
 
         return output;
@@ -101,12 +95,29 @@ export default class ReverbTreeProvider
         if (masterDataObject === undefined) return;
         const output: PathItem[] | undefined = [];
         const dirName = vscode.workspace.workspaceFolders![0].name;
+        const cache = {};
 
-        for (const itemPath in masterDataObject.paths) {
-            const substr = itemPath.slice(
-                Math.max(0, itemPath.indexOf(dirName) + dirName.length + 1),
-            );
-            output.push(new PathItem(substr, itemPath, vscode.TreeItemCollapsibleState.Collapsed));
+        for (const domain in masterDataObject.domains) {
+            for (const itemPath in masterDataObject.domains[domain].urls) {
+                const { filePath } = masterDataObject.domains[domain].urls[itemPath];
+                const { serverPath } = masterDataObject.domains[domain].urls[itemPath];
+                const { href } = masterDataObject.domains[domain].urls[itemPath];
+                const substr = filePath.slice(
+                    Math.max(0, filePath.indexOf(dirName) + dirName.length + 1),
+                );
+                if (!cache[substr]) {
+                    output.push(
+                        new PathItem(
+                            substr,
+                            filePath,
+                            serverPath,
+                            href,
+                            vscode.TreeItemCollapsibleState.Collapsed,
+                        ),
+                    );
+                    cache[substr] = true;
+                }
+            }
         }
 
         return output;
@@ -116,7 +127,9 @@ export default class ReverbTreeProvider
 class PathItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly uri: string,
+        public readonly filePath: string,
+        public readonly serverPath: string,
+        public readonly href: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
@@ -135,14 +148,14 @@ class PathItem extends vscode.TreeItem {
 class RouteItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly uri: string,
+        public readonly filePath: string,
         public readonly method: string,
-        public readonly url: string,
+        public readonly uri: string,
         public readonly range: any,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
-        this.tooltip = `${this.method}: ${this.url}`;
+        this.tooltip = `${this.method}: ${this.uri}`;
         this.description = '';
     }
 

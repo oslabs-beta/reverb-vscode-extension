@@ -62,12 +62,12 @@ function OutputHeader() {
             onClick={() => dispatch(setOutputTabContext('header'))}>
             header
           </button>
-          <button
+          {/* <button
             type="button"
             className={_outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
             onClick={() => dispatch(setOutputTabContext('info'))}>
             preview
-          </button>
+          </button> */}
         </div>
 
         <div className="header__metrics flexR">

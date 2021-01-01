@@ -1,7 +1,6 @@
 interface MasterDataObject {
-    paths: Record<any, any>;
-    urls: Record<any, any>;
-    presets: Record<any, any>;
+    domains: Record<any, any>;
+    index: Record<any, any>;
     serverPaths: Record<any, any>;
     rootDirectory: string;
 }

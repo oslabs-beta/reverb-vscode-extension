@@ -30,12 +30,10 @@ function SelectDomain() {
   useEffect(() => {
     if (_urls !== undefined) {
       setUrlOptions(
-        Object.keys(_urls).map((el) => {
+        _urls.map((el) => {
           return (
-            <option
-              key={_urls[el].url}
-              value={JSON.stringify({ url: _urls[el].url, path: _urls[el].path })}>
-              {`:${_urls[el].port}${_urls[el].pathname}`}
+            <option key={el.href} value={JSON.stringify({ ...el })}>
+              {`:${el.port}${el.pathname}`}
             </option>
           );
         })
@@ -48,11 +46,10 @@ function SelectDomain() {
       setMethodOptions([]);
     } else {
       setMethodOptions(
-        Object.keys(_urls[_currentUrl].ranges).map((el) => {
-          el = el.toUpperCase();
+        _currentUrl.methods.map((method) => {
           return (
-            <option key={el} value={el}>
-              {el}
+            <option key={method} value={method}>
+              {method.toUpperCase()}
             </option>
           );
         })
@@ -64,7 +61,7 @@ function SelectDomain() {
     <form className="select__domain flexR">
       <select
         onChange={(e) => {
-          dispatch(setMethodState(e.target.value));
+          setMethodState(e.target.value);
         }}
         className="select__type">
         {methodOptions}
@@ -75,7 +72,7 @@ function SelectDomain() {
           dispatch(setUrlState(e.target.value));
         }}
         className="select__endpoint">
-        <option key="tester" value={JSON.stringify({ url: 'default', path: 'default' })}>
+        <option key="tester" value="default">
           choose domain
         </option>
         {urlOptions}
