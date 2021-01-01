@@ -1,3 +1,7 @@
+/* eslint-disable guard-for-in */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable consistent-return */
+/* eslint-disable class-methods-use-this */
 /**
  * ************************************
  *
@@ -13,174 +17,198 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-let routeData: WorkspaceObj | undefined;
+let masterDataObject;
 
 // Create a Reverb Tree Provider class that extends vscode Tree Data Provider class
-export default class ReverbTreeProvider implements vscode.TreeDataProvider<RouteItem | PathItem> {
+export default class ReverbTreeProvider
+    implements vscode.TreeDataProvider<RouteItem | PathItem | RootItem> {
     tree: any;
 
     // Construct a new ReverbDependenciesProvider, pass workspaceRoot up to TreeDataProvider constructor
-    constructor(private workspaceRoot: string, workspaceObj: WorkspaceObj | undefined) {
-        routeData = workspaceObj;
+    constructor(private workspaceRoot: string, workspaceObj: any) {
+        masterDataObject = workspaceObj;
     }
 
     // Returns the UI representation (TreeItem) of the element that gets displayed in the view.
-    getTreeItem(element: RouteItem | PathItem): vscode.TreeItem {
+    getTreeItem(element: RouteItem | PathItem | RootItem): vscode.TreeItem {
         return element;
     }
 
     // Returns the children for the given element or root (if no element is passed).
-    getChildren(element?: RouteItem | PathItem) {
+    getChildren(element?: RouteItem | PathItem | RootItem) {
         // Throw an error if no workspace is open
+
         if (!this.workspaceRoot) {
             vscode.window.showInformationMessage('No path in empty workspace');
             return Promise.resolve([]);
         }
         // Throw an error if there is no route data to display
-        if (routeData === undefined) {
+        if (masterDataObject === undefined) {
             vscode.window.showInformationMessage('No route data exists');
             return Promise.resolve([]);
         }
         // If an element was passed in, create elements for its children
-        if (element) {
-            return Promise.resolve(this.getPathsAndRoutes(element.label));
+        if (element?.contextValue === 'pathItem') {
+            return Promise.resolve(this.getRoutes(element));
         }
+        if (element?.contextValue === 'rootItem') {
+            return Promise.resolve(this.getPaths());
+        }
+
         // If no element was passed in, create elements for the entire workspace
-        return Promise.resolve(this.getPathsAndRoutes(''));
+        return Promise.resolve([
+            new RootItem(
+                `${vscode.workspace.workspaceFolders![0].name}/`,
+                this.workspaceRoot,
+                vscode.TreeItemCollapsibleState.Expanded,
+            ),
+        ]);
     }
 
-    // Given a path generate all routes and methods in an array
-    private getPathsAndRoutes(label: string): Array<RouteItem | PathItem> {
-        if (label !== '') {
-            let data;
-            const type = this.getRouteType(label);
-            if (type === 'path' || type === 'route') {
-                data = this.getRouteData(label);
-            }
-            switch (type) {
-                case 'path':
-                    const output = this.generateRouteItems(data);
-                    return output;
-                case 'route':
-                    return [new RouteItem(label, vscode.TreeItemCollapsibleState.None)];
-                    break;
-                // The label could not be found in the route data
-                default:
-                    return [];
-            }
+    private getRoutes({ filePath, serverPath, href }): Array<RouteItem> | undefined {
+        if (masterDataObject === undefined) return;
+        const output: RouteItem[] | undefined = [];
+
+        for (const item in masterDataObject.domains[serverPath].paths[filePath]) {
+            const route = masterDataObject.domains[serverPath].paths[filePath][item];
+            const name = `${route.pathname}`;
+            const uri = href;
+            const { method } = route;
+            console.log(route);
+            const { range } = route;
+            output.push(
+                new RouteItem(
+                    name,
+                    filePath,
+                    method,
+                    uri,
+                    range,
+                    vscode.TreeItemCollapsibleState.None,
+                ),
+            );
         }
-        // If no label was provided, assume we were passed the workspace object
-        const output: Array<RouteItem | PathItem> = [];
-        if (routeData) {
-            Object.keys(routeData).forEach((path) => {
-                // const pathsAndRoutes = this.getPathsAndRoutes(path);
-                // output = [...output, ...pathsAndRoutes];
-                output.push(new PathItem(path, vscode.TreeItemCollapsibleState.Collapsed));
-            });
-        }
+
         return output;
     }
 
-    private getRouteType(label: string): string {
-        let output = 'none';
-        if (routeData) {
-            const elementRoute = label.split(/:\s/, 2)[1];
-            Object.entries(routeData).forEach(([path, routeObject]) => {
-                if (label === path) {
-                    output = 'path';
-                }
-                Object.keys(routeObject).forEach((route) => {
-                    // If the route was found in the list of routes
-                    if (elementRoute === route) {
-                        output = 'route';
-                    }
-                });
-            });
-        }
-        return output;
-    }
+    private getPaths(): Array<PathItem> | undefined {
+        if (masterDataObject === undefined) return;
+        const output: PathItem[] | undefined = [];
+        const dirName = vscode.workspace.workspaceFolders![0].name;
+        const cache = {};
 
-    private getRouteData(
-        label: string,
-    ): EndPointMethods | { [endpoint: string]: EndPointMethods } | undefined {
-        let output;
-        if (routeData) {
-            const elementRoute = label.split(/:\s/, 2)[1];
-            Object.entries(routeData).forEach(([path, routeObject]) => {
-                if (label === path) {
-                    output = routeObject;
-                }
-                Object.entries(routeObject).forEach(([route, methodObject]) => {
-                    // If the route was found in the list of routes
-                    if (elementRoute === route) {
-                        output = methodObject;
-                    }
-                });
-            });
-        }
-        return output;
-    }
-
-    // Generate RouteItem objects for each method/route pair in the provided route data
-    private generateRouteItems(
-        routeData: EndPointMethods | { [endpoint: string]: EndPointMethods } | undefined,
-    ): RouteItem[] {
-        const generatedRoutes: RouteItem[] = [];
-        if (routeData) {
-            // Loop through all routes in the provided route data
-            Object.entries(routeData).forEach(([route, methodObject]) => {
-                // Loop through each method for each route
-                Object.keys(methodObject).forEach((method) => {
-                    const label = `${method}: ${route}`;
-                    // Create a new RouteItem for the method/route pair
-                    generatedRoutes.push(
-                        new RouteItem(label, vscode.TreeItemCollapsibleState.None),
+        for (const domain in masterDataObject.domains) {
+            for (const itemPath in masterDataObject.domains[domain].urls) {
+                const { filePath } = masterDataObject.domains[domain].urls[itemPath];
+                const { serverPath } = masterDataObject.domains[domain].urls[itemPath];
+                const { href } = masterDataObject.domains[domain].urls[itemPath];
+                const substr = filePath.slice(
+                    Math.max(0, filePath.indexOf(dirName) + dirName.length + 1),
+                );
+                if (!cache[substr]) {
+                    output.push(
+                        new PathItem(
+                            substr,
+                            filePath,
+                            serverPath,
+                            href,
+                            vscode.TreeItemCollapsibleState.Collapsed,
+                        ),
                     );
-                });
-            });
+                    cache[substr] = true;
+                }
+            }
         }
-        // Return an array containing all generated RouteItem objects
-        return generatedRoutes;
+
+        return output;
     }
 }
-// Create a Dependency class that extends vscode.TreeItem
+
 class PathItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
+        public readonly filePath: string,
+        public readonly serverPath: string,
+        public readonly href: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
-        // Call the vscode.TreeItem constructor
         super(label, collapsibleState);
-        // Define text that should be displayed when the mouse is hovering over the dependency
         this.tooltip = this.label;
         this.description = '';
     }
 
-    // Defines which icon to display next to each dependency
     iconPath = {
-        light: path.join(__filename, '..', '..', 'resources', 'light', 'dependency.svg'),
-        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg'),
+        light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'http.svg'),
     };
+
+    contextValue = 'pathItem';
 }
 
-// Create a Dependency class that extends vscode.TreeItem
 class RouteItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
+        public readonly filePath: string,
+        public readonly method: string,
+        public readonly uri: string,
+        public readonly range: any,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
-        // Call the vscode.TreeItem constructor
         super(label, collapsibleState);
-        // Define text that should be displayed when the mouse is hovering over the dependency
+        this.tooltip = `${this.method}: ${this.uri}`;
+        this.description = '';
+    }
+
+    methodLabeler(x: string) {
+        switch (true) {
+            case x === 'get':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'GET.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'GET.svg'),
+                };
+            case x === 'put':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'PUT.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'PUT.svg'),
+                };
+            case x === 'post':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'POST.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'POST.svg'),
+                };
+            case x === 'delete':
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'dark', 'DELETE.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'DELETE.svg'),
+                };
+            default:
+                return {
+                    light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'http.svg'),
+                };
+        }
+    }
+
+    iconPath = this.methodLabeler(this.method);
+
+    contextValue = 'routeItem';
+}
+
+class RootItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly uri: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    ) {
+        super(label, collapsibleState);
         this.tooltip = this.label;
         this.description = '';
     }
 
-    // Defines which icon to display next to each dependency
     iconPath = {
-        light: path.join(__filename, '..', '.media', 'rr.png'),
-        dark: path.join(__filename, '..', '.media', 'rr.png'),
+        light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg'),
     };
 
-    contextValue = 'routeItem';
+    contextValue = 'rootItem';
 }

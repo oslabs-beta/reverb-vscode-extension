@@ -6,10 +6,10 @@ const { walk } = require('estree-walker');
 /**
  * Finds start and end lines of express endpoints.
  * @param {string} FILETEXT output of readFileSync of file to be parsed.
- * @returns {ExpressionRanges} Ranges of lines.
+ * @returns {any} Ranges of lines.
  */
 export function getRanges(FILETEXT: string) {
-    const output: ExpressionRanges = {};
+    const output: any = {};
     const ast = parse(FILETEXT, {
         loc: true,
     });

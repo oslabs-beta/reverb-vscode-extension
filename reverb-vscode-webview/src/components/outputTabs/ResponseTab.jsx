@@ -1,5 +1,7 @@
 import React from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2';
+import { useSelector } from 'react-redux';
+import { requestResult } from '../../redux/reducers/inputStateSlice';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import 'codemirror/mode/javascript/javascript';
@@ -13,7 +15,8 @@ import 'codemirror/addon/fold/brace-fold';
 import 'codemirror/addon/fold/comment-fold';
 import 'codemirror/addon/fold/foldgutter.css';
 
-function VerboseResponseTab({ data }) {
+function ResponseTab() {
+  const { data } = useSelector(requestResult);
   const cmOptions = {
     theme: 'material',
     height: 'auto',
@@ -35,4 +38,4 @@ function VerboseResponseTab({ data }) {
   );
 }
 
-export default VerboseResponseTab;
+export default ResponseTab;

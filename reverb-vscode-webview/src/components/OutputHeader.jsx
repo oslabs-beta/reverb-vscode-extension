@@ -1,15 +1,27 @@
+/**
+ * ************************************
+ *
+ * @module  outputHeader.jsx
+ * @author  Amir Marcel, Christopher Johnson, Corey Van Splinter, Sean Arseneault
+ * @date 12/23/2020
+ * @description renders output panel tabs and axios response metrics
+ *
+ * ************************************
+ */
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setOutputTabContext, context } from '../redux/reducers/inputContext';
-import { output } from '../redux/reducers/outputSlice';
 
-function OutputHeader({ watchState }) {
+import { setOutputTabContext, outputTabContext } from '../redux/reducers/viewContextSlice';
+import { requestResult } from '../redux/reducers/inputStateSlice';
+
+function OutputHeader() {
+  const _outputTabContext = useSelector(outputTabContext);
+  const _requestResult = useSelector(requestResult);
+
   const dispatch = useDispatch();
-  const { outputTabContext } = useSelector(context);
-  const { verboseOutput } = useSelector(output);
 
-  const size = verboseOutput.headers['content-length'];
-
+  // sets background color based on status code
   function colorCode(x) {
     switch (true) {
       case x >= 100 && x < 200:
@@ -23,17 +35,21 @@ function OutputHeader({ watchState }) {
       case x >= 500 && x < 600:
         return 'rgb(101, 84, 0)';
       default:
-        return 'var(--vscode-button-secondaryBackground)';
+        return 'var(--vscode-input-background)';
     }
   }
+  let size;
+  if (_requestResult.headers) {
+    size = _requestResult.headers['content-length'];
+  }
   return (
-    <div className="output__header">
-      <div className="header__verbose">
-        <div className="header__nav">
+    <div className="output__header flexR">
+      <div className="header__verbose flexR">
+        <div className="header__nav flexR">
           <button
             type="button"
             className={
-              outputTabContext === 'response' ? 'button__response selected' : 'button__response '
+              _outputTabContext === 'response' ? 'button__response selected' : 'button__response '
             }
             onClick={() => dispatch(setOutputTabContext('response'))}>
             response
@@ -41,31 +57,25 @@ function OutputHeader({ watchState }) {
           <button
             type="button"
             className={
-              outputTabContext === 'header' ? 'button__header selected' : 'button__header '
+              _outputTabContext === 'header' ? 'button__header selected' : 'button__header '
             }
             onClick={() => dispatch(setOutputTabContext('header'))}>
             header
           </button>
-          <button
+          {/* <button
             type="button"
-            className={outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
+            className={_outputTabContext === 'info' ? 'button__info selected' : 'button__info '}
             onClick={() => dispatch(setOutputTabContext('info'))}>
-            info
-          </button>
-          <button
-            type="button"
-            className={outputTabContext === 'main' ? 'button__main selected' : 'button__main '}
-            onClick={() => dispatch(setOutputTabContext('main'))}>
-            watcher
-          </button>
+            preview
+          </button> */}
         </div>
 
-        <div className="header__metrics">
-          <span title="status code" style={{ backgroundColor: colorCode(verboseOutput.status) }}>
-            {verboseOutput.status ? verboseOutput.status : ' - '}
+        <div className="header__metrics flexR">
+          <span title="status code" style={{ backgroundColor: colorCode(_requestResult.status) }}>
+            {_requestResult.status ? _requestResult.status : ' - '}
           </span>
-          <span title={`${verboseOutput.resTime || ''} milliseconds`}>
-            {verboseOutput.resTime === undefined ? ' - ' : `${verboseOutput.resTime} ms`}
+          <span title={`${_requestResult.resTime || ''} milliseconds`}>
+            {_requestResult.resTime === undefined ? ' - ' : `${_requestResult.resTime} ms`}
           </span>
           <span title={`${size || ''} bytes`}>{size === undefined ? ' - ' : `${size} b`}</span>
         </div>
@@ -76,7 +86,9 @@ function OutputHeader({ watchState }) {
           title="Show Terminal"
           onClick={() => {
             return vscode.postMessage({
-              command: 'openTerminal',
+              payload: {
+                command: 'openTerminal',
+              },
             });
           }}>
           {'>_'}

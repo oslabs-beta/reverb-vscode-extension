@@ -1,12 +1,12 @@
 import React from 'react';
-import VerboseOutput from '../components/VerboseOuput/VerboseOutput';
+import OutputTabs from '../components/outputTabs/OutputTabs';
 import OutputHeader from '../components/OutputHeader';
 
 function Output() {
   return (
     <div className="container__output">
       <OutputHeader />
-      <VerboseOutput />
+      <OutputTabs />
     </div>
   );
 }

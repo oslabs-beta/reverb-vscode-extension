@@ -1,3 +1,6 @@
+/* eslint-disable prefer-destructuring */
+/* eslint-disable unicorn/no-null */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * @fileoverview Functions for parsing express-specific information from File objects
  */

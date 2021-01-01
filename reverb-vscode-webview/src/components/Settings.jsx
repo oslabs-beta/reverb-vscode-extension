@@ -1,31 +1,20 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { context, setWatchState } from '../redux/reducers/inputContext';
-import ParseForm from './ParseForm';
+import { useSelector } from 'react-redux';
+
+import { settings } from '../redux/reducers/viewContextSlice';
+import EraseStorage from './settings/EraseStorage';
+import ParseForm from './settings/ParseForm';
 
 function Settings() {
-  return (
-    <div className="input__settings">
-      <ParseForm />
+  const settingsView = useSelector(settings);
 
-      <div className="setting__wipe">
-        <button
-          type="button"
-          className="button__wipe"
-          title="ERASE"
-          onClick={() => {
-            // eslint-disable-next-line no-undef
-            return vscode.postMessage({
-              command: 'deleteRoutesObject',
-            });
-          }}>
-          ERASE
-        </button>
-        <p>Erase ALL stored data</p>
+  return (
+    settingsView && (
+      <div className="input__settings">
+        <ParseForm />
+        <EraseStorage />
       </div>
-    </div>
+    )
   );
 }
 
