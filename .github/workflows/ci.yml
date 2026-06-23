@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [staging]
+  push:
+    branches: [staging]
+
+jobs:
+  lint-and-test:
+    name: Lint, type-check, and test
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Type-check test sources
+        run: yarn test-compile
+
+      # The extension test suite launches a real VS Code instance via vscode-test,
+      # which needs a display. xvfb provides a headless one on the Linux runner.
+      - name: Run extension tests
+        run: xvfb-run -a yarn test
