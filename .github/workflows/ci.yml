@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [staging]
+  push:
+    branches: [staging]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # The repo's .nvmrc pins Node 14 (EOL, with an expired root-CA bundle that
+      # can no longer reach the package registry over TLS). package.json declares
+      # engines.node ">=14.14.0", which a current LTS satisfies, so CI runs on a
+      # supported Node version.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      # --ignore-scripts skips the root postinstall, which would otherwise install
+      # the webview workspace and try to compile node-sass (a deprecated native
+      # module that does not build on Node 20). Linting only covers the extension's
+      # build/src/test sources, which do not depend on the webview.
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Lint
+        run: yarn lint
+
+  # NOTE: A type-check step (yarn test-compile) is intentionally omitted for now.
+  # The project builds via Babel, which transpiles without type-checking, so the
+  # existing source has pre-existing strict-mode `tsc` errors. Enforcing them is
+  # tracked as follow-up work rather than bundled into this CI-setup change.
