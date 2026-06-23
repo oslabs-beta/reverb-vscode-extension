@@ -25,8 +25,12 @@ jobs:
           node-version: 20
           cache: yarn
 
+      # --ignore-scripts skips the root postinstall, which would otherwise install
+      # the webview workspace and try to compile node-sass (a deprecated native
+      # module that does not build on Node 20). Lint and type-check only cover the
+      # extension's build/src/test sources, which do not depend on the webview.
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Lint
         run: yarn lint
